@@ -224,8 +224,8 @@ function xray_manager() {
     
     # Bagian Background Putih untuk Port & Link
     echo -e " \e[47;30m TRANSPORT : WS / GRPC / TLS \e[0m"
-    echo -e " \e[47;30m PORT TLS  : 443             \e[0m"
-    echo -e " \e[47;30m PORT HTTP : 80              \e[0m"
+    echo -e " \e[47;30m PORT TLS  : 443 \e[0m"
+    echo -e " \e[47;30m PORT HTTP : 80 \e[0m"
     echo -e "--------------------------------------"
     echo -e " ${CYAN}LINK CONFIG :${NC}"
     
