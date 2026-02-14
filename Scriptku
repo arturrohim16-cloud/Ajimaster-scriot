@@ -174,26 +174,27 @@ function create_ssh() {
 
     # Tampilan Dashboard Akun untuk Pembeli
         clear
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-    echo -e "\e[47;30m       SSH WEBSOCKET ACCOUNT         \e[0m"
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo -e "      ${YELLOW}SSH WEBSOCKET ACCOUNT${NC}"
+    echo -e "${RED}══════════════════════════════════════${NC}"
     echo -e " Host       : $DOMAIN"
     echo -e " User       : $u"
     echo -e " Pass       : $p"
     echo -e " Expired    : $exp"
     echo -e " Limit IP   : $li User"
     echo -e "--------------------------------------"
-    echo -e " Port TLS   : 443 (WebSocket)"
-    echo -e " Port NTLS  : 80 (WebSocket)"
+    echo -e " ${CYAN}LOGIN DETAIL (TLS/NTLS):${NC}"
+    # Background putih pada format IP:Port@User:Pass
+    echo -e " \e[47;30m $DOMAIN:443@$u:$p \e[0m (TLS)"
+    echo -e " \e[47;30m $DOMAIN:80@$u:$p  \e[0m (NTLS)"
+    echo -e "--------------------------------------"
+    echo -e " ${CYAN}PAYLOAD WEBSOCKET:${NC}"
+    # Background putih pada Payload
+    echo -e " \e[47;30m GET /ssh HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf] \e[0m"
+    echo -e "--------------------------------------"
     echo -e " Path       : /ssh"
     echo -e " UDP Port   : 7200"
-    echo -e "--------------------------------------"
-    echo -e " Payload (HTTP Custom):"
-    echo -e "${CYAN}GET /ssh HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]${NC}"
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-    echo -e " Cara Pakai: Masukkan Host & Payload di HC,"
-    echo -e " centang SSL jika menggunakan Port 443."
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    echo -e "${RED}══════════════════════════════════════${NC}"
     read -p "Enter to menu..."
 
 }
@@ -211,24 +212,23 @@ function xray_manager() {
     jq ".inbounds[0].settings.clients += [{\"id\": \"$uid\", \"email\": \"$u\"}]" $XRAY_CONF > /tmp/x.tmp && mv /tmp/x.tmp $XRAY_CONF
     systemctl restart xray
     echo "$u|null|$exp|$li|0|$pr|$uid" >> /etc/aji/users.db
-    
         clear
     echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "       ${YELLOW}XRAY ACCOUNT (${pr^^})${NC}"
     echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e " Remarks    : $u"
     echo -e " Domain     : $DOMAIN"
+    echo -e " Limit IP   : $li User" # <--- Sekarang sudah muncul di sini
     echo -e " Expired    : $exp"
     echo -e "--------------------------------------"
     
-    # Bagian yang menggunakan Background Putih (Teks Hitam)
+    # Bagian Background Putih untuk Port & Link
     echo -e " \e[47;30m TRANSPORT : WS / GRPC / TLS \e[0m"
     echo -e " \e[47;30m PORT TLS  : 443             \e[0m"
     echo -e " \e[47;30m PORT HTTP : 80              \e[0m"
     echo -e "--------------------------------------"
     echo -e " ${CYAN}LINK CONFIG :${NC}"
     
-    # Link Link di bawah ini dikasih background putih agar mudah dicopy
     if [ "$pr" == "vmess" ]; then
         echo -e "\e[47;30m vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$u\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"path\":\"/vmess\",\"tls\":\"tls\"}" | base64 -w 0) \e[0m"
     elif [ "$pr" == "vless" ]; then
