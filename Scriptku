@@ -345,5 +345,3 @@ function dashboard_utama() {
         *) dashboard_utama ;;
     esac
 }
-
-if [ "$1" == "core_engine" ]; then core_engine; else dashboard_utama; fi
