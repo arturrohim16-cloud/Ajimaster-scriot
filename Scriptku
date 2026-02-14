@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==========================================
-#echo -e "\e[41m  🔥 AJI SYSTEM MASTER V16 FINAL 🔥  \e[0m"
+#    echo -e "\e[41;1;37m            🔥 AJI SYSTEM MASTER VPN 🔥            \e[0m"
 # STATUS: FULL FEATURE, PRODUCTION READY
 # ==========================================
 
@@ -212,7 +212,7 @@ function xray_manager() {
     systemctl restart xray
     echo "$u|null|$exp|$li|0|$pr|$uid" >> /etc/aji/users.db
     
-    clear
+        clear
     echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
     echo -e "\e[47;30m       XRAY ACCOUNT (${pr^^})        \e[0m"
     echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
