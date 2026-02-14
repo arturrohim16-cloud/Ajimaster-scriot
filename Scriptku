@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==========================================
-# 🔥 AJI SYSTEM MASTER V16 FINAL 🔥
+#echo -e "\e[41m  🔥 AJI SYSTEM MASTER V16 FINAL 🔥  \e[0m"
 # STATUS: FULL FEATURE, PRODUCTION READY
 # ==========================================
 
@@ -173,10 +173,10 @@ function create_ssh() {
     echo "$u|$p|$exp|$li|0|ssh" >> /etc/aji/users.db
 
     # Tampilan Dashboard Akun untuk Pembeli
-    clear
-    echo -e "${RED}══════════════════════════════════════${NC}"
-    echo -e "      ${YELLOW}SSH WEBSOCKET ACCOUNT${NC}"
-    echo -e "${RED}══════════════════════════════════════${NC}"
+        clear
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    echo -e "\e[47;30m       SSH WEBSOCKET ACCOUNT         \e[0m"
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
     echo -e " Host       : $DOMAIN"
     echo -e " User       : $u"
     echo -e " Pass       : $p"
@@ -190,15 +190,15 @@ function create_ssh() {
     echo -e "--------------------------------------"
     echo -e " Payload (HTTP Custom):"
     echo -e "${CYAN}GET /ssh HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]${NC}"
-    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
     echo -e " Cara Pakai: Masukkan Host & Payload di HC,"
     echo -e " centang SSL jika menggunakan Port 443."
-    echo -e "${RED}══════════════════════════════════════${NC}"
-    
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
     read -p "Enter to menu..."
+
 }
 
-# --- 7. CREATE XRAY (VMESS/VLESS/TROJAN) ---
+# --- 7. CREATE XRAY MANAGER ---
 function xray_manager() {
     clear
     echo -e " [1] VMESS [2] VLESS [3] TROJAN [0] BACK"
@@ -208,14 +208,25 @@ function xray_manager() {
     read -p " User: " u; read -p " Exp (Day): " d; read -p " Limit IP: " li
     uid=$(uuidgen); exp=$(date -d "$d days" +%Y-%m-%d)
 
-    # Tambahkan ke JSON
     jq ".inbounds[0].settings.clients += [{\"id\": \"$uid\", \"email\": \"$u\"}]" $XRAY_CONF > /tmp/x.tmp && mv /tmp/x.tmp $XRAY_CONF
     systemctl restart xray
-
     echo "$u|null|$exp|$li|0|$pr|$uid" >> /etc/aji/users.db
-    echo -e "${GREEN}Success! Link:${NC}"
-    echo -e "$pr://$uid@$DOMAIN:80#$u"
-    echo -e "CRPC: $pr://$uid@$DOMAIN:443#$u"
+    
+    clear
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    echo -e "\e[47;30m       XRAY ACCOUNT (${pr^^})        \e[0m"
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    echo -e " Remarks    : $u"
+    echo -e " Domain     : $DOMAIN"
+    echo -e " Port TLS   : 443"
+    echo -e " Port NTLS  : 80"
+    echo -e " ID/UUID    : $uid"
+    echo -e " Path       : /vmess"
+    echo -e " Expired    : $exp"
+    echo -e "--------------------------------------"
+    echo -e " Copy Link Below:"
+    echo -e "${CYAN}vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$u\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"path\":\"/vmess\",\"tls\":\"tls\"}" | base64 -w 0)${NC}"
+    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
     read -p "Enter to menu..."
 }
 
