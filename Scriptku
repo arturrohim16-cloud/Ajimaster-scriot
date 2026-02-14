@@ -257,8 +257,7 @@ draw_bar() {
     local perc=$1; local size=10; local filled=$((perc * size / 100)); local empty=$((size - filled))
     local COLOR=""
     if [ "$perc" -le 40 ]; then COLOR="${GREEN}"; elif [ "$perc" -le 75 ]; then COLOR="${YELLOW}"; else COLOR="${RED}"; fi
-    printf "${COLOR}"; printf "%${filled}s" | tr ' ' '█'
-    printf "${NC}"; printf "%${empty}s" | tr ' ' '░'
+    printf "${COLOR}%${filled}s${NC}%${empty}s" | tr ' ' '█' | tr ' ' '░'
 }
 
 function dashboard_utama() {
@@ -285,24 +284,18 @@ function dashboard_utama() {
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     echo -e "🔥 ${YELLOW}AJI SYSTEM MASTER V16 FINAL${NC} 🔥"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "${CYAN}SYSTEM STATUS${NC}"
+        echo -e "${CYAN}SYSTEM STATUS${NC}"
     echo -e " IP VPS       : $IP"
-    echo -e " Domain       : $DOMAIN"
-    echo -e " CPU Usage    : $CPU%"
-    echo -e " RAM          : ${RAM_USED}MB / ${RAM_TOTAL}MB | Free: ${RAM_FREE}MB"
-    echo -e " Disk Usage   : ${DISK_USED} / ${DISK_TOTAL} | Free: ${DISK_FREE}"
-    echo -e " Load Average : $LOAD"
-    echo -e " Uptime       : $UPTIME"
-    echo -e "-------------------------------------------"
-    echo -e "${CYAN}USERS ACTIVE${NC}"
-    echo -e " SSH Active   : $SSH_ACTIVE"
-    echo -e " Xray Active  : $XRAY_ACTIVE"
-    echo -e "-------------------------------------------"
-    echo -e "${CYAN}SERVICE STATUS${NC}"
-    echo -e " Xray   : $XRAY_STATUS"
-    echo -e " Nginx  : $NGINX_STATUS"
-    echo -e " UDP    : $UDP_STATUS"
-    echo -e " Cron   : $CRON_STATUS"
+    echo -e " Domain       : $DOMAIN" 
+    # --- Perhitungan (Data di balik layar) ---
+    RAM_PERC=$(free | grep Mem | awk '{print int($3/$2 * 100)}')
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
+    RAM=$(free -m | awk 'NR==2{printf "%s/%sMB (%.2f%%)", $3,$2,$3*100/$2 }')
+    UP=$(uptime -p | sed 's/up //')
+    # --- Tampilan Bar (Ini yang memunculkan warna) ---
+    echo -n " RAM Usage    : "; draw_bar $RAM_PERC; echo -e " $RAM"
+    echo -n " CPU Usage    : "; draw_bar $CPU_USAGE; echo -e " $CPU_USAGE%"
+    echo -e " Uptime       : $UP"
     echo -e "-------------------------------------------"
     echo -e " [01] SSH/OPENVPN           [06] DELETE USER"
     echo -e " [02] XRAY MANAGER          [07] EXTEND USER"
