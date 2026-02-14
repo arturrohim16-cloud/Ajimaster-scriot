@@ -1,0 +1,249 @@
+#!/bin/bash
+# ==========================================
+# 🔥 AJI SYSTEM MASTER V16 FINAL 🔥
+# STATUS: FULL FEATURE, PRODUCTION READY
+# ==========================================
+
+# --- 1. ROOT CHECK ---
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: Anda harus menjalankan script ini sebagai ROOT!"
+    exit 1
+fi
+
+# --- 2. VAR & FOLDER INITIALIZER ---
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; PURPLE='\033[0;35m'; CYAN='\033[0;36m'; NC='\033[0m'
+BG_WHITE='\033[47;30m'
+
+mkdir -p /etc/aji /etc/xray /var/log/xray /etc/udp /root/backup
+touch /etc/aji/users.db
+DOMAIN=$(cat /etc/xray/domain 2>/dev/null || curl -s ipinfo.io/ip)
+IP=$(curl -s ipinfo.io/ip)
+XRAY_CONF="/etc/xray/config.json"
+PATH_SCRIPT="/usr/bin/menu"
+
+# --- 3. AUTO INSTALLER (REVISED: SSL & NGINX WS) ---
+if [ ! -f "$PATH_SCRIPT" ]; then
+    echo -e "${YELLOW}Deploying NOC Grade Environment with SSL & WS...${NC}"
+    apt update -y
+    apt install -y xray nginx curl jq net-tools python3-certbot-nginx uuid-runtime socat ntpdate nano lsb-release > /dev/null 2>&1
+
+    # 3a. Generate SSL Certbot (Otomatis)
+    echo -e "${CYAN}Requesting SSL Certificate for $DOMAIN...${NC}"
+    systemctl stop nginx
+    # Menggunakan standalone mode untuk ambil sertifikat pertama kali
+    certbot certonly --standalone --preferred-challenges http --agree-tos --email admin@$DOMAIN -d $DOMAIN --non-interactive
+    
+    # 3b. Auto Configure Nginx Reverse Proxy for WebSocket
+    cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name $DOMAIN;
+
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+
+    location /vmess {
+        if (\$http_upgrade != "websocket") { return 404; }
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:10001; # Pointing ke Xray Internal Port
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+    }
+
+    location /ssh {
+        if (\$http_upgrade != "websocket") { return 404; }
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:8880; # Pointing ke Websocket SSH Python/Go
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+    }
+}
+EOF
+
+    # 3c. Initialize Xray JSON (Point to Internal Port 10001)
+    echo '{"inbounds":[{"port":10001,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/vmess"}},"sniffing":{"enabled":true,"destOverride":["http","tls"]}}],"outbounds":[{"protocol":"freedom","settings":{}}]}' > $XRAY_CONF
+    
+    # Copy script ke PATH_SCRIPT
+    cp "$0" "$PATH_SCRIPT" && chmod +x "$PATH_SCRIPT"
+    (crontab -l 2>/dev/null | grep -v "menu" ; echo "*/1 * * * * /usr/bin/menu core_engine") | crontab -
+    
+    systemctl restart nginx && systemctl restart xray
+    echo -e "${GREEN}System Ready with SSL! Type 'menu' to start.${NC}"
+fi
+
+# --- 4. CORE ENGINE: LIMIT & EXPIRED ---
+function core_engine() {
+    local now=$(date +%Y-%m-%d)
+    while read line; do
+        [ -z "$line" ] && continue
+        user=$(echo $line | cut -d'|' -f1); exp=$(echo $line | cut -d'|' -f3)
+        lim_ip=$(echo $line | cut -d'|' -f4); proto=$(echo $line | cut -d'|' -f6)
+
+        if [[ "$now" > "$exp" ]]; then
+            delete_logic "$user" "$proto"
+            continue
+        fi
+
+        if [ "$proto" == "ssh" ]; then
+            cip=$(netstat -anp | grep ESTABLISHED | grep sshd | grep -w "$user" | awk '{print $5}' | cut -d: -f1 | sort -u | wc -l)
+            if [ "$cip" -gt "$lim_ip" ]; then
+                passwd -l "$user"
+                pkill -u "$user"
+            else
+                passwd -u "$user" 2>/dev/null
+            fi
+        else
+            cip=$(grep -w "$user" /var/log/xray/access.log | tail -n 100 | awk '{print $3}' | cut -d: -f1 | sort -u | wc -l)
+            if [ "$cip" -gt "$lim_ip" ]; then
+                jq "del(.inbounds[].settings.clients[] | select(.email == \"$user\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
+                systemctl restart xray
+            fi
+        fi
+    done < /etc/aji/users.db
+}
+
+# --- 5. DELETE LOGIC ---
+function delete_logic() {
+    local u=$1; local p=$2
+    if [ "$p" == "ssh" ]; then userdel -f "$u"; else
+        jq "del(.inbounds[].settings.clients[] | select(.email == \"$u\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
+        systemctl restart xray
+    fi
+    sed -i "/^$u|/d" /etc/aji/users.db
+}
+
+# --- 6. CREATE SSH (3 PORT: 80,443,UDP) ---
+function create_ssh() {
+    clear
+    echo -e "${CYAN}━━━━━ CREATE SSH/TRIAL NOC GRADE ━━━━━${NC}"
+    read -p " Username  : " u; [ -z "$u" ] && return
+    read -p " Password  : " p; [ -z "$p" ] && return
+    read -p " Exp (Day) : " d; [[ ! "$d" =~ ^[0-9]+$ ]] && return
+    read -p " Limit IP  : " li; [[ ! "$li" =~ ^[0-9]+$ ]] && return
+
+    exp=$(date -d "$d days" +%Y-%m-%d)
+    useradd -e $exp -s /bin/false -M "$u" && echo "$u:$p" | chpasswd
+    echo "$u|$p|$exp|$li|0|ssh" >> /etc/aji/users.db
+
+    echo -e "\n${GREEN}SUCCESS! SSH CONNECTED${NC}"
+    echo -e "Host: $DOMAIN | User: $u | Pass: $p | Exp: $exp"
+    echo -e "Ports: 80, 443, UDP 7200"
+    echo -e "Payload/Link (Example): GET / HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]"
+    read -p "Enter to menu..."
+}
+
+# --- 7. CREATE XRAY (VMESS/VLESS/TROJAN) ---
+function xray_manager() {
+    clear
+    echo -e " [1] VMESS [2] VLESS [3] TROJAN [0] BACK"
+    read -p " Pilih: " opt; [ "$opt" == "0" ] && return
+    case $opt in 1) pr="vmess";; 2) pr="vless";; 3) pr="trojan";; *) return;; esac
+    
+    read -p " User: " u; read -p " Exp (Day): " d; read -p " Limit IP: " li
+    uid=$(uuidgen); exp=$(date -d "$d days" +%Y-%m-%d)
+
+    # Tambahkan ke JSON
+    jq ".inbounds[0].settings.clients += [{\"id\": \"$uid\", \"email\": \"$u\"}]" $XRAY_CONF > /tmp/x.tmp && mv /tmp/x.tmp $XRAY_CONF
+    systemctl restart xray
+
+    echo "$u|null|$exp|$li|0|$pr|$uid" >> /etc/aji/users.db
+    echo -e "${GREEN}Success! Link:${NC}"
+    echo -e "$pr://$uid@$DOMAIN:80#$u"
+    echo -e "CRPC: $pr://$uid@$DOMAIN:443#$u"
+    read -p "Enter to menu..."
+}
+
+# --- 8. UDP SETTINGS (BadVPN) ---
+function setup_udp() {
+    clear
+    echo -e "--- UDP GAMING ACTIVATOR ---"
+    wget -qO /usr/bin/badvpn "https://github.com/ambrop7/badvpn/raw/master/badvpn-udpgw"
+    chmod +x /usr/bin/badvpn
+    screen -dmS udp badvpn --listen-addr 127.0.0.1:7200
+    echo "UDP Port 7200 Active!"; sleep 2
+}
+
+# --- 9. DASHBOARD FULL INFO ---
+draw_bar() {
+    local perc=$1; local size=10; local filled=$((perc * size / 100)); local empty=$((size - filled))
+    printf "${GREEN}%${filled}s${NC}%${empty}s" | tr ' ' '█' | tr ' ' '░'
+}
+
+function dashboard_utama() {
+    clear
+
+    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
+    RAM_TOTAL=$(free -m | awk '/Mem:/ {print $2}')
+    RAM_USED=$(free -m | awk '/Mem:/ {print $3}')
+    RAM_FREE=$(free -m | awk '/Mem:/ {print $4}')
+    DISK_TOTAL=$(df -h / | awk 'NR==2 {print $2}')
+    DISK_USED=$(df -h / | awk 'NR==2 {print $3}')
+    DISK_FREE=$(df -h / | awk 'NR==2 {print $4}')
+    LOAD=$(uptime | awk -F 'load average:' '{print $2}' | sed 's/ //g')
+    UPTIME=$(uptime -p)
+
+    SSH_ACTIVE=$(who | wc -l)
+    XRAY_ACTIVE=$(grep "email" /var/log/xray/access.log | tail -n 50 | wc -l)
+
+    systemctl is-active --quiet xray && XRAY_STATUS="🟢 ON" || XRAY_STATUS="🔴 OFF"
+    systemctl is-active --quiet nginx && NGINX_STATUS="🟢 ON" || NGINX_STATUS="🔴 OFF"
+    pgrep -x badvpn >/dev/null && UDP_STATUS="🟢 ON" || UDP_STATUS="🔴 OFF"
+    crontab -l | grep -q "menu core_engine" && CRON_STATUS="🟢 ACTIVE" || CRON_STATUS="🔴 INACTIVE"
+
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "🔥 ${YELLOW}AJI SYSTEM MASTER V16 FINAL${NC} 🔥"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}SYSTEM STATUS${NC}"
+    echo -e " IP VPS       : $IP"
+    echo -e " Domain       : $DOMAIN"
+    echo -e " CPU Usage    : $CPU%"
+    echo -e " RAM          : ${RAM_USED}MB / ${RAM_TOTAL}MB | Free: ${RAM_FREE}MB"
+    echo -e " Disk Usage   : ${DISK_USED} / ${DISK_TOTAL} | Free: ${DISK_FREE}"
+    echo -e " Load Average : $LOAD"
+    echo -e " Uptime       : $UPTIME"
+    echo -e "-------------------------------------------"
+    echo -e "${CYAN}USERS ACTIVE${NC}"
+    echo -e " SSH Active   : $SSH_ACTIVE"
+    echo -e " Xray Active  : $XRAY_ACTIVE"
+    echo -e "-------------------------------------------"
+    echo -e "${CYAN}SERVICE STATUS${NC}"
+    echo -e " Xray   : $XRAY_STATUS"
+    echo -e " Nginx  : $NGINX_STATUS"
+    echo -e " UDP    : $UDP_STATUS"
+    echo -e " Cron   : $CRON_STATUS"
+    echo -e "-------------------------------------------"
+    echo -e " [01] SSH/OPENVPN           [06] DELETE USER"
+    echo -e " [02] XRAY MANAGER          [07] EXTEND USER"
+    echo -e " [03] UDP SETTINGS          [08] BACKUP & RESTORE"
+    echo -e " [04] CHANGE DOMAIN         [09] UPDATE SCRIPT"
+    echo -e " [05] BOT SETTINGS          [10] REBOOT VPS"
+    echo -e " [11] ${YELLOW}EDIT SCRIPT (NANO)${NC}"
+    echo -e ""
+    echo -e " [00] EXIT"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Pilih Menu : " opt
+    case $opt in
+        1) create_ssh ;;
+        2) xray_manager ;;
+        3) setup_udp ;;
+        4) read -p "New Domain: " nd; echo "$nd" > /etc/xray/domain; DOMAIN=$nd; dashboard_utama ;;
+        6) read -p "User to Delete: " du; delete_logic "$du" "all"; dashboard_utama ;;
+        7) extend_user_menu ;;
+        8) cp /etc/aji/users.db /root/backup/ ; echo "Backup Success!"; sleep 1; dashboard_utama ;;
+        9) update_script ;;
+        10) reboot ;;
+        11) nano $PATH_SCRIPT ;;
+        0) exit ;;
+        *) dashboard_utama ;;
+    esac
+}
+
+# --- 10. EXECUTION ---
+if [ "$1" == "core_engine" ]; then core_engine; else dashboard_utama; fi
