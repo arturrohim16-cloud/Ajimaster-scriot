@@ -255,7 +255,10 @@ function setup_udp() {
 # --- 9. DASHBOARD FULL INFO ---
 draw_bar() {
     local perc=$1; local size=10; local filled=$((perc * size / 100)); local empty=$((size - filled))
-    printf "${GREEN}%${filled}s${NC}%${empty}s" | tr ' ' '█' | tr ' ' '░'
+    local COLOR=""
+    if [ "$perc" -le 40 ]; then COLOR="${GREEN}"; elif [ "$perc" -le 75 ]; then COLOR="${YELLOW}"; else COLOR="${RED}"; fi
+    printf "${COLOR}"; printf "%${filled}s" | tr ' ' '█'
+    printf "${NC}"; printf "%${empty}s" | tr ' ' '░'
 }
 
 function dashboard_utama() {
@@ -315,13 +318,19 @@ function dashboard_utama() {
         1) create_ssh ;;
         2) xray_manager ;;
         3) setup_udp ;;
-        4) read -p "New Domain: " nd; echo "$nd" > /etc/xray/domain; DOMAIN=$nd; dashboard_utama ;;
-        6) read -p "User to Delete: " du; delete_logic "$du" "all"; dashboard_utama ;;
-        7) extend_user_menu ;;
-        8) cp /etc/aji/users.db /root/backup/ ; echo "Backup Success!"; sleep 1; dashboard_utama ;;
-        9) update_script ;;
+        4) change_domain ;;  # Pastikan nama fungsinya benar
+        5) bot_settings ;;    # Pastikan nama fungsinya benar
+        6) read -p "User to Delete: " du; sed -i "/^$du|/d" /etc/aji/users.db; dashboard_utama ;;
+        7) renew_user ;;     # Pastikan nama fungsinya benar
+        8) menu_backup ;;    # Pastikan nama fungsinya benar
+        9) # Fungsi Update Script
+           echo -e "${YELLOW}Updating Script...${NC}"
+           wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
+           chmod +x /usr/bin/menu
+           echo -e "${GREEN}Update Success!${NC}"
+           sleep 2; menu ;;
         10) reboot ;;
-        11) nano $PATH_SCRIPT ;;
+        11) nano /usr/bin/menu ;; # Membuka editor nano langsung
         0) exit ;;
         *) dashboard_utama ;;
     esac
