@@ -301,6 +301,8 @@ menu_manager() {
 
 function dashboard_utama() {
     clear
+    DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "No Domain")
+    IP=$(curl -sS ipv4.icanhazip.com || echo "No IP")
     RAM_PERC=$(free | grep Mem | awk '{print int($3/$2 * 100)}')
     CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
     RAM=$(free -m | awk 'NR==2{printf "%s/%sMB (%.2f%%)", $3,$2,$3*100/$2 }')
@@ -332,9 +334,9 @@ function dashboard_utama() {
         3) menu_manager "VLESS" "vless" ;;
         4) menu_manager "TROJAN" "tr" ;;
         5) bot_settings ;;
-        6) read -p "User to Delete: " du; sed -i "/^$du|/d" /etc/aji/users.db; dashboard_utama ;;
-        7) renew_user ;;
-        8) menu_backup ;;
+        6) del-user ;;
+        7) renew-user ;;
+        8) menu-backup ;;
         9) 
            echo -e "${YELLOW}Updating Script...${NC}"
            wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
