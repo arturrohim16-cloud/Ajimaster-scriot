@@ -21,16 +21,15 @@ IP=$(curl -s ipinfo.io/ip)
 XRAY_CONF="/etc/xray/config.json"
 PATH_SCRIPT="/usr/bin/menu"
 
-# --- 3. AUTO INSTALLER (REVISED: SSL & NGINX WS) ---
+# --- 3. AUTO INSTALLER (FIXED VERSION) ---
 if [ ! -f "$PATH_SCRIPT" ]; then
     echo -e "${YELLOW}Deploying NOC Grade Environment with SSL & WS...${NC}"
     apt update -y
-    apt install -y xray nginx curl jq net-tools python3-certbot-nginx uuid-runtime socat ntpdate nano lsb-release > /dev/null 2>&1
+    apt install -y xray nginx curl jq net-tools python3-certbot-nginx uuid-runtime socat ntpdate nano lsb-release screen > /dev/null 2>&1
 
     # 3a. Generate SSL Certbot (Otomatis)
     echo -e "${CYAN}Requesting SSL Certificate for $DOMAIN...${NC}"
     systemctl stop nginx
-    # Menggunakan standalone mode untuk ambil sertifikat pertama kali
     certbot certonly --standalone --preferred-challenges http --agree-tos --email admin@$DOMAIN -d $DOMAIN --non-interactive
     
     # 3b. Auto Configure Nginx Reverse Proxy for WebSocket
@@ -48,7 +47,7 @@ server {
     location /vmess {
         if (\$http_upgrade != "websocket") { return 404; }
         proxy_redirect off;
-        proxy_pass http://127.0.0.1:10001; # Pointing ke Xray Internal Port
+        proxy_pass http://127.0.0.1:10001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -58,7 +57,7 @@ server {
     location /ssh {
         if (\$http_upgrade != "websocket") { return 404; }
         proxy_redirect off;
-        proxy_pass http://127.0.0.1:8880; # Pointing ke Websocket SSH Python/Go
+        proxy_pass http://127.0.0.1:8880;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -66,37 +65,10 @@ server {
     }
 }
 EOF
-    # 3d. Install Python WebSocket (untuk SSH Port 80/443)
-    echo -e "${CYAN}Installing Python WebSocket for SSH...${NC}"
-    wget -q -O /usr/bin/ws-python "https://raw.githubusercontent.com/AjiSystem/master/main/ws-python.py" # Link ini hanya contoh, kamu bisa upload file ws-python milikmu sendiri
-    
-    # Jika link di atas mati, gunakan command di bawah untuk membuat file manual:
+
+    # 3c. Install Python WebSocket (untuk SSH Port 80/443)
     cat <<EOF > /usr/bin/ws-python
-import socket, threading, thread, select
-
-LISTENING_ADDR = '127.0.0.1'
-LISTENING_PORT = 8880
-PASS = ''
-
-def main():
-    print "WebSocket SSH Bridge Started on port 8880"
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((LISTENING_ADDR, LISTENING_PORT))
-    server.listen(100)
-    while True:
-        client, addr = server.accept()
-        threading.Thread(target=proxy, args=(client,)).start()
-
-def proxy(client):
-    data = client.recv(1024)
-    if "Upgrade: websocket" in data:
-        client.send('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n')
-        target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        target.connect(('127.0.0.1', 22))
-        threading.Thread(target=forward, args=(client, target)).start()
-        threading.Thread(target=forward, args=(target, client)).start()
-
+import socket, threading
 def forward(src, dst):
     while True:
         try:
@@ -104,13 +76,32 @@ def forward(src, dst):
             if not data: break
             dst.send(data)
         except: break
+def proxy(client):
+    try:
+        data = client.recv(1024).decode('utf-8', errors='ignore')
+        if "Upgrade: websocket" in data:
+            client.send(b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n')
+            target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            target.connect(('127.0.0.1', 22))
+            threading.Thread(target=forward, args=(client, target)).start()
+            threading.Thread(target=forward, args=(target, client)).start()
+    except: client.close()
+def main():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(('127.0.0.1', 8880))
+    server.listen(100)
+    while True:
+        client, addr = server.accept()
+        threading.Thread(target=proxy, args=(client,)).start()
+if __name__ == '__main__':
+    main()
 EOF
 
-        chmod +x /usr/bin/ws-python
-    apt install screen -y > /dev/null 2>&1
+    chmod +x /usr/bin/ws-python
     screen -dmS ws-ssh python3 /usr/bin/ws-python
-    
-    # Initialize Xray JSON (Pastikan perintah ini utuh)
+
+    # 3d. Initialize Xray JSON
     echo '{"inbounds":[{"port":10001,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/vmess"}},"sniffing":{"enabled":true,"destOverride":["http","tls"]}}],"outbounds":[{"protocol":"freedom","settings":{}}]}' > $XRAY_CONF
     
     # Copy script ke PATH_SCRIPT
