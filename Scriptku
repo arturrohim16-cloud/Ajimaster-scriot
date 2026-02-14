@@ -101,7 +101,7 @@ EOF
     chmod +x /usr/bin/ws-python
     screen -dmS ws-ssh python3 /usr/bin/ws-python
 
-    # 3d. Initialize Xray JSON
+        # 3d. Initialize Xray JSON (Satu baris utuh)
     echo '{"inbounds":[{"port":10001,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/vmess"}},"sniffing":{"enabled":true,"destOverride":["http","tls"]}}],"outbounds":[{"protocol":"freedom","settings":{}}]}' > $XRAY_CONF
     
     # Copy script ke PATH_SCRIPT
