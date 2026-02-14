@@ -260,10 +260,12 @@ draw_bar() {
     local empty=$((size - filled))
     local COLOR=""
     if [ "$perc" -le 40 ]; then COLOR="${GREEN}"; elif [ "$perc" -le 75 ]; then COLOR="${YELLOW}"; else COLOR="${RED}"; fi
-    printf "${COLOR}%${filled}s${NC}%${empty}s" | tr ' ' '█' | tr ' ' '░'
+    printf "${COLOR}"
+    printf "%${filled}s" | tr ' ' '█'
+    printf "${NC}"
+    printf "%${empty}s" | tr ' ' '░'
 }
 
-# --- SUB-MENU MANAGER (Muncul saat menu 01-04 dipilih) ---
 menu_manager() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
@@ -279,19 +281,19 @@ menu_manager() {
     echo -e "-------------------------------------------"
     read -p " Pilih Menu : " opt_sub
     case $opt_sub in
-        1) add_$2 ;;
-        2) trial_$2 ;;
+        1) add-$2 ;;
+        2) trial-$2 ;;
         3) 
            read -p " Masukkan Username yang mau dimatikan: " u_off
            if [[ "$2" == "ssh" ]]; then
                passwd -l $u_off
            else
-               sed -i "s/\"$u_off\"/\"#$u_off\"/g" /etc/xray/config.json
+               sed -i "s/\"$u_off\"/\"offline-$u_off\"/g" /etc/xray/config.json
                systemctl restart xray
            fi
            echo -e " User $u_off Berhasil Dimatikan."; sleep 2; menu_manager "$1" "$2" ;;
-        4) del_$2 ;;
-        5) cek_$2 ;;
+        4) del-$2 ;;
+        5) cek-$2 ;;
         0) dashboard_utama ;;
         *) menu_manager "$1" "$2" ;;
     esac
@@ -305,7 +307,7 @@ function dashboard_utama() {
     UP=$(uptime -p | sed 's/up //')
 
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "🔥 ${YELLOW}AJI SYSTEM MASTER V16 FINAL${NC} 🔥"
+    echo -e "\e[41;1;37m            🔥 AJI SYSTEM MASTER V16 FINAL 🔥            \e[0m"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     echo -e "${CYAN}SYSTEM STATUS${NC}"
     echo -e " IP VPS       : $IP"
@@ -319,16 +321,16 @@ function dashboard_utama() {
     echo -e " [03] VLESS MANAGER         [08] BACKUP & RESTORE"
     echo -e " [04] TROJAN MANAGER        [09] UPDATE SCRIPT"
     echo -e " [05] BOT SETTINGS          [10] REBOOT VPS"
-    echo -e " [11] ${YELLOW}EDIT SCRIPT (NANO)${NC}"
+    echo -e " [11] EDIT SCRIPT (NANO)"
     echo -e ""
     echo -e " [00] EXIT"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     read -p " Pilih Menu : " opt
     case $opt in
         1) menu_manager "SSH" "ssh" ;;
-        2) menu_manager "VMESS" "vmess" ;;
+        2) menu_manager "VMESS" "ws" ;;
         3) menu_manager "VLESS" "vless" ;;
-        4) menu_manager "TROJAN" "trojan" ;;
+        4) menu_manager "TROJAN" "tr" ;;
         5) bot_settings ;;
         6) read -p "User to Delete: " du; sed -i "/^$du|/d" /etc/aji/users.db; dashboard_utama ;;
         7) renew_user ;;
