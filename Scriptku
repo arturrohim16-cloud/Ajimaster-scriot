@@ -213,21 +213,33 @@ function xray_manager() {
     echo "$u|null|$exp|$li|0|$pr|$uid" >> /etc/aji/users.db
     
         clear
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-    echo -e "\e[47;30m       XRAY ACCOUNT (${pr^^})        \e[0m"
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "       ${YELLOW}XRAY ACCOUNT (${pr^^})${NC}"
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e " Remarks    : $u"
     echo -e " Domain     : $DOMAIN"
-    echo -e " Port TLS   : 443"
-    echo -e " Port NTLS  : 80"
-    echo -e " ID/UUID    : $uid"
-    echo -e " Path       : /vmess"
     echo -e " Expired    : $exp"
     echo -e "--------------------------------------"
-    echo -e " Copy Link Below:"
-    echo -e "${CYAN}vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$u\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"path\":\"/vmess\",\"tls\":\"tls\"}" | base64 -w 0)${NC}"
-    echo -e "\e[47;30m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+    
+    # Bagian yang menggunakan Background Putih (Teks Hitam)
+    echo -e " \e[47;30m TRANSPORT : WS / GRPC / TLS \e[0m"
+    echo -e " \e[47;30m PORT TLS  : 443             \e[0m"
+    echo -e " \e[47;30m PORT HTTP : 80              \e[0m"
+    echo -e "--------------------------------------"
+    echo -e " ${CYAN}LINK CONFIG :${NC}"
+    
+    # Link Link di bawah ini dikasih background putih agar mudah dicopy
+    if [ "$pr" == "vmess" ]; then
+        echo -e "\e[47;30m vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$u\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"path\":\"/vmess\",\"tls\":\"tls\"}" | base64 -w 0) \e[0m"
+    elif [ "$pr" == "vless" ]; then
+        echo -e "\e[47;30m vless://$uid@$DOMAIN:443?path=/vmess&security=tls&encryption=none&type=ws#$u \e[0m"
+    elif [ "$pr" == "trojan" ]; then
+        echo -e "\e[47;30m trojan://$uid@$DOMAIN:443?path=/vmess&security=tls&type=ws#$u \e[0m"
+    fi
+    
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     read -p "Enter to menu..."
+
 }
 
 # --- 8. UDP SETTINGS (BadVPN) ---
