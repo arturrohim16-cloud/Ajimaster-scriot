@@ -106,17 +106,20 @@ def forward(src, dst):
         except: break
 EOF
 
-    chmod +x /usr/bin/ws-python
-    screen -dmS ws-ssh python /usr/bin/ws-python
-
-    # 3c. Initialize Xray JSON (Point to Internal Port 10001)
+        chmod +x /usr/bin/ws-python
+    apt install screen -y > /dev/null 2>&1
+    screen -dmS ws-ssh python3 /usr/bin/ws-python
+    
+    # Initialize Xray JSON (Pastikan perintah ini utuh)
     echo '{"inbounds":[{"port":10001,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/vmess"}},"sniffing":{"enabled":true,"destOverride":["http","tls"]}}],"outbounds":[{"protocol":"freedom","settings":{}}]}' > $XRAY_CONF
     
     # Copy script ke PATH_SCRIPT
     cp "$0" "$PATH_SCRIPT" && chmod +x "$PATH_SCRIPT"
     (crontab -l 2>/dev/null | grep -v "menu" ; echo "*/1 * * * * /usr/bin/menu core_engine") | crontab -
     
-    systemctl restart nginx && systemctl restart xray
+    systemctl daemon-reload
+    systemctl enable nginx xray
+    systemctl restart nginx xray
     echo -e "${GREEN}System Ready with SSL! Type 'menu' to start.${NC}"
 fi
 
