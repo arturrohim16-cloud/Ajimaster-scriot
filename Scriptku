@@ -66,6 +66,48 @@ server {
     }
 }
 EOF
+    # 3d. Install Python WebSocket (untuk SSH Port 80/443)
+    echo -e "${CYAN}Installing Python WebSocket for SSH...${NC}"
+    wget -q -O /usr/bin/ws-python "https://raw.githubusercontent.com/AjiSystem/master/main/ws-python.py" # Link ini hanya contoh, kamu bisa upload file ws-python milikmu sendiri
+    
+    # Jika link di atas mati, gunakan command di bawah untuk membuat file manual:
+    cat <<EOF > /usr/bin/ws-python
+import socket, threading, thread, select
+
+LISTENING_ADDR = '127.0.0.1'
+LISTENING_PORT = 8880
+PASS = ''
+
+def main():
+    print "WebSocket SSH Bridge Started on port 8880"
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((LISTENING_ADDR, LISTENING_PORT))
+    server.listen(100)
+    while True:
+        client, addr = server.accept()
+        threading.Thread(target=proxy, args=(client,)).start()
+
+def proxy(client):
+    data = client.recv(1024)
+    if "Upgrade: websocket" in data:
+        client.send('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n')
+        target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        target.connect(('127.0.0.1', 22))
+        threading.Thread(target=forward, args=(client, target)).start()
+        threading.Thread(target=forward, args=(target, client)).start()
+
+def forward(src, dst):
+    while True:
+        try:
+            data = src.recv(1024)
+            if not data: break
+            dst.send(data)
+        except: break
+EOF
+
+    chmod +x /usr/bin/ws-python
+    screen -dmS ws-ssh python /usr/bin/ws-python
 
     # 3c. Initialize Xray JSON (Point to Internal Port 10001)
     echo '{"inbounds":[{"port":10001,"listen":"127.0.0.1","protocol":"vmess","settings":{"clients":[]},"streamSettings":{"network":"ws","wsSettings":{"path":"/vmess"}},"sniffing":{"enabled":true,"destOverride":["http","tls"]}}],"outbounds":[{"protocol":"freedom","settings":{}}]}' > $XRAY_CONF
@@ -129,13 +171,36 @@ function create_ssh() {
     read -p " Limit IP  : " li; [[ ! "$li" =~ ^[0-9]+$ ]] && return
 
     exp=$(date -d "$d days" +%Y-%m-%d)
+    
+    # Membuat user di sistem VPS
     useradd -e $exp -s /bin/false -M "$u" && echo "$u:$p" | chpasswd
+    
+    # Menyimpan data ke database internal
     echo "$u|$p|$exp|$li|0|ssh" >> /etc/aji/users.db
 
-    echo -e "\n${GREEN}SUCCESS! SSH CONNECTED${NC}"
-    echo -e "Host: $DOMAIN | User: $u | Pass: $p | Exp: $exp"
-    echo -e "Ports: 80, 443, UDP 7200"
-    echo -e "Payload/Link (Example): GET / HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]"
+    # Tampilan Dashboard Akun untuk Pembeli
+    clear
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo -e "      ${YELLOW}SSH WEBSOCKET ACCOUNT${NC}"
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo -e " Host       : $DOMAIN"
+    echo -e " User       : $u"
+    echo -e " Pass       : $p"
+    echo -e " Expired    : $exp"
+    echo -e " Limit IP   : $li User"
+    echo -e "--------------------------------------"
+    echo -e " Port TLS   : 443 (WebSocket)"
+    echo -e " Port NTLS  : 80 (WebSocket)"
+    echo -e " Path       : /ssh"
+    echo -e " UDP Port   : 7200"
+    echo -e "--------------------------------------"
+    echo -e " Payload (HTTP Custom):"
+    echo -e "${CYAN}GET /ssh HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]${NC}"
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo -e " Cara Pakai: Masukkan Host & Payload di HC,"
+    echo -e " centang SSL jika menggunakan Port 443."
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    
     read -p "Enter to menu..."
 }
 
