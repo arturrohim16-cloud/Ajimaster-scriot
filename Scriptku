@@ -254,53 +254,70 @@ function setup_udp() {
 
 # --- 9. DASHBOARD FULL INFO ---
 draw_bar() {
-    local perc=$1; local size=10; local filled=$((perc * size / 100)); local empty=$((size - filled))
+    local perc=$1
+    local size=10
+    local filled=$((perc * size / 100))
+    local empty=$((size - filled))
     local COLOR=""
     if [ "$perc" -le 40 ]; then COLOR="${GREEN}"; elif [ "$perc" -le 75 ]; then COLOR="${YELLOW}"; else COLOR="${RED}"; fi
     printf "${COLOR}%${filled}s${NC}%${empty}s" | tr ' ' '█' | tr ' ' '░'
 }
 
+# --- SUB-MENU MANAGER (Muncul saat menu 01-04 dipilih) ---
+menu_manager() {
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "         MANAGER $1 (AJI MASTER SYSTEM)           "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e " [01] Create Akun Premium"
+    echo -e " [02] Create Akun Trial"
+    echo -e " [03] Matikan Akun"
+    echo -e " [04] Hapus User"
+    echo -e " [05] Cek Multi Login"
+    echo -e ""
+    echo -e " [00] Kembali ke Menu Utama"
+    echo -e "-------------------------------------------"
+    read -p " Pilih Menu : " opt_sub
+    case $opt_sub in
+        1) add_$2 ;;
+        2) trial_$2 ;;
+        3) 
+           read -p " Masukkan Username yang mau dimatikan: " u_off
+           if [[ "$2" == "ssh" ]]; then
+               passwd -l $u_off
+           else
+               sed -i "s/\"$u_off\"/\"#$u_off\"/g" /etc/xray/config.json
+               systemctl restart xray
+           fi
+           echo -e " User $u_off Berhasil Dimatikan."; sleep 2; menu_manager "$1" "$2" ;;
+        4) del_$2 ;;
+        5) cek_$2 ;;
+        0) dashboard_utama ;;
+        *) menu_manager "$1" "$2" ;;
+    esac
+}
+
 function dashboard_utama() {
     clear
-
-    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
-    RAM_TOTAL=$(free -m | awk '/Mem:/ {print $2}')
-    RAM_USED=$(free -m | awk '/Mem:/ {print $3}')
-    RAM_FREE=$(free -m | awk '/Mem:/ {print $4}')
-    DISK_TOTAL=$(df -h / | awk 'NR==2 {print $2}')
-    DISK_USED=$(df -h / | awk 'NR==2 {print $3}')
-    DISK_FREE=$(df -h / | awk 'NR==2 {print $4}')
-    LOAD=$(uptime | awk -F 'load average:' '{print $2}' | sed 's/ //g')
-    UPTIME=$(uptime -p)
-
-    SSH_ACTIVE=$(who | wc -l)
-    XRAY_ACTIVE=$(grep "email" /var/log/xray/access.log | tail -n 50 | wc -l)
-
-    systemctl is-active --quiet xray && XRAY_STATUS="🟢 ON" || XRAY_STATUS="🔴 OFF"
-    systemctl is-active --quiet nginx && NGINX_STATUS="🟢 ON" || NGINX_STATUS="🔴 OFF"
-    pgrep -x badvpn >/dev/null && UDP_STATUS="🟢 ON" || UDP_STATUS="🔴 OFF"
-    crontab -l | grep -q "menu core_engine" && CRON_STATUS="🟢 ACTIVE" || CRON_STATUS="🔴 INACTIVE"
-
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "🔥 ${YELLOW}AJI SYSTEM MASTER V16 FINAL${NC} 🔥"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-        echo -e "${CYAN}SYSTEM STATUS${NC}"
-    echo -e " IP VPS       : $IP"
-    echo -e " Domain       : $DOMAIN" 
-    # --- Perhitungan (Data di balik layar) ---
     RAM_PERC=$(free | grep Mem | awk '{print int($3/$2 * 100)}')
     CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
     RAM=$(free -m | awk 'NR==2{printf "%s/%sMB (%.2f%%)", $3,$2,$3*100/$2 }')
     UP=$(uptime -p | sed 's/up //')
-    # --- Tampilan Bar (Ini yang memunculkan warna) ---
+
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "🔥 ${YELLOW}AJI SYSTEM MASTER V16 FINAL${NC} 🔥"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}SYSTEM STATUS${NC}"
+    echo -e " IP VPS       : $IP"
+    echo -e " Domain       : $DOMAIN" 
     echo -n " RAM Usage    : "; draw_bar $RAM_PERC; echo -e " $RAM"
     echo -n " CPU Usage    : "; draw_bar $CPU_USAGE; echo -e " $CPU_USAGE%"
     echo -e " Uptime       : $UP"
     echo -e "-------------------------------------------"
     echo -e " [01] SSH/OPENVPN           [06] DELETE USER"
-    echo -e " [02] XRAY MANAGER          [07] EXTEND USER"
-    echo -e " [03] UDP SETTINGS          [08] BACKUP & RESTORE"
-    echo -e " [04] CHANGE DOMAIN         [09] UPDATE SCRIPT"
+    echo -e " [02] VMESS MANAGER         [07] EXTEND USER"
+    echo -e " [03] VLESS MANAGER         [08] BACKUP & RESTORE"
+    echo -e " [04] TROJAN MANAGER        [09] UPDATE SCRIPT"
     echo -e " [05] BOT SETTINGS          [10] REBOOT VPS"
     echo -e " [11] ${YELLOW}EDIT SCRIPT (NANO)${NC}"
     echo -e ""
@@ -308,26 +325,23 @@ function dashboard_utama() {
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     read -p " Pilih Menu : " opt
     case $opt in
-        1) create_ssh ;;
-        2) xray_manager ;;
-        3) setup_udp ;;
-        4) change_domain ;;  # Pastikan nama fungsinya benar
-        5) bot_settings ;;    # Pastikan nama fungsinya benar
+        1) menu_manager "SSH" "ssh" ;;
+        2) menu_manager "VMESS" "vmess" ;;
+        3) menu_manager "VLESS" "vless" ;;
+        4) menu_manager "TROJAN" "trojan" ;;
+        5) bot_settings ;;
         6) read -p "User to Delete: " du; sed -i "/^$du|/d" /etc/aji/users.db; dashboard_utama ;;
-        7) renew_user ;;     # Pastikan nama fungsinya benar
-        8) menu_backup ;;    # Pastikan nama fungsinya benar
-        9) # Fungsi Update Script
+        7) renew_user ;;
+        8) menu_backup ;;
+        9) 
            echo -e "${YELLOW}Updating Script...${NC}"
            wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
-           chmod +x /usr/bin/menu
-           echo -e "${GREEN}Update Success!${NC}"
-           sleep 2; menu ;;
+           chmod +x /usr/bin/menu; sleep 2; menu ;;
         10) reboot ;;
-        11) nano /usr/bin/menu ;; # Membuka editor nano langsung
+        11) nano /usr/bin/menu ;;
         0) exit ;;
         *) dashboard_utama ;;
     esac
 }
 
-# --- 10. EXECUTION ---
 if [ "$1" == "core_engine" ]; then core_engine; else dashboard_utama; fi
