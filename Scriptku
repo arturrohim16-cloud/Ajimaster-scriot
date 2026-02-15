@@ -362,6 +362,22 @@ function dashboard_utama() {
     echo -n " RAM Usage    : "; draw_bar $RAM_PERC; echo -e " $RAM"
     echo -n " CPU Usage    : "; draw_bar $CPU_USAGE; echo -e " $CPU_USAGE%"
     echo -e " Uptime       : $UP"
+    # Menghitung jumlah user otomatis
+    total_ssh=$(grep -c "|ssh|" /etc/aji/users.db 2>/dev/null || echo "0")
+    total_vmess=$(grep -c "|VMESS|" /etc/aji/users.db 2>/dev/null || echo "0")
+    total_vless=$(grep -c "|VLESS|" /etc/aji/users.db 2>/dev/null || echo "0")
+    total_trojan=$(grep -c "|TROJAN|" /etc/aji/users.db 2>/dev/null || echo "0")
+    total_shadow=$(grep -c "|SHADOW|" /etc/aji/users.db 2>/dev/null || echo "0")
+    echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m         \e[1;36m>>> INFORMATION ACCOUNT <<<\e[0m           \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;32mSSH/OPENVPN      = $total_ssh  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;32mVMESS/WS/GRPC    = $total_vmess  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;32mVLESS/WS/GRPC    = $total_vless  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;32mTROJAN/WS/GRPC   = $total_trojan  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;32mSHADOW/WS/GRPC   = $total_shadow  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
+    echo -e "  \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
+  
     echo -e "-------------------------------------------"
     echo -e " [01] SSH/OPENVPN           [06] DELETE USER"
     echo -e " [02] VMESS MANAGER         [07] EXTEND USER"
