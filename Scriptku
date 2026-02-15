@@ -10,7 +10,7 @@ echo -e "\e[107;30m Version : V16 FINAL PREMIUM     \e[0m"
 # WARNA DASAR
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
-# PERSIAPAN FOLDER & VARIABEL GLOBAL (PENTING!)
+# PERSIAPAN FOLDER & VARIABEL GLOBAL
 mkdir -p /etc/aji /etc/xray /root/backup
 touch /etc/aji/users.db
 DOMAIN=$(cat /etc/xray/domain 2>/dev/null || curl -s ipinfo.io/ip)
