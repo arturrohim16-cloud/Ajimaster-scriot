@@ -326,29 +326,6 @@ renew-user() {
     fi
     sleep 2; dashboard_utama
 }
-
-del-user() {
-    clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "             HAPUS PENGGUNA (DELETE)               "
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p " Masukkan Username yang akan dihapus: " u
-    if grep -q -w "$u" /etc/aji/users.db; then
-        proto=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f6)
-        if [[ "$proto" == "ssh" ]]; then 
-            userdel -f "$u"
-        else
-            jq "del(.inbounds[0].settings.clients[] | select(.email == \"$u\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
-            systemctl restart xray
-        fi
-        sed -i "/^$u|/d" /etc/aji/users.db
-        echo -e "${GREEN}User $u Berhasil Dihapus!${NC}"
-    else
-        echo -e "${RED}User Tidak Ditemukan!${NC}"
-    fi
-    sleep 2; dashboard_utama
-}
-
 renew-user() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
@@ -428,3 +405,4 @@ update_script() {
     sleep 2
     menu
 }
+dashboard_utama
