@@ -337,31 +337,33 @@ function dashboard_utama() {
         6) del-user ;;
         7) renew-user ;;
         8) menu-backup ;;
-        9) update_script ;;
-        10) reboot ;;
-        11) nano /usr/bin/menu ;;
-        00) exit ;;
-        *) dashboard_utama ;;
-    esac
-           echo -e "${YELLOW}update_script() {
-    clear
-    echo -e "\e[1;31m═══════════════════════════════════════════════════\e[0m"
-    echo -e "       \e[42;1;37m  UPDATE SCRIPT MANUALLY  \e[0m"
-    echo -e "\e[1;31m═══════════════════════════════════════════════════\e[0m"
-    echo -e ""
-    echo -e " \e[1;33mChecking for updates from GitHub...\e[0m"
-    sleep 2
-    wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
-    chmod +x /usr/bin/menu
-    echo -e ""
-    echo -e " \e[1;32mSUCCESS! Script has been updated.\e[0m"
-    sleep 2
-    menu
-}
-
+                9) update_script ;;
         10) reboot ;;
         11) nano /usr/bin/menu ;;
         0) exit ;;
         *) dashboard_utama ;;
     esac
 }
+
+update_script() {
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "       ${GREEN}  UPDATE SCRIPT MANUALLY  ${NC}"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e ""
+    echo -e " ${YELLOW}Checking for updates from GitHub...${NC}"
+    sleep 2
+    wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
+    chmod +x /usr/bin/menu
+    echo -e ""
+    echo -e " ${GREEN}SUCCESS! Script has been updated.${NC}"
+    sleep 2
+    menu
+}
+
+if [ "$1" == "core_engine" ]; then
+    core_engine
+else
+    dashboard_utama
+fi
+
