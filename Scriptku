@@ -153,79 +153,114 @@ function delete_logic() {
 }
 
 # --- 6. CREATE SSH (3 PORT: 80,443,UDP) ---
-function create_ssh() {
+function add_ssh() {
     clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "         CREATE SSH PREMIUM ACCOUNT          "
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p " Username : " user
-    [[ -z "$user" ]] && dashboard_utama
-    read -p " Password : " pass
-    read -p " Limit IP : " iplim
-    read -p " Masa Aktif (Hari) : " aktif
-    exp=$(date -d "$aktif days" +%Y-%m-%d)
-    useradd -e $exp -M -s /bin/false "$user"
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║        CREATE NEW SSH UDP ACCOUNT          ║"
+    echo -e "╚════════════════════════════════════════════╝"
+    read -p "  Username  : " user
+    read -p "  Password  : " pass
+    read -p "  Exp Day   : " days
+    read -p "  Limit IP  : " iplimit
+    
+    useradd -e $(date -d "$days days" +"%Y-%m-%d") -s /bin/false -M $user
     echo "$user:$pass" | chpasswd
-    echo "$user|$pass|$exp|$iplim|0|ssh" >> /etc/aji/users.db
+    echo "$user $iplimit" >> /etc/ssh/.ssh.db
+    
+    IP=$(curl -s ifconfig.me)
+    DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
+    if [ -z "$DOMAIN" ]; then DOMAIN=$IP; fi
+
     clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "      \e[44;1;37m  DETAIL AKUN SSH PREMIUM  \e[0m"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e " IP/Domain   : $DOMAIN"
-    echo -e " Username    : $user"
-    echo -e " Password    : $pass"
-    echo -e " Port Open   : 22, 443, 80, 8080"
-    echo -e " Expired     : $exp"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e " Payload HTTP :"
-    echo -e "\e[107;30mGET / HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]\e[0m"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p "Tekan Enter untuk kembali"
-    dashboard_utama
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║       SSH & UDP CUSTOM ACCOUNT DETAIL      ║"
+    echo -e "╠════════════════════════════════════════════╝"
+    echo -e "║ Host/IP   : $DOMAIN"
+    echo -e "║ Port SSH  : 22, 80, 443"
+    echo -e "║ Port UDP  : 1-65535 (Active)"
+    echo -e "║ Limit IP  : $iplimit Perangkat"
+    echo -e "║ Expired   : $days Days"
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "║ Format SSH Port 22 :"
+    echo -e "║ \e[107;32m$DOMAIN:22@$user:$pass\e[0m"
+    echo -e "║ Format HTTP Port 80 :"
+    echo -e "║ \e[107;32m$DOMAIN:80@$user:$pass\e[0m"
+    echo -e "║ Format SSL Port 443 :"
+    echo -e "║ \e[107;32m$DOMAIN:443@$user:$pass\e[0m"
+    echo -e "║ Format UDP Custom :"
+    echo -e "║ \e[107;32m$DOMAIN:1-65535@$user:$pass\e[0m"
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "║ Payload UDP Custom :"
+    echo -e "║ \e[107;32mGET / HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]\e[0m"
+    echo -e "╚════════════════════════════════════════════╝"
+    echo -e "  SSH Berhasil Dibuat!"
+    echo ""
+    read -n 1 -s -r -p "  Tekan tombol apa saja untuk kembali ke Menu"
+    menu
 }
 
 function xray_manager() {
     clear
     proto_type=$1
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "         CREATE $proto_type ACCOUNT PREMIUM          "
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p " Username : " user
-    [[ -z "$user" ]] && dashboard_utama
-    read -p " Limit IP : " iplim
-    read -p " Masa Aktif (Hari) : " aktif
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║        CREATE $proto_type ACCOUNT PREMIUM        ║"
+    echo -e "╚════════════════════════════════════════════╝"
+    read -p "  Username : " user
+    [[ -z "$user" ]] && menu
+    read -p "  Limit IP : " iplim
+    read -p "  Masa Aktif (Hari) : " aktif
+    
     uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=$(date -d "$aktif days" +%Y-%m-%d)
+    
     jq ".inbounds[0].settings.clients += [{\"id\": \"$uuid\", \"email\": \"$user\"}]" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
     systemctl restart xray
+    
     echo "$user|$uuid|$exp|$iplim|0|$proto_type" >> /etc/aji/users.db
+    
     if [[ "$proto_type" == "VMESS" ]]; then
-        cat <<EOF > /etc/aji/vmess_base.json
-{"v":"2","ps":"$user","add":"$DOMAIN","port":"443","id":"$uuid","aid":"0","net":"ws","path":"/vmess","type":"none","host":"","tls":"tls"}
+        cat <<EOF > /etc/aji/vmess_tls.json
+{"v":"2","ps":"$user","add":"$DOMAIN","port":"443","id":"$uuid","aid":"0","net":"ws","path":"/vmess","type":"none","host":"$DOMAIN","tls":"tls"}
 EOF
-        link="vmess://$(base64 -w 0 /etc/aji/vmess_base.json)"
+        cat <<EOF > /etc/aji/vmess_http.json
+{"v":"2","ps":"$user","add":"$DOMAIN","port":"80","id":"$uuid","aid":"0","net":"ws","path":"/vmess","type":"none","host":"$DOMAIN","tls":"none"}
+EOF
+        link_vmess="vmess://$(base64 -w 0 /etc/aji/vmess_tls.json)"
+        link_http="vmess://$(base64 -w 0 /etc/aji/vmess_http.json)"
+        link_grpc="vmess://$uuid@$DOMAIN:443?path=/vmess-grpc&security=tls&encryption=none&type=grpc&serviceName=vmess-grpc#$user"
     elif [[ "$proto_type" == "VLESS" ]]; then
-        link="vless://$uuid@$DOMAIN:443?path=/vless&security=tls&encryption=none&type=ws#$user"
+        link_vmess="vless://$uuid@$DOMAIN:443?path=/vless&security=tls&encryption=none&type=ws#$user"
+        link_http="vless://$uuid@$DOMAIN:80?path=/vless&security=none&encryption=none&type=ws#$user"
+        link_grpc="vless://$uuid@$DOMAIN:443?path=/vless-grpc&security=tls&encryption=none&type=grpc&serviceName=vless-grpc#$user"
     elif [[ "$proto_type" == "TROJAN" ]]; then
-        link="trojan://$uuid@$DOMAIN:443?path=/trojan&security=tls&type=ws#$user"
+        link_vmess="trojan://$uuid@$DOMAIN:443?path=/trojan&security=tls&type=ws#$user"
+        link_http="trojan://$uuid@$DOMAIN:80?path=/trojan&security=none&type=ws#$user"
+        link_grpc="trojan://$uuid@$DOMAIN:443?path=/trojan-grpc&security=tls&type=grpc&serviceName=trojan-grpc#$user"
     fi
+
     clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "      \e[44;1;37m  DETAIL AKUN $proto_type PREMIUM  \e[0m"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e " Remarks     : $user"
-    echo -e " Domain      : $DOMAIN"
-    echo -e " Port TLS    : 443"
-    echo -e " UUID        : $uuid"
-    echo -e " Expired     : $exp"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e " ${YELLOW}LINK CONFIG :${NC}"
-    echo -e ""
-    echo -e "\e[107;30m$link\e[0m"
-    echo -e ""
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p "Tekan Enter untuk kembali"
-    dashboard_utama
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║         $proto_type ACCOUNT DETAIL             ║"
+    echo -e "╠════════════════════════════════════════════╝"
+    echo -e "║ Remarks   : $user"
+    echo -e "║ Domain    : $DOMAIN"
+    echo -e "║ Limit IP  : $iplim Perangkat"
+    echo -e "║ UUID      : $uuid"
+    echo -e "║ Expired   : $exp"
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "║ Link VMESS / TLS (443) :"
+    echo -e "║ \e[107;32m$link_vmess\e[0m"
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "║ Link HTTP / Non-TLS (80) :"
+    echo -e "║ \e[107;32m$link_http\e[0m"
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "║ Link gRPC (Multi Port) :"
+    echo -e "║ \e[107;32m$link_grpc\e[0m"
+    echo -e "╚════════════════════════════════════════════╝"
+    echo -e "  $proto_type Berhasil Dibuat!"
+    echo ""
+    read -p "  Tekan Enter untuk kembali ke Menu"
+    menu
 }
 
 setup_udp() {
