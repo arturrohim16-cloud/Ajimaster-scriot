@@ -331,7 +331,7 @@ backup_restore() {
     case $opt_back in
         1)
             mkdir -p /root/backup
-            cp /etc/aji/users.db /root/backup/users.db.bak
+            cp /etc/aji/users.db /root/backup/users.db.bak 2>/dev/null
             echo -e "    [\e[1;32m OK \e[0m] Data berhasil di-backup ke /root/backup"
             ;;
         2)
@@ -354,28 +354,19 @@ shadow_manager() {
     echo -e "   \e[1;35m║\e[0m            \e[1;107;32m SHADOWSOCKS MANAGER \e[0m           \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
     status=$(systemctl is-active xray)
-    if [ "$status" = "active" ]; then
-        echo -e "    Status Service: \e[1;32m RUNNING (Xray-Core) \e[0m"
-    else
-        echo -e "    Status Service: \e[1;31m STOPPED \e[0m"
-    fi
+    echo -e "    Layanan: Shadowsocks-libev via Xray"
+    echo -e "    Status : $([ "$status" = "active" ] && echo -e "\e[1;32mRUNNING\e[0m" || echo -e "\e[1;31mSTOPPED\e[0m")"
     echo -e "   ─────────────────────────────────────────────"
-    echo -e "    [!] Shadowsocks kini menyatu dengan Xray-Core"
-    echo -e ""
-    read -p "    Tekan Enter untuk kembali ke Menu"
-    menu
-}
-
-run_speedtest() {
-    clear
-    if ! command -v speedtest &> /dev/null; then
-        echo -e " Menginstal Speedtest..."
-        apt install speedtest-cli -y
-    fi
-    speedtest-cli
-    echo -e ""
-    read -n 1 -s -r -p " Tekan tombol apa saja untuk kembali"
-    menu
+    echo -e "    1. Add User Shadowsocks"
+    echo -e "    2. Delete User Shadowsocks"
+    echo -e "    0. Kembali ke Menu"
+    echo -e "   ─────────────────────────────────────────────"
+    read -p "    Pilih Opsi : " opt_sh
+    case $opt_sh in
+        1) add_trojan ;; # Diarahkan ke trojan karena port biasanya sama
+        2) del_user ;;
+        *) menu ;;
+    esac
 }
 
 bot_settings() {
@@ -383,16 +374,14 @@ bot_settings() {
     echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
     echo -e "   \e[1;35m║\e[0m          \e[1;107;32m MENU BOT PANEL SETTINGS \e[0m         \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
-    echo -e "    Konfigurasi Bot Notifikasi Telegram"
-    echo -e "   ─────────────────────────────────────────────"
+    mkdir -p /etc/aji
     read -p "    Masukkan Bot Token : " b_token
     read -p "    Masukkan Admin ID  : " b_id
     echo "$b_token" > /etc/aji/bot.token
     echo "$b_id" > /etc/aji/bot.id
     echo -e "   ─────────────────────────────────────────────"
     echo -e "    [\e[1;32m OK \e[0m] Pengaturan Bot Berhasil Disimpan!"
-    echo -e ""
-    read -p "    Tekan Enter untuk kembali ke Menu"
+    sleep 2
     menu
 }
 
