@@ -447,11 +447,11 @@ function dashboard_utama() {
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;36mCPU LOAD    :\e[0m $(draw_bar $cpu_usage) $cpu_usage%            \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;36mRAM USAGE   :\e[0m $(draw_bar $ram_usage) $ram_usage%            \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
+    echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32m[01] SSH/OVPN      \e[1;35m║\e[0m \e[1;32m[09] UPDATE SCRIPT  \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32m[02] VMESS MG      \e[1;35m║\e[0m \e[1;32m[10] REBOOT VPS     \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32m[03] VLESS MG      \e[1;35m║\e[0m \e[1;32m[11] EDIT SCRIPT    \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[04] TROJAN MG     \e[1;35m║\e[0m \e[1;32} \e[1;32m[12] SHADOW MG      \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;32m[04] TROJAN MG     \e[1;35m║\e[0m \e[1;32m[12] SHADOW MG      \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32m[05] BOT SETTINGS  \e[1;35m║\e[0m \e[1;32m[13] SPEEDTEST      \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32m[06] DELETE USER   \e[1;35m║\e[0m \e[1;32m[14] CREATE SSL     \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32m[07] EXTEND USER   \e[1;35m║\e[0m \e[1;32m[15] INSTALL UDP    \e[1;35m║\e[0m"
@@ -459,9 +459,8 @@ function dashboard_utama() {
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m               \e[1;32m[00] EXIT MENU\e[0m                  \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
-
     read -p " Select Menu : " opt
-    case $opt in
+       case $opt in
         1) add_ssh ;;
         2) add_vmess ;;
         3) add_vless ;;
