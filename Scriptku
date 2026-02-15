@@ -328,7 +328,7 @@ function dashboard_utama() {
     echo -e " [00] EXIT"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     read -p " Pilih Menu : " opt
-    case $opt in
+        case $opt in
         1) menu_manager "SSH" "ssh" ;;
         2) menu_manager "VMESS" "ws" ;;
         3) menu_manager "VLESS" "vless" ;;
@@ -337,8 +337,13 @@ function dashboard_utama() {
         6) del-user ;;
         7) renew-user ;;
         8) menu-backup ;;
-        9) 
-           echo -e "${YELLOW}update-script() {
+        9) update_script ;;
+        10) reboot ;;
+        11) nano /usr/bin/menu ;;
+        00) exit ;;
+        *) dashboard_utama ;;
+    esac
+           echo -e "${YELLOW}update_script() {
     clear
     echo -e "\e[1;31m═══════════════════════════════════════════════════\e[0m"
     echo -e "       \e[42;1;37m  UPDATE SCRIPT MANUALLY  \e[0m"
@@ -346,17 +351,14 @@ function dashboard_utama() {
     echo -e ""
     echo -e " \e[1;33mChecking for updates from GitHub...\e[0m"
     sleep 2
-
     wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
     chmod +x /usr/bin/menu
-
     echo -e ""
-    echo -e " \e[1;32mSUCCESS! Script has been updated to the latest version.\e[0m"
-    echo -e ""
-    echo -e " \e[1;33mReturning to menu in 2 seconds...\e[0m"
+    echo -e " \e[1;32mSUCCESS! Script has been updated.\e[0m"
     sleep 2
     menu
 }
+
         10) reboot ;;
         11) nano /usr/bin/menu ;;
         0) exit ;;
