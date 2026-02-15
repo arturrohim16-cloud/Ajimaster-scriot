@@ -254,52 +254,62 @@ draw_bar() {
 
 shadow_manager() {
     clear
-    echo -e "\e[1;32m Mengelola User Shadowsocks...\e[0m"
-    grep "|SHADOW|" /etc/aji/users.db
-    read -p "Tekan Enter untuk Kembali"
+    echo -e " Menu Shadowsocks Manager"
+    echo -e " Sedang dalam proses pengembangan"
+    sleep 2
+    menu
 }
 
 run_speedtest() {
     clear
-    echo -e "\e[1;32m Menjalankan Speedtest Server...\e[0m"
-    if [[ ! -e /usr/bin/speedtest-cli ]]; then
+    if ! command -v speedtest &> /dev/null; then
+        echo -e " Menginstal Speedtest..."
         apt install speedtest-cli -y
     fi
     speedtest-cli
-    echo ""
-    read -p "Tekan Enter untuk Kembali"
+    echo -e ""
+    read -n 1 -s -r -p " Tekan tombol apa saja untuk kembali"
+    menu
 }
 
 create_ssl() {
     clear
-    echo -e "\e[1;32m Mengaktifkan Sertifikat SSL (Acme.sh)...\e[0m"
-    domain=$(cat /etc/xray/domain)
+    echo -e " Membuat Sertifikat SSL..."
     systemctl stop xray
-    curl https://get.acme.sh | sh
-    ~/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+    systemctl stop nginx
+    domain=$(cat /etc/xray/domain)
+    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
+    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+    /root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
     ~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
     systemctl start xray
-    echo -e "\e[1;32m SSL Berhasil Dipasang!\e[0m"
-    read -p "Tekan Enter untuk Kembali"
+    systemctl start nginx
+    echo -e " SSL Berhasil Diperbarui"
+    sleep 2
+    menu
 }
 
 install_udp() {
     clear
-    echo -e "\e[1;32m Menginstall UDP Custom (Gaming Optimization)...\e[0m"
+    echo -e " Menginstal UDP Custom..."
     wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/udp-custom"
     chmod +x /usr/bin/udp-custom
-    echo -e "\e[1;32m UDP Custom Berhasil Diaktifkan!\e[0m"
-    read -p "Tekan Enter untuk Kembali"
+    echo -e " UDP Custom Berhasil Diinstal"
+    sleep 2
+    menu
 }
 
 restart_services() {
     clear
-    echo -e "\e[1;32m Merestart Semua Layanan (Xray, UDP, Cron)...\e[0m"
+    echo -e " Sedang Me-restart Semua Layanan..."
     systemctl restart xray
-    systemctl restart cron
+    systemctl restart nginx
+    systemctl restart ssh
+    systemctl restart dropbear
+    systemctl restart ws-stunnel
+    echo -e " Semua Layanan Berhasil Di-restart"
     sleep 2
-    echo -e "\e[1;32m Semua Service Berhasil Direstart!\e[0m"
-    read -p "Tekan Enter untuk Kembali"
+    menu
 }
 
 menu_manager() {
