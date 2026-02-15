@@ -142,14 +142,37 @@ function core_engine() {
     done < /etc/aji/users.db
 }
 
-# --- 5. DELETE LOGIC ---
-function delete_logic() {
-    local u=$1; local p=$2
-    if [ "$p" == "ssh" ]; then userdel -f "$u"; else
-        jq "del(.inbounds[].settings.clients[] | select(.email == \"$u\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
-        systemctl restart xray
+function cek_user() {
+    clear
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║           CEK USER LOGIN ONLINE            ║"
+    echo -e "╚════════════════════════════════════════════╝"
+    echo -e "  Sedang memeriksa koneksi user..."
+    echo -e "╟─────────────────────────────────────────────"
+
+    if [ -f /var/log/xray/access.log ]; then
+        data=$(grep -E "accepted" /var/log/xray/access.log | cut -d ' ' -f 7 | sort | uniq | cut -d: -f1)
+    else
+        data=""
     fi
-    sed -i "/^$u|/d" /etc/aji/users.db
+
+    if [[ -z "$data" ]]; then
+        echo -e "  ║ Status: \e[107;31m TIDAK ADA USER ONLINE \e[0m"
+    else
+        echo -e "  DAFTAR USER YANG SEDANG KONEK:"
+        echo -e "╟─────────────────────────────────────────────"
+        for user in $data; do
+            if [[ ! -z "$user" ]]; then
+                echo -e "  ║ User: \e[107;32m $user \e[0m [ONLINE]"
+            fi
+        done
+    fi
+
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "╚════════════════════════════════════════════╝"
+    echo ""
+    read -p "  Tekan Enter untuk kembali ke Dashboard"
+    dashboard_utama
 }
 
 # --- 6. CREATE SSH (3 PORT: 80,443,UDP) ---
@@ -343,22 +366,25 @@ install_udp() {
     menu
 }
 
-restart_services() {
+function restart_services() {
     clear
-    echo -e " Restarting Services..."
-    systemctl restart xray
-    systemctl restart nginx
-    systemctl restart ssh
-    sleep 2
-    menu
-}
-
-restart_services() {
-    clear
-    echo -e " Restarting Services..."
-    systemctl restart xray
-    systemctl restart nginx
-    systemctl restart ssh
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m         \e[1;107;32m RESTARTING ALL SERVICES \e[0m        \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e "    Mohon tunggu sebentar..."
+    echo -e "   ─────────────────────────────────────────────"
+    
+    echo -ne "    Restarting Xray... "
+    systemctl restart xray && echo -e "[\e[1;32m OK \e[0m]"
+    
+    echo -ne "    Restarting Nginx... "
+    systemctl restart nginx && echo -e "[\e[1;32m OK \e[0m]"
+    
+    echo -ne "    Restarting SSH...   "
+    systemctl restart ssh && echo -e "[\e[1;32m OK \e[0m]"
+    
+    echo -e "   ─────────────────────────────────────────────"
+    echo -e "    Semua layanan berhasil dijalankan kembali!"
     sleep 2
     menu
 }
@@ -397,61 +423,61 @@ menu_manager() {
     esac
 }
 
-del-user() {
+del_user() {
     clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "             HAPUS PENGGUNA (DELETE)               "
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p " Masukkan Username yang akan dihapus: " u
-    if grep -q -w "$u" /etc/aji/users.db; then
-        proto=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f6)
-        if [[ "$proto" == "ssh" ]]; then 
-            userdel -f "$u"
-        else
-            jq "del(.inbounds[0].settings.clients[] | select(.email == \"$u\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
-            systemctl restart xray
-        fi
-        sed -i "/^$u|/d" /etc/aji/users.db
-        echo -e "${GREEN}User $u Berhasil Dihapus!${NC}"
-    else
-        echo -e "${RED}User Tidak Ditemukan!${NC}"
-    fi
-    sleep 2; dashboard_utama
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║            DELETE XRAY ACCOUNT             ║"
+    echo -e "╚════════════════════════════════════════════╝"
+    echo -e "  Daftar User Aktif di VPS:"
+    echo -e "╟─────────────────────────────────────────────"
+    grep -E "^### " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | nl -s ") "
+    echo -e "╟─────────────────────────────────────────────"
+    read -p "  Ketik Nama User yang ingin dihapus: " user
+    if [[ -z "$user" ]]; then menu; fi
+
+    sed -i "/^### $user/,/^#&/d" /etc/xray/config.json
+    systemctl restart xray
+    
+    clear
+    echo -e "╔════════════════════════════════════════════╗"
+    echo -e "║          PROSES HAPUS BERHASIL             ║"
+    echo -e "╠════════════════════════════════════════════╝"
+    echo -e "║ Nama User : \e[107;32m $user \e[0m"
+    echo -e "║ Status    : Telah Dihapus Permanen"
+    echo -e "╟─────────────────────────────────────────────"
+    echo -e "║ Sistem Xray telah diperbarui otomatis"
+    echo -e "╚════════════════════════════════════════════╝"
+    echo ""
+    read -p "  Tekan Enter untuk kembali ke Menu"
+    menu
 }
 
-renew-user() {
+renew_user() {
     clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "            PERPANJANG MASA AKTIF (RENEW)          "
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p " Masukkan Username: " u
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m       \e[1;107;32m PERPANJANG MASA AKTIF USER \e[0m       \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e ""
+    read -p "  Masukkan Username : " u
     if grep -q -w "$u" /etc/aji/users.db; then
-        read -p " Tambah Masa Aktif (Hari): " days
+        read -p "  Tambah Masa Aktif (Hari) : " days
         exp_old=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f3)
         exp_new=$(date -d "$exp_old + $days days" +%Y-%m-%d)
         sed -i "s/$exp_old/$exp_new/g" /etc/aji/users.db
-        echo -e "${GREEN}User $u diperpanjang ke $exp_new${NC}"
+        
+        clear
+        echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+        echo -e "   \e[1;35m║\e[0m          \e[1;32mRENEW ACCOUNT SUCCESS\e[0m             \e[1;35m║\e[0m"
+        echo -e "   \e[1;35m╠════════════════════════════════════════════╝\e[0m"
+        echo -e "   \e[1;35m║\e[0m User: \e[1;107;32m $u \e[0m"
+        echo -e "   \e[1;35m║\e[0m Expired Baru: \e[1;32m$exp_new\e[0m"
+        echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
     else
-        echo -e "${RED}User Tidak Ditemukan!${NC}"
+        echo -e "   \e[1;31m[!] User Tidak Ditemukan!\e[0m"
     fi
-    sleep 2; dashboard_utama
-}
-renew-user() {
-    clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "            PERPANJANG MASA AKTIF (RENEW)          "
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    read -p " Masukkan Username: " u
-    if grep -q -w "$u" /etc/aji/users.db; then
-        read -p " Tambah Masa Aktif (Hari): " days
-        exp_old=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f3)
-        exp_new=$(date -d "$exp_old + $days days" +%Y-%m-%d)
-        sed -i "s/$exp_old/$exp_new/g" /etc/aji/users.db
-        echo -e "${GREEN}User $u diperpanjang ke $exp_new${NC}"
-    else
-        echo -e "${RED}User Tidak Ditemukan!${NC}"
-    fi
-    sleep 2; dashboard_utama
+    echo ""
+    read -p "  Tekan Enter untuk kembali ke Menu"
+    dashboard_utama
 }
 
 function dashboard_utama() {
@@ -509,16 +535,17 @@ function dashboard_utama() {
     echo -e "   \e[1;35m║\e[0m \e[1;36mCPU LOAD    :\e[0m $(draw_bar $cpu_usage) $cpu_usage%            \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;36mRAM USAGE   :\e[0m $(draw_bar $ram_usage) $ram_usage%            \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[01] SSH/OVPN      \e[1;35m║\e[0m \e[1;32m[09] UPDATE SCRIPT  \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[02] VMESS MG      \e[1;35m║\e[0m \e[1;32} \e[1;32m[10] REBOOT VPS     \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[03] VLESS MG      \e[1;35m║\e[0m \e[1;32m[11] EDIT SCRIPT    \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[04] TROJAN MG     \e[1;35m║\e[0m \e[1;32m[12] SHADOW MG      \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[05] BOT SETTINGS  \e[1;35m║\e[0m \e[1;32m[13] SPEEDTEST      \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[06] DELETE USER   \e[1;35m║\e[0m \e[1;32m[14] CREATE SSL     \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[07] EXTEND USER   \e[1;35m║\e[0m \e[1;32m[15] INSTALL UDP    \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;32m[08] BACKUP/REST   \e[1;35m║\e[0m \e[1;32m[16] RESTART SERV   \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH/OVPN      \e[1;35m║\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SCRIPT  \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS MG      \e[1;35m║\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS     \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS MG      \e[1;35m║\e[0m \e[1;33m[11]\e[0m \e[1;36mEDIT SCRIPT    \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN MG     \e[1;35m║\e[0m \e[1;33m[12]\e[0m \e[1;36mSHADOW MG      \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[05]\e[0m \e[1;32mBOT SETTINGS  \e[1;35m║\e[0m \e[1;33m[13]\e[0m \e[1;36mSPEEDTEST      \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[06]\e[0m \e[1;31mDELETE USER   \e[1;35m║\e[0m \e[1;33m[14]\e[0m \e[1;36mCREATE SSL     \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND USER   \e[1;35m║\e[0m \e[1;33m[15]\e[0m \e[1;36mINSTALL UDP    \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m \e[1;33m[08]\e[0m \e[1;32mBACKUP/REST   \e[1;35m║\e[0m \e[1;33m[16]\e[0m \e[1;36mRESTART SERV   \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
-    echo -e "   \e[1;35m║\e[0m               \e[1;32m[00] EXIT MENU\e[0m                  \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m               \e[1;33m[\e[1;32m17\e[1;33m]\e[0m \e[1;107;32m CEK ONLINE \e[0m                 \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                  \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
     read -p " Select Menu : " opt
     case $opt in
@@ -538,8 +565,9 @@ function dashboard_utama() {
         14) create_ssl ;;
         15) install_udp ;;
         16) restart_services ;;
+        17) cek_user ;;
         0|00) exit ;;
-        *) echo -e " Salah Tekan Mas!" && sleep 1 && menu ;;
+        *) menu ;;
     esac
 }
 
