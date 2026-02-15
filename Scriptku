@@ -184,7 +184,6 @@ function create_ssh() {
     dashboard_utama
 }
 
-# --- 7. CREATE XRAY MANAGER ---
 function xray_manager() {
     clear
     proto_type=$1
@@ -229,8 +228,7 @@ EOF
     dashboard_utama
 }
 
-# --- 8. UDP SETTINGS (BadVPN) ---
-function setup_udp() {
+setup_udp() {
     clear
     echo -e "--- UDP GAMING ACTIVATOR ---"
     wget -qO /usr/bin/badvpn "https://github.com/ambrop7/badvpn/raw/master/badvpn-udpgw"
@@ -295,6 +293,23 @@ create_ssl() {
     systemctl start xray
     systemctl start nginx
     echo -e " SSL Berhasil Diperbarui"
+    sleep 2
+    menu
+}
+
+install_udp() {
+    clear
+    echo -e " Install UDP Custom..."
+    sleep 2
+    menu
+}
+
+restart_services() {
+    clear
+    echo -e " Restarting Services..."
+    systemctl restart xray
+    systemctl restart nginx
+    systemctl restart ssh
     sleep 2
     menu
 }
