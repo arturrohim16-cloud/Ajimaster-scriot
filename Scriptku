@@ -202,44 +202,53 @@ function create_ssh() {
 # --- 7. CREATE XRAY MANAGER ---
 function xray_manager() {
     clear
-    echo -e " [1] VMESS [2] VLESS [3] TROJAN [0] BACK"
-    read -p " Pilih: " opt; [ "$opt" == "0" ] && return
-    case $opt in 1) pr="vmess";; 2) pr="vless";; 3) pr="trojan";; *) return;; esac
+    proto_type=$1
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "         CREATE $proto_type ACCOUNT PREMIUM          "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Username : " user
+    [[ -z "$user" ]] && dashboard_utama
+    read -p " Limit IP : " iplim
+    read -p " Masa Aktif (Hari) : " aktif
     
-    read -p " User: " u; read -p " Exp (Day): " d; read -p " Limit IP: " li
-    uid=$(uuidgen); exp=$(date -d "$d days" +%Y-%m-%d)
-
-    jq ".inbounds[0].settings.clients += [{\"id\": \"$uid\", \"email\": \"$u\"}]" $XRAY_CONF > /tmp/x.tmp && mv /tmp/x.tmp $XRAY_CONF
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+    exp=$(date -d "$aktif days" +%Y-%m-%d)
+    
+    jq ".inbounds[0].settings.clients += [{\"id\": \"$uuid\", \"email\": \"$user\"}]" /etc/xray/config.json > /tmp/xray.tmp && mv /tmp/xray.tmp /etc/xray/config.json
     systemctl restart xray
-    echo "$u|null|$exp|$li|0|$pr|$uid" >> /etc/aji/users.db
-        clear
-    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "       ${YELLOW}XRAY ACCOUNT (${pr^^})${NC}"
-    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e " Remarks    : $u"
-    echo -e " Domain     : $DOMAIN"
-    echo -e " Limit IP   : $li User" # <--- Sekarang sudah muncul di sini
-    echo -e " Expired    : $exp"
-    echo -e "--------------------------------------"
+    echo "$user|$uuid|$exp|$iplim|0|$proto_type" >> /etc/aji/users.db
     
-    # Bagian Background Putih untuk Port & Link
-    echo -e " \e[47;30m TRANSPORT : WS / GRPC / TLS \e[0m"
-    echo -e " \e[47;30m PORT TLS  : 443 \e[0m"
-    echo -e " \e[47;30m PORT HTTP : 80 \e[0m"
-    echo -e "--------------------------------------"
-    echo -e " ${CYAN}LINK CONFIG :${NC}"
-    
-    if [ "$pr" == "vmess" ]; then
-        echo -e "\e[47;30m vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$u\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"path\":\"/vmess\",\"tls\":\"tls\"}" | base64 -w 0) \e[0m"
-    elif [ "$pr" == "vless" ]; then
-        echo -e "\e[47;30m vless://$uid@$DOMAIN:443?path=/vmess&security=tls&encryption=none&type=ws#$u \e[0m"
-    elif [ "$pr" == "trojan" ]; then
-        echo -e "\e[47;30m trojan://$uid@$DOMAIN:443?path=/vmess&security=tls&type=ws#$u \e[0m"
+    if [[ "$proto_type" == "VMESS" ]]; then
+        cat <<EOF > /etc/aji/vmess_base.json
+{"v":"2","ps":"$user","add":"$DOMAIN","port":"443","id":"$uuid","aid":"0","net":"ws","path":"/vmess","type":"none","host":"","tls":"tls"}
+EOF
+        link="vmess://$(base64 -w 0 /etc/aji/vmess_base.json)"
+    elif [[ "$proto_type" == "VLESS" ]]; then
+        link="vless://$uuid@$DOMAIN:443?path=/vless&security=tls&encryption=none&type=ws#$user"
+    elif [[ "$proto_type" == "TROJAN" ]]; then
+        link="trojan://$uuid@$DOMAIN:443?path=/trojan&security=tls&type=ws#$user"
     fi
-    
-    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    read -p "Enter to menu..."
 
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "      \e[44;1;37m  DETAIL AKUN $proto_type PREMIUM  \e[0m"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e " Remarks     : $user"
+    echo -e " Domain      : $DOMAIN"
+    echo -e " Port TLS    : 443"
+    echo -e " UUID        : $uuid"
+    echo -e " Expired     : $exp"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e " ${YELLOW}LINK CONFIG :${NC}"
+    echo -e ""
+    echo -e "\e[107;30m$link\e[0m"
+    echo -e ""
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "       \e[42;1;37m  TERIMA KASIH TELAH BERLANGGANAN  \e[0m"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo ""
+    read -p "Tekan Enter untuk kembali ke Menu Utama"
+    dashboard_utama
 }
 
 # --- 8. UDP SETTINGS (BadVPN) ---
@@ -280,8 +289,7 @@ menu_manager() {
     echo -e "-------------------------------------------"
     read -p " Pilih Menu : " opt_sub
     case $opt_sub in
-        1) if [[ "$2" == "ssh" ]]; then create_ssh; else xray_manager; fi ;;
-        2) if [[ "$2" == "ssh" ]]; then create_ssh; else xray_manager; fi ;;
+        1) if [[ "$2" == "ssh" ]]; then create_ssh; else xray_manager "$1"; fi ;;
         3) del-user ;;
         4) cek-user ;;
         0) dashboard_utama ;;
