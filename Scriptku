@@ -299,7 +299,11 @@ create_ssl() {
 
 install_udp() {
     clear
-    echo -e " Install UDP Custom..."
+    echo -e " Sedang Mengunduh & Menginstal UDP Custom..."
+    wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/udp-custom"
+    chmod +x /usr/bin/udp-custom
+    /usr/bin/udp-custom install
+    echo -e " UDP Custom Berhasil Terpasang!"
     sleep 2
     menu
 }
