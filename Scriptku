@@ -14,7 +14,7 @@ fi
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; PURPLE='\033[0;35m'; CYAN='\033[0;36m'; NC='\033[0m'
 BG_WHITE='\033[47;30m'
 
-mkdir -p /etc/aji /etc/xray /var/log/xray /etc/udp /root/backup
+mkdir -p /etc/aji /etc/xray /root/backup
 touch /etc/aji/users.db
 DOMAIN=$(cat /etc/xray/domain 2>/dev/null || curl -s ipinfo.io/ip)
 IP=$(curl -s ipinfo.io/ip)
@@ -158,45 +158,33 @@ function delete_logic() {
 # --- 6. CREATE SSH (3 PORT: 80,443,UDP) ---
 function create_ssh() {
     clear
-    echo -e "${CYAN}━━━━━ CREATE SSH/TRIAL NOC GRADE ━━━━━${NC}"
-    read -p " Username  : " u; [ -z "$u" ] && return
-    read -p " Password  : " p; [ -z "$p" ] && return
-    read -p " Exp (Day) : " d; [[ ! "$d" =~ ^[0-9]+$ ]] && return
-    read -p " Limit IP  : " li; [[ ! "$li" =~ ^[0-9]+$ ]] && return
-
-    exp=$(date -d "$d days" +%Y-%m-%d)
-    
-    # Membuat user di sistem VPS
-    useradd -e $exp -s /bin/false -M "$u" && echo "$u:$p" | chpasswd
-    
-    # Menyimpan data ke database internal
-    echo "$u|$p|$exp|$li|0|ssh" >> /etc/aji/users.db
-
-    # Tampilan Dashboard Akun untuk Pembeli
-        clear
-    echo -e "${RED}══════════════════════════════════════${NC}"
-    echo -e "      ${YELLOW}SSH WEBSOCKET ACCOUNT${NC}"
-    echo -e "${RED}══════════════════════════════════════${NC}"
-    echo -e " Host       : $DOMAIN"
-    echo -e " User       : $u"
-    echo -e " Pass       : $p"
-    echo -e " Expired    : $exp"
-    echo -e " Limit IP   : $li User"
-    echo -e "--------------------------------------"
-    echo -e " ${CYAN}LOGIN DETAIL (TLS/NTLS):${NC}"
-    # Background putih pada format IP:Port@User:Pass
-    echo -e " \e[47;30m $DOMAIN:443@$u:$p \e[0m (TLS)"
-    echo -e " \e[47;30m $DOMAIN:80@$u:$p  \e[0m (NTLS)"
-    echo -e "--------------------------------------"
-    echo -e " ${CYAN}PAYLOAD WEBSOCKET:${NC}"
-    # Background putih pada Payload
-    echo -e " \e[47;30m GET /ssh HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf] \e[0m"
-    echo -e "--------------------------------------"
-    echo -e " Path       : /ssh"
-    echo -e " UDP Port   : 7200"
-    echo -e "${RED}══════════════════════════════════════${NC}"
-    read -p "Enter to menu..."
-
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "         CREATE SSH PREMIUM ACCOUNT          "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Username : " user
+    [[ -z "$user" ]] && dashboard_utama
+    read -p " Password : " pass
+    read -p " Limit IP : " iplim
+    read -p " Masa Aktif (Hari) : " aktif
+    exp=$(date -d "$aktif days" +%Y-%m-%d)
+    useradd -e $exp -M -s /bin/false "$user"
+    echo "$user:$pass" | chpasswd
+    echo "$user|$pass|$exp|$iplim|0|ssh" >> /etc/aji/users.db
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "      \e[44;1;37m  DETAIL AKUN SSH PREMIUM  \e[0m"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e " IP/Domain   : $DOMAIN"
+    echo -e " Username    : $user"
+    echo -e " Password    : $pass"
+    echo -e " Port Open   : 22, 443, 80, 8080"
+    echo -e " Expired     : $exp"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e " Payload HTTP :"
+    echo -e "\e[107;30mGET / HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]\e[0m"
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p "Tekan Enter untuk kembali"
+    dashboard_utama
 }
 
 # --- 7. CREATE XRAY MANAGER ---
@@ -210,14 +198,11 @@ function xray_manager() {
     [[ -z "$user" ]] && dashboard_utama
     read -p " Limit IP : " iplim
     read -p " Masa Aktif (Hari) : " aktif
-    
     uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=$(date -d "$aktif days" +%Y-%m-%d)
-    
-    jq ".inbounds[0].settings.clients += [{\"id\": \"$uuid\", \"email\": \"$user\"}]" /etc/xray/config.json > /tmp/xray.tmp && mv /tmp/xray.tmp /etc/xray/config.json
+    jq ".inbounds[0].settings.clients += [{\"id\": \"$uuid\", \"email\": \"$user\"}]" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
     systemctl restart xray
     echo "$user|$uuid|$exp|$iplim|0|$proto_type" >> /etc/aji/users.db
-    
     if [[ "$proto_type" == "VMESS" ]]; then
         cat <<EOF > /etc/aji/vmess_base.json
 {"v":"2","ps":"$user","add":"$DOMAIN","port":"443","id":"$uuid","aid":"0","net":"ws","path":"/vmess","type":"none","host":"","tls":"tls"}
@@ -228,7 +213,6 @@ EOF
     elif [[ "$proto_type" == "TROJAN" ]]; then
         link="trojan://$uuid@$DOMAIN:443?path=/trojan&security=tls&type=ws#$user"
     fi
-
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     echo -e "      \e[44;1;37m  DETAIL AKUN $proto_type PREMIUM  \e[0m"
@@ -244,10 +228,7 @@ EOF
     echo -e "\e[107;30m$link\e[0m"
     echo -e ""
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "       \e[42;1;37m  TERIMA KASIH TELAH BERLANGGANAN  \e[0m"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo ""
-    read -p "Tekan Enter untuk kembali ke Menu Utama"
+    read -p "Tekan Enter untuk kembali"
     dashboard_utama
 }
 
@@ -282,19 +263,71 @@ menu_manager() {
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     echo -e " [01] Create Akun Premium"
     echo -e " [02] Create Akun Trial"
-    echo -e " [03] Hapus User"
-    echo -e " [04] Cek Multi Login"
+    echo -e " [03] Perpanjang Masa Aktif"
+    echo -e " [04] Hapus Akun $1"
     echo -e ""
     echo -e " [00] Kembali ke Menu Utama"
     echo -e "-------------------------------------------"
     read -p " Pilih Menu : " opt_sub
     case $opt_sub in
         1) if [[ "$2" == "ssh" ]]; then create_ssh; else xray_manager "$1"; fi ;;
-        3) del-user ;;
-        4) cek-user ;;
+        2) 
+           user="trial$(($RANDOM%1000))"; exp=$(date -d "1 days" +%Y-%m-%d)
+           if [[ "$2" == "ssh" ]]; then
+              useradd -e $exp -M -s /bin/false "$user"; echo "$user:1" | chpasswd
+              echo "$user|1|$exp|1|0|ssh" >> /etc/aji/users.db
+           else
+              uuid=$(cat /proc/sys/kernel/random/uuid)
+              jq ".inbounds[0].settings.clients += [{\"id\": \"$uuid\", \"email\": \"$user\"}]" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
+              systemctl restart xray
+              echo "$user|$uuid|$exp|1|0|$1" >> /etc/aji/users.db
+           fi
+           echo -e "${GREEN}Trial Berhasil Dibuat${NC}"; sleep 2; dashboard_utama ;;
+        3) renew-user ;;
+        4) del-user ;;
         0) dashboard_utama ;;
         *) menu_manager "$1" "$2" ;;
     esac
+}
+
+del-user() {
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "             HAPUS PENGGUNA (DELETE)               "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Masukkan Username yang akan dihapus: " u
+    if grep -q -w "$u" /etc/aji/users.db; then
+        proto=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f6)
+        if [[ "$proto" == "ssh" ]]; then 
+            userdel -f "$u"
+        else
+            jq "del(.inbounds[0].settings.clients[] | select(.email == \"$u\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
+            systemctl restart xray
+        fi
+        sed -i "/^$u|/d" /etc/aji/users.db
+        echo -e "${GREEN}User $u Berhasil Dihapus!${NC}"
+    else
+        echo -e "${RED}User Tidak Ditemukan!${NC}"
+    fi
+    sleep 2; dashboard_utama
+}
+
+renew-user() {
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "            PERPANJANG MASA AKTIF (RENEW)          "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Masukkan Username: " u
+    if grep -q -w "$u" /etc/aji/users.db; then
+        read -p " Tambah Masa Aktif (Hari): " days
+        exp_old=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f3)
+        exp_new=$(date -d "$exp_old + $days days" +%Y-%m-%d)
+        sed -i "s/$exp_old/$exp_new/g" /etc/aji/users.db
+        echo -e "${GREEN}User $u diperpanjang ke $exp_new${NC}"
+    else
+        echo -e "${RED}User Tidak Ditemukan!${NC}"
+    fi
+    sleep 2; dashboard_utama
 }
 
 function dashboard_utama() {
