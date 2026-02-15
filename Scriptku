@@ -273,27 +273,17 @@ menu_manager() {
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     echo -e " [01] Create Akun Premium"
     echo -e " [02] Create Akun Trial"
-    echo -e " [03] Matikan Akun"
-    echo -e " [04] Hapus User"
-    echo -e " [05] Cek Multi Login"
+    echo -e " [03] Hapus User"
+    echo -e " [04] Cek Multi Login"
     echo -e ""
     echo -e " [00] Kembali ke Menu Utama"
     echo -e "-------------------------------------------"
     read -p " Pilih Menu : " opt_sub
     case $opt_sub in
-        1) add-$2 ;;
-        2) trial-$2 ;;
-        3) 
-           read -p " Masukkan Username yang mau dimatikan: " u_off
-           if [[ "$2" == "ssh" ]]; then
-               passwd -l $u_off
-           else
-               sed -i "s/\"$u_off\"/\"offline-$u_off\"/g" /etc/xray/config.json
-               systemctl restart xray
-           fi
-           echo -e " User $u_off Berhasil Dimatikan."; sleep 2; menu_manager "$1" "$2" ;;
-        4) del-$2 ;;
-        5) cek-$2 ;;
+        1) if [[ "$2" == "ssh" ]]; then create_ssh; else xray_manager; fi ;;
+        2) if [[ "$2" == "ssh" ]]; then create_ssh; else xray_manager; fi ;;
+        3) del-user ;;
+        4) cek-user ;;
         0) dashboard_utama ;;
         *) menu_manager "$1" "$2" ;;
     esac
