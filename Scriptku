@@ -1,4 +1,5 @@
 #!/bin/bash
+
 MYIP=$(wget -qO- ipinfo.io/ip)
 CITY=$(wget -qO- ipinfo.io/city)
 ISP=$(wget -qO- ipinfo.io/org | cut -d " " -f 2-)
@@ -638,20 +639,23 @@ function dashboard_utama() {
     cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' | cut -d. -f1)
     ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     
-    total_ssh=$(grep -c "|ssh|" /etc/aji/users.db 2>/dev/null || echo "0")
-    total_vmess=$(grep -c "|VMESS|" /etc/aji/users.db 2>/dev/null || echo "0")
-    total_vless=$(grep -c "|VLESS|" /etc/aji/users.db 2>/dev/null || echo "0")
-    total_trojan=$(grep -c "|TROJAN|" /etc/aji/users.db 2>/dev/null || echo "0")
-    total_shadow=$(grep -c "|SHADOW|" /etc/aji/users.db 2>/dev/null || echo "0")
+    total_ssh=$(grep -c -E "^### " "/etc/aji/users.db" 2>/dev/null || echo "0")
+    total_vmess=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_vless=$(grep -c -E "^#& " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_trojan=$(grep -c -E "^#! " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_shadow=$(grep -c -E "^#^ " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' | cut -d. -f1)
+    ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
 
-    echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
-    echo -e "   \e[1;35m║\e[0m               \e[1;107;35m AJI MASTER SCRIPT \e[0m                 \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
-    echo -e "   \e[1;35m║\e[0m  \e[1;33mOS       :\e[0m $OS"
-    echo -e "   \e[1;35m║\e[0m  \e[1;33mIP VPS   :\e[0m $MYIP"
-    echo -e "   \e[1;35m║\e[0m  \e[1;33mDOMAIN   :\e[0m $DOMAIN"
-    echo -e "   \e[1;35m║\e[0m  \e[1;33mLOKASI   :\e[0m $CITY (\e[1;36m$ISP\e[0m)"
-    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
+    clear
+    echo -e "   \e[1;35m◣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◢\e[0m"
+    echo -e "   \e[1;35m┃\e[0m       \e[1;31mA\e[1;32mJ\e[1;33mI \e[1;34mM\e[1;35mA\e[1;36mS\e[1;31mT\e[1;32mE\e[1;33mE \e[1;34mP\e[1;35mR\e[1;36mE\e[1;31mM\e[1;32mI\e[1;33mU\e[1;34mM \e[1;35mC\e[1;36mO\e[1;31mN\e[1;32mT\e[1;33mR\e[1;34mO\e[1;35mL \e[1;36mP\e[1;31mA\e[1;32mN\e[1;33mE\e[1;34mL\e[0m       \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┸┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┸\e[0m"
+    echo -e "   \e[1;35m┃\e[0m  \e[1;31mO\e[1;32mS \e[1;33mS\e[1;34mY\e[1;35mS\e[1;36mT\e[1;31mE\e[1;32mM   \e[1;35m:\e[0m $OS"
+    echo -e "   \e[1;35m┃\e[0m  \e[1;33mI\e[1;34mP \e[1;35mA\e[1;36mD\e[1;31mD\e[1;32mR\e[1;33mE\e[1;34mS\e[1;35mS  \e[1;35m:\e[0m $MYIP"
+    echo -e "   \e[1;35m┃\e[0m  \e[1;36mD\e[1;31mO\e[1;32mM\e[1;33mA\e[1;34mI\e[1;35mN \e[1;36mN\e[1;31mA\e[1;32mM\e[1;33mE  \e[1;35m:\e[0m $DOMAIN"
+    echo -e "   \e[1;35m┃\e[0m  \e[1;32mL\e[1;33mO\e[1;34mC\e[1;35mA\e[1;36mT\e[1;31mI\e[1;32mO\e[1;33mN    \e[1;35m:\e[0m $CITY (\e[1;36m$ISP\e[0m)"
+    echo -e "   \e[1;35m┹┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┰┲\e[0m"
     echo -e "   \e[1;35m║\e[0m         \e[1;36m>>> INFORMATION ACCOUNT <<<\e[0m           \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32mSSH/OPENVPN     = $total_ssh  ACC PREMIUM\e[0m          \e[1;35m║\e[0m"
