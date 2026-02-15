@@ -376,7 +376,7 @@ function dashboard_utama() {
     echo -e "   \e[1;35m║\e[0m   \e[1;32mVLESS/WS/GRPC    = $total_vless  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m   \e[1;32mTROJAN/WS/GRPC   = $total_trojan  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m   \e[1;32mSHADOW/WS/GRPC   = $total_shadow  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
-    echo -e "  \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
+    echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
   
     echo -e "-------------------------------------------"
     echo -e " [01] SSH/OPENVPN           [06] DELETE USER"
