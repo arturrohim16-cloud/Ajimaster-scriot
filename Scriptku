@@ -436,6 +436,37 @@ function restart_services() {
     menu
 }
 
+update_script() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m            \e[1;107;32m UPDATE SCRIPT MENU \e[0m            \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e "    Sedang memeriksa pembaruan..."
+    sleep 2
+    wget -q -O $0 "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
+    chmod +x $0
+    echo -e "   ─────────────────────────────────────────────"
+    echo -e "    [\e[1;32m OK \e[0m] Script berhasil di-update ke versi terbaru!"
+    sleep 2
+    menu
+}
+
+run_speedtest() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m             \e[1;107;32m RUNNING SPEEDTEST \e[0m            \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e "    Mohon tunggu, sedang mengukur kecepatan VPS..."
+    echo -e "   ─────────────────────────────────────────────"
+    if ! command -v speedtest-cli &> /dev/null; then
+        apt update && apt install speedtest-cli -y &> /dev/null
+    fi
+    speedtest-cli --simple
+    echo -e "   ─────────────────────────────────────────────"
+    read -p "    Tekan Enter untuk kembali ke Menu"
+    menu
+}
+
 menu_manager() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
@@ -644,7 +675,7 @@ function dashboard_utama() {
         8) backup_restore ;;
         9) update_script ;;
         10) reboot ;;
-        11) nano /usr/bin/menu ;;
+        11) nano $0 ;;
         12) shadow_manager ;;
         13) run_speedtest ;;
         14) create_ssl ;;
