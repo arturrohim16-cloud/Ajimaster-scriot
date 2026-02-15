@@ -337,7 +337,7 @@ function dashboard_utama() {
         6) del-user ;;
         7) renew-user ;;
         8) menu-backup ;;
-                9) update_script ;;
+        9) update_script ;;
         10) reboot ;;
         11) nano /usr/bin/menu ;;
         0) exit ;;
@@ -348,7 +348,7 @@ function dashboard_utama() {
 update_script() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "       ${GREEN}  UPDATE SCRIPT MANUALLY  ${NC}"
+    echo -e "       \e[42;1;37m  UPDATE SCRIPT MANUALLY  \e[0m"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     echo -e ""
     echo -e " ${YELLOW}Checking for updates from GitHub...${NC}"
@@ -366,4 +366,3 @@ if [ "$1" == "core_engine" ]; then
 else
     dashboard_utama
 fi
-
