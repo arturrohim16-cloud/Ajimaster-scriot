@@ -338,9 +338,25 @@ function dashboard_utama() {
         7) renew-user ;;
         8) menu-backup ;;
         9) 
-           echo -e "${YELLOW}Updating Script...${NC}"
-           wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
-           chmod +x /usr/bin/menu; sleep 2; menu ;;
+           echo -e "${YELLOW}update-script() {
+    clear
+    echo -e "\e[1;31m═══════════════════════════════════════════════════\e[0m"
+    echo -e "       \e[42;1;37m  UPDATE SCRIPT MANUALLY  \e[0m"
+    echo -e "\e[1;31m═══════════════════════════════════════════════════\e[0m"
+    echo -e ""
+    echo -e " \e[1;33mChecking for updates from GitHub...\e[0m"
+    sleep 2
+
+    wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
+    chmod +x /usr/bin/menu
+
+    echo -e ""
+    echo -e " \e[1;32mSUCCESS! Script has been updated to the latest version.\e[0m"
+    echo -e ""
+    echo -e " \e[1;33mReturning to menu in 2 seconds...\e[0m"
+    sleep 2
+    menu
+}
         10) reboot ;;
         11) nano /usr/bin/menu ;;
         0) exit ;;
