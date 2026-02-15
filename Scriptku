@@ -239,17 +239,16 @@ function setup_udp() {
     echo "UDP Port 7200 Active!"; sleep 2
 }
 
-# --- 9. DASHBOARD FULL INFO ---
 draw_bar() {
     local perc=$1
     local size=10
     local filled=$((perc * size / 100))
     local empty=$((size - filled))
     local COLOR=""
-    if [ "$perc" -le 40 ]; then COLOR="${GREEN}"; elif [ "$perc" -le 75 ]; then COLOR="${YELLOW}"; else COLOR="${RED}"; fi
+    if [ "$perc" -le 40 ]; then COLOR="\e[1;32m"; elif [ "$perc" -le 75 ]; then COLOR="\e[1;33m"; else COLOR="\e[1;31m"; fi
     printf "${COLOR}"
     printf "%${filled}s" | tr ' ' '█'
-    printf "${NC}"
+    printf "\e[0m"
     printf "%${empty}s" | tr ' ' '░'
 }
 
@@ -427,7 +426,12 @@ function dashboard_utama() {
     echo -e "   \e[1;35m║\e[0m   \e[1;32mTROJAN/WS/GRPC   = $total_trojan  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m   \e[1;32mSHADOW/WS/GRPC   = $total_shadow  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
-  
+    cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' | cut -d. -f1)
+    ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
+    echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;36mCPU LOAD    :\e[0m  $(draw_bar $cpu_usage) $cpu_usage%             \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m   \e[1;36mRAM USAGE   :\e[0m  $(draw_bar $ram_usage) $ram_usage%             \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
     echo -e " \e[1;35m─────────────────────────────────────────────────────────\e[0m"
     echo -e "  \e[1;32m[01]\e[0m SSH/OPENVPN          \e[1;35m║\e[0m  \e[1;32m[09]\e[0m UPDATE SCRIPT"
     echo -e "  \e[1;32m[02]\e[0m VMESS MANAGER        \e[1;35m║\e[0m  \e[1;32m[10]\e[0m REBOOT VPS"
@@ -442,15 +446,15 @@ function dashboard_utama() {
     echo -e " \e[1;35m─────────────────────────────────────────────────────────\e[0m"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     read -p " Pilih Menu : " opt
-        case $opt in
-        1) menu_manager "SSH" "ssh" ;;
-        2) menu_manager "VMESS" "ws" ;;
-        3) menu_manager "VLESS" "vless" ;;
-        4) menu_manager "TROJAN" "tr" ;;
+            case $opt in
+        1) add_ssh ;;
+        2) add_vmess ;;
+        3) add_vless ;;
+        4) add_trojan ;;
         5) bot_settings ;;
-        6) del-user ;;
-        7) renew-user ;;
-        8) menu-backup ;;
+        6) del_user ;;
+        7) renew_user ;;
+        8) backup_restore ;;
         9) update_script ;;
         10) reboot ;;
         11) nano /usr/bin/menu ;;
@@ -459,9 +463,8 @@ function dashboard_utama() {
         14) create_ssl ;;
         15) install_udp ;;
         16) restart_services ;;
-
-        0) exit ;;
-        *) dashboard_utama ;;
+        0|00) exit ;;
+        *) echo -e " Salah Tekan Mas!" && sleep 1 && menu ;;
     esac
 }
 
