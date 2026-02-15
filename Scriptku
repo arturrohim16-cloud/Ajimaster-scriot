@@ -464,7 +464,6 @@ renew_user() {
         exp_old=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f3)
         exp_new=$(date -d "$exp_old + $days days" +%Y-%m-%d)
         sed -i "s/$exp_old/$exp_new/g" /etc/aji/users.db
-        
         clear
         echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
         echo -e "   \e[1;35m║\e[0m          \e[1;32mRENEW ACCOUNT SUCCESS\e[0m             \e[1;35m║\e[0m"
@@ -477,7 +476,46 @@ renew_user() {
     fi
     echo ""
     read -p "  Tekan Enter untuk kembali ke Menu"
-    dashboard_utama
+    menu
+}
+
+restart_services() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m         \e[1;107;32m RESTARTING ALL SERVICES \e[0m        \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -ne "    Restarting Xray... "
+    systemctl restart xray && echo -e "[\e[1;32m OK \e[0m]"
+    echo -ne "    Restarting Nginx... "
+    systemctl restart nginx && echo -e "[\e[1;32m OK \e[0m]"
+    echo -ne "    Restarting SSH...   "
+    systemctl restart ssh && echo -e "[\e[1;32m OK \e[0m]"
+    sleep 2
+    menu
+}
+
+cek_user() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m           \e[1;107;32m CEK USER LOGIN ONLINE \e[0m          \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    if [ -f /var/log/xray/access.log ]; then
+        data=$(grep -E "accepted" /var/log/xray/access.log | cut -d ' ' -f 7 | sort | uniq | cut -d: -f1)
+    else
+        data=""
+    fi
+    if [[ -z "$data" ]]; then
+        echo -e "  ║ Status: \e[107;31m TIDAK ADA USER ONLINE \e[0m"
+    else
+        for user in $data; do
+            if [[ ! -z "$user" ]]; then
+                echo -e "  ║ User: \e[107;32m $user \e[0m [ONLINE]"
+            fi
+        done
+    fi
+    echo ""
+    read -p "  Tekan Enter untuk kembali ke Menu"
+    menu
 }
 
 function dashboard_utama() {
