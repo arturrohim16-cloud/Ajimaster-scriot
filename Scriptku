@@ -460,7 +460,7 @@ function dashboard_utama() {
     echo -e "   \e[1;35m║\e[0m               \e[1;32m[00] EXIT MENU\e[0m                  \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
     read -p " Select Menu : " opt
-       case $opt in
+    case $opt in
         1) add_ssh ;;
         2) add_vmess ;;
         3) add_vless ;;
