@@ -253,6 +253,56 @@ draw_bar() {
     printf "%${empty}s" | tr ' ' '░'
 }
 
+shadow_manager() {
+    clear
+    echo -e "\e[1;32m Mengelola User Shadowsocks...\e[0m"
+    grep "|SHADOW|" /etc/aji/users.db
+    read -p "Tekan Enter untuk Kembali"
+}
+
+run_speedtest() {
+    clear
+    echo -e "\e[1;32m Menjalankan Speedtest Server...\e[0m"
+    if [[ ! -e /usr/bin/speedtest-cli ]]; then
+        apt install speedtest-cli -y
+    fi
+    speedtest-cli
+    echo ""
+    read -p "Tekan Enter untuk Kembali"
+}
+
+create_ssl() {
+    clear
+    echo -e "\e[1;32m Mengaktifkan Sertifikat SSL (Acme.sh)...\e[0m"
+    domain=$(cat /etc/xray/domain)
+    systemctl stop xray
+    curl https://get.acme.sh | sh
+    ~/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+    ~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+    systemctl start xray
+    echo -e "\e[1;32m SSL Berhasil Dipasang!\e[0m"
+    read -p "Tekan Enter untuk Kembali"
+}
+
+install_udp() {
+    clear
+    echo -e "\e[1;32m Menginstall UDP Custom (Gaming Optimization)...\e[0m"
+    wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/udp-custom"
+    chmod +x /usr/bin/udp-custom
+    echo -e "\e[1;32m UDP Custom Berhasil Diaktifkan!\e[0m"
+    read -p "Tekan Enter untuk Kembali"
+}
+
+restart_services() {
+    clear
+    echo -e "\e[1;32m Merestart Semua Layanan (Xray, UDP, Cron)...\e[0m"
+    systemctl restart xray
+    systemctl restart cron
+    sleep 2
+    echo -e "\e[1;32m Semua Service Berhasil Direstart!\e[0m"
+    read -p "Tekan Enter untuk Kembali"
+}
+
 menu_manager() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
@@ -378,15 +428,18 @@ function dashboard_utama() {
     echo -e "   \e[1;35m║\e[0m   \e[1;32mSHADOW/WS/GRPC   = $total_shadow  ACCOUNT PREMIUM\e[0m    \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
   
-    echo -e "-------------------------------------------"
-    echo -e " [01] SSH/OPENVPN           [06] DELETE USER"
-    echo -e " [02] VMESS MANAGER         [07] EXTEND USER"
-    echo -e " [03] VLESS MANAGER         [08] BACKUP & RESTORE"
-    echo -e " [04] TROJAN MANAGER        [09] UPDATE SCRIPT"
-    echo -e " [05] BOT SETTINGS          [10] REBOOT VPS"
-    echo -e " [11] EDIT SCRIPT (NANO)"
-    echo -e ""
-    echo -e " [00] EXIT"
+        echo -e " \e[1;35m─────────────────────────────────────────────────────────\e[0m"
+    echo -e "  \e[1;32m[01]\e[0m SSH/OPENVPN          \e[1;35m║\e[0m  \e[1;32m[09]\e[0m UPDATE SCRIPT"
+    echo -e "  \e[1;32m[02]\e[0m VMESS MANAGER        \e[1;32m\e[1;35m║\e[0m  \e[1;32m[10]\e[0m REBOOT VPS"
+    echo -e "  \e[1;32m[03]\e[0m VLESS MANAGER        \e[1;32m\e[1;35m║\e[0m  \e[1;32m[11]\e[0m EDIT SCRIPT (NANO)"
+    echo -e "  \e[1;32m[04]\e[0m TROJAN MANAGER       \e[1;32m\e[1;35m║\e[0m  \e[1;32m[12]\e[0m SHADOW MANAGER"
+    echo -e "  \e[1;32m[05]\e[0m BOT SETTINGS         \e[1;32m\e[1;35m║\e[0m  \e[1;32m[13]\e[0m SPEEDTEST SERVER"
+    echo -e "  \e[1;32m[06]\e[0m DELETE USER          \e[1;32m\e[1;35m║\e[0m  \e[1;32m[14]\e[0m CREATE SSL CERT"
+    echo -e "  \e[1;32m[07]\e[0m EXTEND USER          \e[1;32m\e[1;35m║\e[0m  \e[1;32m[15]\e[0m INSTALL UDP CUSTOM"
+    echo -e "  \e[1;32m[08]\e[0m BACKUP & RESTORE     \e[1;32m\e[1;35m║\e[0m  \e[1;32m[16]\e[0m RESTART SERVICES"
+    echo -e " \e[1;35m─────────────────────────────────────────────────────────\e[0m"
+    echo -e "                \e[1;32m[00]\e[0m EXIT MENU"
+    echo -e " \e[1;35m─────────────────────────────────────────────────────────\e[0m"
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
     read -p " Pilih Menu : " opt
         case $opt in
@@ -401,6 +454,12 @@ function dashboard_utama() {
         9) update_script ;;
         10) reboot ;;
         11) nano /usr/bin/menu ;;
+        12) shadow_manager ;;
+        13) run_speedtest ;;
+        14) create_ssl ;;
+        15) install_udp ;;
+        16) restart_services ;;
+
         0) exit ;;
         *) dashboard_utama ;;
     esac
