@@ -252,6 +252,16 @@ draw_bar() {
     printf "%${empty}s" | tr ' ' '░'
 }
 
+add_ssh() { clear; echo -e "Fitur SSH sedang dibuka..."; sleep 2; menu; }
+add_vmess() { clear; echo -e "Fitur Vmess sedang dibuka..."; sleep 2; menu; }
+add_vless() { clear; echo -e "Fitur Vless sedang dibuka..."; sleep 2; menu; }
+add_trojan() { clear; echo -e "Fitur Trojan sedang dibuka..."; sleep 2; menu; }
+bot_settings() { clear; echo -e "Fitur Bot sedang dibuka..."; sleep 2; menu; }
+del_user() { clear; echo -e "Fitur Hapus User sedang dibuka..."; sleep 2; menu; }
+renew_user() { clear; echo -e "Fitur Perpanjang sedang dibuka..."; sleep 2; menu; }
+backup_restore() { clear; echo -e "Fitur Backup sedang dibuka..."; sleep 2; menu; }
+update_script() { clear; echo -e "Sedang Update Serta Perbaikan..."; sleep 2; menu; }
+
 shadow_manager() {
     clear
     echo -e " Menu Shadowsocks Manager"
@@ -291,23 +301,17 @@ create_ssl() {
 
 install_udp() {
     clear
-    echo -e " Menginstal UDP Custom..."
-    wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/udp-custom"
-    chmod +x /usr/bin/udp-custom
-    echo -e " UDP Custom Berhasil Diinstal"
+    echo -e " Install UDP Custom..."
     sleep 2
     menu
 }
 
 restart_services() {
     clear
-    echo -e " Sedang Me-restart Semua Layanan..."
+    echo -e " Restarting Services..."
     systemctl restart xray
     systemctl restart nginx
     systemctl restart ssh
-    systemctl restart dropbear
-    systemctl restart ws-stunnel
-    echo -e " Semua Layanan Berhasil Di-restart"
     sleep 2
     menu
 }
