@@ -7,28 +7,26 @@ OS=$(cat /etc/os-release | grep -w PRETTY_NAME | head -1 | cut -d '"' -f 2)
 TYPE=$(cat /etc/aji_expire_type 2>/dev/null)
 
 if [[ "$TYPE" == "unlimited" ]]; then
-    STATUS_SC="\e[1;32mUNLIMITED (OWNER)\e[0m"
+STATUS_SC="\e[1;32mUNLIMITED (OWNER)\e[0m"
 else
-    if [ -z "$TYPE" ]; then
-        clear
-        echo "AKSES ILEGAL!"
-        exit 0
-    fi
-
-    TOTAL_HARI=$TYPE
-    START_DATE=$(cat /etc/aji/install_date 2>/dev/null)
-    NOW=$(date +%s)
-    DETIK_TOTAL=$((TOTAL_HARI * 86400))
-    DETIK_BERJALAN=$((NOW - START_DATE))
-    SISA_DETIK=$((DETIK_TOTAL - DETIK_BERJALAN))
-    SISA_HARI=$((SISA_DETIK / 86400))
-
-    if [ "$SISA_DETIK" -le 0 ]; then
-        clear
-        echo "MASA AKTIF HABIS!"
-        exit 0
-    fi
-    STATUS_SC="\e[1;33mEXP SCRIPT: $((SISA_HARI + 1))H\e[0m"
+if [ -z "$TYPE" ]; then
+clear
+echo "AKSES ILEGAL!"
+exit 0
+fi
+TOTAL_HARI=$TYPE
+START_DATE=$(cat /etc/aji/install_date 2>/dev/null)
+NOW=$(date +%s)
+DETIK_TOTAL=$((TOTAL_HARI * 86400))
+DETIK_BERJALAN=$((NOW - START_DATE))
+SISA_DETIK=$((DETIK_TOTAL - DETIK_BERJALAN))
+SISA_HARI=$((SISA_DETIK / 86400))
+if [ "$SISA_DETIK" -le 0 ]; then
+clear
+echo "MASA AKTIF HABIS!"
+exit 0
+fi
+STATUS_SC="\e[1;33mEXP SCRIPT: $((SISA_HARI + 1))H\e[0m"
 fi
 # ==========================================
 #        DATA PEMILIK SCRIPT
