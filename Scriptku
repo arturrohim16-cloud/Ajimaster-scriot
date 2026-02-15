@@ -1,19 +1,16 @@
 #!/bin/bash
 # ==========================================
-#    echo -e "\e[41;1;37m            🔥 AJI SYSTEM MASTER VPN 🔥            \e[0m"
-# STATUS: FULL FEATURE, PRODUCTION READY
+#        DATA PEMILIK SCRIPT
+# ==========================================
+echo -e "\e[41;1;37m Script : Ajimaster Cloud System \e[0m"
+echo -e "\e[107;30m Creator : AJI MASTER            \e[0m"
+echo -e "\e[107;30m Version : V16 FINAL PREMIUM     \e[0m"
 # ==========================================
 
-# --- 1. ROOT CHECK ---
-if [ "$EUID" -ne 0 ]; then
-    echo "Error: Anda harus menjalankan script ini sebagai ROOT!"
-    exit 1
-fi
+# WARNA DASAR
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
-# --- 2. VAR & FOLDER INITIALIZER ---
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'; PURPLE='\033[0;35m'; CYAN='\033[0;36m'; NC='\033[0m'
-BG_WHITE='\033[47;30m'
-
+# PERSIAPAN FOLDER & VARIABEL GLOBAL (PENTING!)
 mkdir -p /etc/aji /etc/xray /root/backup
 touch /etc/aji/users.db
 DOMAIN=$(cat /etc/xray/domain 2>/dev/null || curl -s ipinfo.io/ip)
@@ -330,6 +327,46 @@ renew-user() {
     sleep 2; dashboard_utama
 }
 
+del-user() {
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "             HAPUS PENGGUNA (DELETE)               "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Masukkan Username yang akan dihapus: " u
+    if grep -q -w "$u" /etc/aji/users.db; then
+        proto=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f6)
+        if [[ "$proto" == "ssh" ]]; then 
+            userdel -f "$u"
+        else
+            jq "del(.inbounds[0].settings.clients[] | select(.email == \"$u\"))" $XRAY_CONF > /tmp/xray.tmp && mv /tmp/xray.tmp $XRAY_CONF
+            systemctl restart xray
+        fi
+        sed -i "/^$u|/d" /etc/aji/users.db
+        echo -e "${GREEN}User $u Berhasil Dihapus!${NC}"
+    else
+        echo -e "${RED}User Tidak Ditemukan!${NC}"
+    fi
+    sleep 2; dashboard_utama
+}
+
+renew-user() {
+    clear
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    echo -e "            PERPANJANG MASA AKTIF (RENEW)          "
+    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
+    read -p " Masukkan Username: " u
+    if grep -q -w "$u" /etc/aji/users.db; then
+        read -p " Tambah Masa Aktif (Hari): " days
+        exp_old=$(grep -w "$u" /etc/aji/users.db | cut -d'|' -f3)
+        exp_new=$(date -d "$exp_old + $days days" +%Y-%m-%d)
+        sed -i "s/$exp_old/$exp_new/g" /etc/aji/users.db
+        echo -e "${GREEN}User $u diperpanjang ke $exp_new${NC}"
+    else
+        echo -e "${RED}User Tidak Ditemukan!${NC}"
+    fi
+    sleep 2; dashboard_utama
+}
+
 function dashboard_utama() {
     clear
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "No Domain")
@@ -391,9 +428,3 @@ update_script() {
     sleep 2
     menu
 }
-
-if [ "$1" == "core_engine" ]; then
-    core_engine
-else
-    dashboard_utama
-fi
