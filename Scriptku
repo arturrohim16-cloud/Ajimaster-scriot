@@ -318,11 +318,51 @@ renew_user() { clear; echo -e "Fitur Perpanjang sedang dibuka..."; sleep 2; menu
 backup_restore() { clear; echo -e "Fitur Backup sedang dibuka..."; sleep 2; menu; }
 update_script() { clear; echo -e "Sedang Update Serta Perbaikan..."; sleep 2; menu; }
 
+backup_restore() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m            \e[1;107;32m BACKUP & RESTORE \e[0m              \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e "    1. Backup Data Sekarang"
+    echo -e "    2. Restore Data Terakhir"
+    echo -e "    0. Kembali ke Menu"
+    echo -e "   ─────────────────────────────────────────────"
+    read -p "    Pilih Opsi : " opt_back
+    case $opt_back in
+        1)
+            mkdir -p /root/backup
+            cp /etc/aji/users.db /root/backup/users.db.bak
+            echo -e "    [\e[1;32m OK \e[0m] Data berhasil di-backup ke /root/backup"
+            ;;
+        2)
+            if [ -f /root/backup/users.db.bak ]; then
+                cp /root/backup/users.db.bak /etc/aji/users.db
+                echo -e "    [\e[1;32m OK \e[0m] Data berhasil dikembalikan!"
+            else
+                echo -e "    [\e[1;31m Error \e[0m] File backup tidak ditemukan!"
+            fi
+            ;;
+        *) menu ;;
+    esac
+    read -p "    Tekan Enter..."
+    menu
+}
+
 shadow_manager() {
     clear
-    echo -e " Menu Shadowsocks Manager"
-    echo -e " Sedang dalam proses pengembangan"
-    sleep 2
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m            \e[1;107;32m SHADOWSOCKS MANAGER \e[0m           \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    status=$(systemctl is-active xray)
+    if [ "$status" = "active" ]; then
+        echo -e "    Status Service: \e[1;32m RUNNING (Xray-Core) \e[0m"
+    else
+        echo -e "    Status Service: \e[1;31m STOPPED \e[0m"
+    fi
+    echo -e "   ─────────────────────────────────────────────"
+    echo -e "    [!] Shadowsocks kini menyatu dengan Xray-Core"
+    echo -e ""
+    read -p "    Tekan Enter untuk kembali ke Menu"
     menu
 }
 
@@ -335,6 +375,24 @@ run_speedtest() {
     speedtest-cli
     echo -e ""
     read -n 1 -s -r -p " Tekan tombol apa saja untuk kembali"
+    menu
+}
+
+bot_settings() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m          \e[1;107;32m MENU BOT PANEL SETTINGS \e[0m         \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e "    Konfigurasi Bot Notifikasi Telegram"
+    echo -e "   ─────────────────────────────────────────────"
+    read -p "    Masukkan Bot Token : " b_token
+    read -p "    Masukkan Admin ID  : " b_id
+    echo "$b_token" > /etc/aji/bot.token
+    echo "$b_id" > /etc/aji/bot.id
+    echo -e "   ─────────────────────────────────────────────"
+    echo -e "    [\e[1;32m OK \e[0m] Pengaturan Bot Berhasil Disimpan!"
+    echo -e ""
+    read -p "    Tekan Enter untuk kembali ke Menu"
     menu
 }
 
