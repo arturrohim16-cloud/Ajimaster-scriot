@@ -314,6 +314,16 @@ restart_services() {
     menu
 }
 
+restart_services() {
+    clear
+    echo -e " Restarting Services..."
+    systemctl restart xray
+    systemctl restart nginx
+    systemctl restart ssh
+    sleep 2
+    menu
+}
+
 menu_manager() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
