@@ -1,4 +1,9 @@
 #!/bin/bash
+MYIP=$(wget -qO- ipinfo.io/ip)
+CITY=$(wget -qO- ipinfo.io/city)
+ISP=$(wget -qO- ipinfo.io/org | cut -d " " -f 2-)
+DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "Belum Terpasang")
+OS=$(cat /etc/os-release | grep -w PRETTY_NAME | head -1 | cut -d '"' -f 2)
 # ==========================================
 #        DATA PEMILIK SCRIPT
 # ==========================================
@@ -640,6 +645,13 @@ function dashboard_utama() {
     total_shadow=$(grep -c "|SHADOW|" /etc/aji/users.db 2>/dev/null || echo "0")
 
     echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m               \e[1;107;35m AJI MASTER SCRIPT \e[0m                 \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
+    echo -e "   \e[1;35m║\e[0m  \e[1;33mOS       :\e[0m $OS"
+    echo -e "   \e[1;35m║\e[0m  \e[1;33mIP VPS   :\e[0m $MYIP"
+    echo -e "   \e[1;35m║\e[0m  \e[1;33mDOMAIN   :\e[0m $DOMAIN"
+    echo -e "   \e[1;35m║\e[0m  \e[1;33mLOKASI   :\e[0m $CITY (\e[1;36m$ISP\e[0m)"
+    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m         \e[1;36m>>> INFORMATION ACCOUNT <<<\e[0m           \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32mSSH/OPENVPN     = $total_ssh  ACC PREMIUM\e[0m          \e[1;35m║\e[0m"
@@ -647,9 +659,6 @@ function dashboard_utama() {
     echo -e "   \e[1;35m║\e[0m \e[1;32mVLESS/WS/GRPC   = $total_vless  ACC PREMIUM\e[0m          \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32mTROJAN/WS/GRPC  = $total_trojan  ACC PREMIUM\e[0m          \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;32mSHADOW/WS/GRPC  = $total_shadow  ACC PREMIUM\e[0m          \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;36mCPU LOAD    :\e[0m $(draw_bar $cpu_usage) $cpu_usage%            \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m║\e[0m \e[1;36mRAM USAGE   :\e[0m $(draw_bar $ram_usage) $ram_usage%            \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH/OVPN      \e[1;35m║\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SCRIPT  \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS MG      \e[1;35m║\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS     \e[1;35m║\e[0m"
