@@ -653,6 +653,7 @@ clear_log() {
 
     ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     uptime_vps=$(uptime -p | cut -d " " -f 2-5)
+    OS=$(cat /etc/os-release | grep -w PRETTY_NAME | cut -d'"' -f2)
 
     clear
     echo -e "   \e[1;35m      █████╗      ██╗██╗     ██╗   ██╗██████╗ ███╗   ██╗\e[0m"
@@ -665,12 +666,12 @@ clear_log() {
     echo -e "   \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
     echo -e "   \e[1;35m┃\e[0m \e[41;1;37m           🔥 AJI SYSTEM MASTER V16 FINAL 🔥          \e[0m \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┝┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┥\e[0m"
-    printf "   \e[1;35m┃\e[0m  \e[1;33mIP ADDRESS  :\e[0m %-34s \e[1;35m┃\e[0m\n" "$MYIP"
-    printf "   \e[1;35m┃\e[0m  \e[1;36mDOMAIN NAME :\e[0m %-34s \e[1;35m┃\e[0m\n" "$DOMAIN"
-    printf "   \e[1;35m┃\e[0m  \e[1;32mRAM USAGE   :\e[0m %-4s " "$ram_usage%"
+     printf "   \e[1;35m┃\e[0m  \e[1;33mIP ADDRESS  :\e[0m %-34s \e[1;35m┃\e[0m\n" "$MYIP"
+     printf "   \e[1;35m┃\e[0m  \e[1;36mDOMAIN NAME :\e[0m %-34s \e[1;35m┃\e[0m\n" "$DOMAIN"
+     printf "   \e[1;35m┃\e[0m  \e[1;32mRAM USAGE   :\e[0m %-4s " "$ram_usage%"
     draw_bar $ram_usage
-    printf "                 \e[1;35m┃\e[0m\n"
-    printf "   \e[1;35m┃\e[0m  \e[1;34mUPTIME VPS  :\e[0m %-34s \e[1;35m┃\e[0m\n" "$uptime_vps"
+     printf "                                                    \e[1;35m┃\e[0m\n"
+     printf "   \e[1;35m┃\e[0m  \e[1;34mUPTIME VPS  :\e[0m %-34s \e[1;35m┃\e[0m\n" "$uptime_vps"
     echo -e "   \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
 
     echo -e "   \e[1;38;5;201m▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜\e[0m"
