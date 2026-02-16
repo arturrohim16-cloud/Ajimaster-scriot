@@ -649,6 +649,13 @@ function dashboard_utama() {
     total_vless=$(grep -c "|VLESS|" /etc/aji/users.db 2>/dev/null || echo "0")
     total_trojan=$(grep -c "|TROJAN|" /etc/aji/users.db 2>/dev/null || echo "0")
     total_shadow=$(grep -c "|SHADOW|" /etc/aji/users.db 2>/dev/null || echo "0")
+
+    s_ssh=$(systemctl is-active ssh); [[ $s_ssh == "active" ]] && st_ssh="\e[1;32mON\e[0m" || st_ssh="\e[1;31mOFF\e[0m"
+    s_ngx=$(systemctl is-active nginx); [[ $s_ngx == "active" ]] && st_ngx="\e[1;32mON\e[0m" || st_ngx="\e[1;31mOFF\e[0m"
+    s_xry=$(systemctl is-active xray); [[ $s_xry == "active" ]] && st_xry="\e[1;32mON\e[0m" || st_xry="\e[1;31mOFF\e[0m"
+    echo -e "   \e[1;38;5;201m◣━━━━━━━━━━━━━━━◢◣━━━━━━━━━━━━━━━◢◣━━━━━━━━━━━━━━━◢\e[0m"
+    echo -e "   \e[1;38;5;201m█\e[0m \e[1;92mSSH    : $st_ssh\e[0m   \e[1;38;5;201m█\e[0m \e[1;92mNGINX  : $st_ngx\e[0m   \e[1;38;5;201m█\e[0m \e[1;92mXRAY   : $st_xry\e[0m   \e[1;38;5;201m█\e[0m"
+    echo -e "   \e[1;38;5;201m◤━━━━━━━━━━━━━━━◥◤━━━━━━━━━━━━━━━◥◤━━━━━━━━━━━━━━━◥\e[0m"
     echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
     echo -e "   \e[1;35m║\e[0m         \e[1;36m>>> INFORMATION ACCOUNT <<<\e[0m           \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
