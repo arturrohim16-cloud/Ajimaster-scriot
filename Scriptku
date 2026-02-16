@@ -816,8 +816,10 @@ clear_log() {
         sleep 2
         menu
     ;;
-        20) clear_log ;;
-clear_log() {
+        20)
+    clear_log
+    ;;
+
         find /var/log -type f -name "*.log" -exec truncate -s 0 {} +
         echo 3 > /proc/sys/vm/drop_caches
         echo -e "\e[1;32mLogs Cleared!\e[0m"
