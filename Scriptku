@@ -705,6 +705,7 @@ function dashboard_utama() {
     echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
     echo -e "   \e[1;35m║\e[0m               \e[1;33m[\e[1;32m17\e[1;33m]\e[0m \e[1;107;32m CEK ONLINE \e[0m                 \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m               \e[1;33m[\e[1;32m18\e[1;33m]\e[0m \e[1;107;34m LIST HARGA KUOTA \e[0m           \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m║\e[0m               \e[1;33m[\e[1;32m19\e[1;33m]\e[0m \e[1;107;31m FIX / REPAIR SERVICE \e[0m       \e[1;35m║\e[0m"
     echo -e "   \e[1;35m║\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                  \e[1;35m║\e[0m"
     echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
     read -p " Select Menu : " opt
@@ -786,6 +787,34 @@ function dashboard_utama() {
         echo -e " https://wa.me/qr/GXNINYUQLUVBN1"
         echo ""
         read -p "  Tekan Enter Untuk Kembali..."
+        menu
+    ;;
+        19)
+        clear
+        echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
+        echo -e "   \e[1;35m║\e[0m         \e[1;33m🛠️  MENU REPAIR & REINSTALL 🛠️\e[0m          \e[1;35m║\e[0m"
+        echo -e "   \e[1;35m╠═══════════════════════════════════════════════════╣\e[0m"
+        echo -e "    \e[1;36m[01]\e[0m Fix/Reinstall SSH & Dropbear"
+        echo -e "    \e[1;36m[02]\e[0m Fix/Reinstall Nginx & SSL"
+        echo -e "    \e[1;36m[03]\e[0m Fix/Reinstall X-RAY Core"
+        echo -e "    \e[1;36m[04]\e[0m Fix/Reinstall HAPROXY"
+        echo -e "    \e[1;36m[05]\e[0m Fix/Reinstall WS-ePRO"
+        echo -e "    \e[1;35m---------------------------------------------------\e[0m"
+        echo -e "    \e[1;33m[00] Kembali Ke Menu Utama\e[0m"
+        echo -e "   \e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
+        read -p "  Pilih Nomor: " fix_opt
+
+        case $fix_opt in
+            1|01) systemctl restart ssh dropbear; apt install --reinstall ssh dropbear -y ;;
+            2|02) systemctl restart nginx; apt install --reinstall nginx -y ;;
+            3|03) bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install ;;
+            4|04) systemctl restart haproxy; apt install --reinstall haproxy -y ;;
+            5|05) systemctl restart ws-epro; systemctl enable ws-epro ;;
+            0|00) menu ;;
+            *) echo "Pilihan Salah"; sleep 1; menu ;;
+        esac
+        echo -e "\e[1;32mSelesai Perbaikan!\e[0m"
+        sleep 2
         menu
     ;;
 
