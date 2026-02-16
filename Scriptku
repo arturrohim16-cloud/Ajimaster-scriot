@@ -550,6 +550,34 @@ EOF
     menu
 }
 
+mkdir -p /etc/aji
+
+cat <<EOF > /etc/aji/banner.txt
+<font color="#8A2BE2"><b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b></font><br>
+<font color="#00FFFF"><b>   🚀 WELCOME TO AJI MASTER VPN 🚀   </b></font><br>
+<font color="#FFD700"><b>      [ LAYANAN PREMIUM ]      </b></font><br>
+<font color="#8A2BE2"><b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b></font><br>
+<font color="#00FF00"><b> ● [ SSH | UDP ] ● [ XRAY ] ● [ TROJAN ] ● </b></font><br>
+<br>
+<font color="#FFFFFF"><b> ━━━ 🤝 HUBUNGI ORDER & TRIAL 🤝 ━━━ </b></font><br>
+<font color="#00FFFF"><b> WA: wa.me/6287826591220 </b></font><br>
+<font color="#00FFFF"><b> TELE: t.me/AjiMasterCloud </b></font><br>
+<font color="#8A2BE2"><b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b></font>
+EOF
+
+if [ -f "/etc/default/dropbear" ]; then
+    sed -i 's|DROPBEAR_BANNER=""|DROPBEAR_BANNER="/etc/aji/banner.txt"|g' /etc/default/dropbear
+    sed -i 's|DROPBEAR_BANNER=".*"|DROPBEAR_BANNER="/etc/aji/banner.txt"|g' /etc/default/dropbear
+    systemctl restart dropbear > /dev/null 2>&1
+fi
+
+if [ -f "/etc/ssh/sshd_config" ]; then
+    sed -i 's|^Banner.*|Banner /etc/aji/banner.txt|g' /etc/ssh/sshd_config
+    sed -i 's|^#Banner.*|Banner /etc/aji/banner.txt|g' /etc/ssh/sshd_config
+    grep -q "^Banner /etc/aji/banner.txt" /etc/ssh/sshd_config || echo "Banner /etc/aji/banner.txt" >> /etc/ssh/sshd_config
+    systemctl restart ssh > /dev/null 2>&1
+fi
+
 menu_manager() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
