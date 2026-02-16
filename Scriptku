@@ -483,6 +483,73 @@ run_speedtest() {
     menu
 }
 
+backup_telegram() {
+    clear
+    echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}       SETTING AUTO BACKUP TELEGRAM${NC}"
+    echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e " ${YELLOW}Pastikan Anda sudah memiliki:${NC}"
+    echo -e " 1. Chat ID (Cek di @userinfobot)"
+    echo -e " 2. Bot Token (Bikin di @BotFather)"
+    echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    read -p " Masukkan Chat ID Telegram : " id_tele
+    read -p " Masukkan Bot Token Anda    : " token_bot
+    
+    if [[ -z "$id_tele" || -z "$token_bot" ]]; then
+        echo -e "${RED} Error: Data tidak boleh kosong!${NC}"
+        sleep 2
+        menu
+    fi
+
+    # Simpan konfigurasi agar permanen
+    mkdir -p /etc/aji
+    echo "$id_tele" > /etc/aji/chat_id
+    echo "$token_bot" > /etc/aji/token_bot
+    
+    # Membuat script pengeksekusi backup
+    cat <<EOF > /usr/bin/aji-backup
+#!/bin/bash
+ID="\$(cat /etc/aji/chat_id)"
+TOKEN="\$(cat /etc/aji/token_bot)"
+DOM="\$(cat /etc/xray/domain)"
+DATE="\$(date +'%d-%m-%Y')"
+
+# Menyiapkan folder
+mkdir -p /root/backup_aji
+cp /etc/aji/users.db /root/backup_aji/ 2>/dev/null
+cp /etc/xray/config.json /root/backup_aji/ 2>/dev/null
+cp /etc/xray/domain /root/backup_aji/ 2>/dev/null
+cd /root
+
+# Mengompres
+zip -r "Backup_\${DOM}_\${DATE}.zip" backup_aji/ > /dev/null
+
+# Kirim ke Telegram
+curl -s -F chat_id="\$ID" -F document=@"Backup_\${DOM}_\${DATE}.zip" -F caption="✅ AUTO BACKUP BERHASIL
+━━━━━━━━━━━━━━━━━━━━
+Domain : \${DOM}
+Tanggal: \${DATE}
+━━━━━━━━━━━━━━━━━━━━
+Script by AJI MASTER" https://api.telegram.org/bot\${TOKEN}/sendDocument > /dev/null
+
+# Pembersihan
+rm -rf backup_aji
+rm "Backup_\${DOM}_\${DATE}.zip"
+EOF
+
+    chmod +x /usr/bin/aji-backup
+    
+    # Pasang di Cron Job (Jalan otomatis setiap jam 00:00 malam)
+    (crontab -l 2>/dev/null | grep -v "aji-backup" ; echo "0 0 * * * /usr/bin/aji-backup") | crontab -
+    
+    echo -e ""
+    echo -e "${GREEN} Auto Backup Berhasil Diaktifkan!${NC}"
+    echo -e "${YELLOW} File backup akan dikirim ke Telegram setiap jam 00:00.${NC}"
+    read -n 1 -s -r -p " Tekan [ Enter ] untuk kembali ke menu"
+    menu
+}
+
 menu_manager() {
     clear
     echo -e "${RED}═══════════════════════════════════════════════════${NC}"
