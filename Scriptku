@@ -1159,7 +1159,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
          21) backup_telegram ;;
          22) drop_banner ;;
          23) install_hy2 ;;
-         24) istall_vless ;;
+         24) install_grpc ;;
         0|00) exit ;;
         *) menu ;;
     esac
