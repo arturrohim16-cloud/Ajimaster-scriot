@@ -725,6 +725,64 @@ cek_user() {
     menu
 }
 
+install_hy2() {
+    clear
+    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
+    echo -e "   \e[1;35m║\e[0m           \e[1;107;32m INSTALL HYSTERIA2 GACOR \e[0m          \e[1;35m║\e[0m"
+    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
+    echo -e "  Sedang mengunduh file Hysteria2..."
+    wget -qO /usr/local/bin/hysteria https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64
+    chmod +x /usr/local/bin/hysteria
+
+    echo -e "  Menyiapkan Sertifikat SSL..."
+    mkdir -p /etc/xray
+    openssl req -x509 -nodes -newkey rsa:2048 -keyout /etc/xray/hysteria.key -out /etc/xray/hysteria.crt -days 3650 -subj "/CN=bing.com"
+
+    echo -e "  Membuat Konfigurasi Server..."
+    cat <<EOF > /etc/xray/config_hy2.yaml
+listen: :8443
+auth:
+  type: password
+  password: ajimaster-pass
+tls:
+  cert: /etc/xray/hysteria.crt
+  key: /etc/xray/hysteria.key
+quic:
+  initStreamReceiveWindow: 8388608
+  maxStreamReceiveWindow: 8388608
+  initConnReceiveWindow: 20971520
+  maxConnReceiveWindow: 20971520
+  maxIdleTimeout: 30s
+  keepAlivePeriod: 10s
+ignoreClientBandwidth: false
+disableUDP: false
+EOF
+
+    echo -e "  Membuat Service Sistem..."
+    cat <<EOF > /etc/systemd/system/hy2.service
+[Unit]
+Description=Hysteria2 Service
+After=network.target
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/hysteria server --config /etc/xray/config_hy2.yaml
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable hy2
+    systemctl restart hy2
+    
+    echo -e "  \e[1;32mINSTALASI HYSTERIA2 SELESAI!\e[0m"
+    echo -e "  Port     : 8443"
+    echo -e "  Password : ajimaster-pass"
+    echo ""
+    read -p "  Tekan Enter untuk kembali ke Menu"
+    menu
+}
+
 function dashboard_utama() {
 draw_bar() {
     local perc=$1
@@ -818,6 +876,8 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m17\e[1;33m]\e[0m \e[1;107;32m CEK ONLINE \e[0m \e[1;33m[\e[1;32m18\e[1;33m]\e[0m \e[1;107;34m LIST HARGA KUOTA \e[0m \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m19\e[1;33m]\e[0m \e[1;107;31m FIX REPAIR \e[0m \e[1;33m[\e[1;32m20\e[1;33m]\e[0m \e[1;107;32m CLEAR LOG/CACHE \e[0m  \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m21\e[1;33m]\e[0m \e[1;107;35m BACKUP TELEGRAM \e[0m \e[1;33m[\e[1;32m22\e[1;33m]\e[0m \e[1;107;34m EDIT BANNER \e[0m     \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m       \e[1;33m[\e[1;32m23\e[1;33m]\e[0m \e[1;95m INSTALL HYSTERIA2 (GACOR UDP) \e[0m      \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
     echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                  \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
@@ -941,6 +1001,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 }
          21) backup_telegram ;;
          22) drop_banner ;;
+         23) install_hy2 ;;
         0|00) exit ;;
         *) menu ;;
     esac
