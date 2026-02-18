@@ -914,7 +914,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
         echo -e "    \e[1;36m[06]\e[0m Akrab 26GB - 83GB             \e[1;32mRp 85.000\e[0m"
         echo -e "    \e[1;36m[07]\e[0m Akrab 33GB - 71GB             \e[1;32mRp 80.000\e[0m"
         echo -e "    \e[1;36m[08]\e[0m Akrab 53GB - 92GB             \e[1;32mRp 95.000\e[0m"
-        echo -e "    \e[1;36m[09]\e[0m Akrab 65GB - 123GB            \e[1;32mRp 115.000\e[0m"
+        echo -e "    \e[1;36m[09]\e[0m Akrab 65GB - 123GB            \e[1;32mRp 105.000\e[0m"
         echo -e "    \e[1;36m[10]\e[0m Akrab 88GB - 107GB            \e[1;32mRp 110.000\e[0m"
         echo -e "    \e[1;36m[11]\e[0m Akrab 105GB- 163GB            \e[1;32mRp 115.000\e[0m"
         echo -e "    \e[1;35m---------------------------------------------------\e[0m"
