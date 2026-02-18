@@ -447,27 +447,40 @@ create_ssl() {
     menu
 }
 
-# ==========================================
-# FUNGSI UDP-CUSTOM MAX PREMIUM (ANTI-BENGONG)
-# ==========================================
 install_udp() {
     clear
-    echo -e "\e[1;35m Menghapus Versi Lama & Menginstall UDP-Custom Max Premium...\e[0m"
+    echo -e "\e[1;35m🚀 MEMASANG UDP-CUSTOM TURBO ULTIMATE (MAX RACING MODE)...\e[0m"
     
-    # Berhentikan service lama jika ada
+    # 1. OPTIMASI KERNEL KHUSUS JALUR UDP MENTAH
+    # Kita buka limit antrean data di sistem Linux agar tidak ada paket yang tertahan
+    cat <<EOF > /etc/sysctl.d/99-ajimaster-udp-turbo.conf
+net.core.rmem_max=16777216
+net.core.wmem_max=16777216
+net.core.rmem_default=16777216
+net.core.wmem_default=16777216
+net.core.netdev_max_backlog=5000
+net.ipv4.udp_mem=10240 87380 16777216
+net.ipv4.udp_rmem_min=16384
+net.ipv4.udp_wmem_min=16384
+EOF
+    sysctl --system &>/dev/null
+
+    # 2. BERSIHKAN VERSI LAMA
     systemctl stop udp-custom &>/dev/null
+    rm -rf /etc/udp/config.json
     
-    # Download Binary Terbaru
+    # 3. DOWNLOAD BINARY TERBARU
     mkdir -p /etc/udp
     wget -qO /usr/bin/udp-custom https://github.com/mizustore/repostore/raw/main/udp-custom-linux-amd64
     chmod +x /usr/bin/udp-custom
 
-    # Konfigurasi Buffer Maksimal (Anti-Lag)
+    # 4. KONFIGURASI BUFFER RAKSASA (ANTI-BENGONG & SPEED MAX)
+    # Kita set stream_buffer ke 64MB untuk narik speed edukasi/opok sekuat tenaga
     cat <<EOF > /etc/udp/config.json
 {
   "listen": ":36600",
-  "stream_buffer": 33554432,
-  "receive_buffer": 33554432,
+  "stream_buffer": 67108864,
+  "receive_buffer": 67108864,
   "auth": {
     "type": "password",
     "password": "ajimaster-udp"
@@ -479,17 +492,19 @@ install_udp() {
 }
 EOF
 
-    # Service Auto-Restart dengan Timeout Khusus Opok
+    # 5. SERVICE AUTO-RUNNING DENGAN AGGRESSIVE KEEP-ALIVE
+    # -sock-timeout 600: Menjaga koneksi tetap hidup 10 menit meskipun sinyal hilang
+    # -buffer 65535: Paket data maksimal dalam satu kiriman
     cat <<EOF > /etc/systemd/system/udp-custom.service
 [Unit]
-Description=UDP-Custom Max Premium By Ajimaster
+Description=UDP-Custom Turbo Ultimate By Ajimaster
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/usr/bin
-ExecStart=/usr/bin/udp-custom server -exclude 1-65535 -auth ajimaster-udp -buffer 65535 -sock-timeout 300
+ExecStart=/usr/bin/udp-custom server -exclude 1-65535 -auth ajimaster-udp -buffer 65535 -sock-timeout 600
 Restart=always
 RestartSec=2s
 
@@ -501,21 +516,31 @@ EOF
     systemctl enable udp-custom
     systemctl restart udp-custom
     
-    echo -e "\e[1;32m UDP-CUSTOM BERHASIL DIOPTIMASI!\e[0m"
-    echo -e " Port: 1-65535 | Password: ajimaster-udp"
-    read -p " Tekan Enter untuk Kembali ke Menu"
+    echo -e "\e[1;32m✅ UDP-CUSTOM TURBO ULTIMATE BERHASIL DIAKTIFKAN!\e[0m"
+    echo -e "Password : ajimaster-udp"
+    echo -e "Fitur    : Buffer 64MB, Kernel Tuning, Anti-RTO 600s"
+    read -p "Tekan Enter untuk Kembali ke Menu"
     menu
 }
 
-# ==========================================
-# FUNGSI VLESS gRPC RAJA OPOK (ANTI-LIMIT)
-# ==========================================
 install_grpc() {
     clear
-    echo -e "\e[1;35m Mengonfigurasi VLESS gRPC Multi-Stream Premium...\e[0m"
+    echo -e "\e[1;35m🚀 MEMASANG VLESS gRPC TURBO ULTIMATE (BYPASS LIMIT MODE)...\e[0m"
 
-    # Membuat Inbound Khusus gRPC di Xray
-    # Menggunakan Multi-Mode agar bypass limit 200MB operator
+    # 1. OPTIMASI KERNEL UNTUK TRAFIK STREAMING (gRPC)
+    # Kita fokuskan pada percepatan pengiriman paket kecil secara beruntun
+    cat <<EOF > /etc/sysctl.d/99-ajimaster-grpc-turbo.conf
+net.ipv4.tcp_fastopen=3
+net.ipv4.tcp_slow_start_after_idle=0
+net.ipv4.tcp_no_metrics_save=1
+net.ipv4.tcp_low_latency=1
+EOF
+    sysctl --system &>/dev/null
+
+    # 2. KONFIGURASI XRAY GRPC MULTI-STREAMING
+    # serviceName: vless-grpc
+    # multiMode: true (Kunci jebol limit)
+    # tcpFastOpen: true (Konek instan)
     cat > /etc/xray/vless_grpc.json <<EOF
 {
     "inbounds": [
@@ -523,16 +548,26 @@ install_grpc() {
             "port": 443,
             "protocol": "vless",
             "settings": {
-                "clients": [{ "id": "$(cat /proc/sys/kernel/random/uuid)", "level": 0 }],
+                "clients": [
+                    {
+                        "id": "$(cat /proc/sys/kernel/random/uuid)",
+                        "level": 0
+                    }
+                ],
                 "decryption": "none"
             },
             "streamSettings": {
                 "network": "grpc",
                 "grpcSettings": {
                     "serviceName": "vless-grpc",
-                    "multiMode": true
+                    "multiMode": true,
+                    "idle_timeout": 60,
+                    "health_check_timeout": 20,
+                    "permit_without_stream": true,
+                    "initial_windows_size": 1048576
                 },
                 "sockopt": {
+                    "marker": 255,
                     "tcpFastOpen": true,
                     "keepAlive": true,
                     "keepAlivePeriod": 15
@@ -544,9 +579,12 @@ install_grpc() {
 EOF
 
     systemctl restart xray
-    echo -e "\e[1;32m VLESS gRPC MAX PREMIUM BERHASIL TERPASANG!\e[0m"
-    echo -e " Service Name: vless-grpc | Port: 443"
-    read -p " Tekan Enter untuk Kembali ke Menu"
+    
+    echo -e "\e[1;32m✅ VLESS gRPC TURBO ULTIMATE BERHASIL TERPASANG!\e[0m"
+    echo -e "Service Name : vless-grpc"
+    echo -e "Port         : 443 (TLS)"
+    echo -e "Fitur        : Multi-Stream, TCP Fast Open, Anti-Limit"
+    read -p "Tekan Enter untuk Kembali ke Menu"
     menu
 }
 
@@ -848,59 +886,55 @@ cek_user() {
 
 install_hy2() {
     clear
-    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
-    echo -e "   \e[1;35m║\e[0m           \e[1;107;32m INSTALL HYSTERIA2 GACOR \e[0m          \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
-    echo -e "  Sedang mengunduh file Hysteria2..."
-    wget -qO /usr/local/bin/hysteria https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64
-    chmod +x /usr/local/bin/hysteria
-
-    echo -e "  Menyiapkan Sertifikat SSL..."
-    mkdir -p /etc/xray
-    openssl req -x509 -nodes -newkey rsa:2048 -keyout /etc/xray/hysteria.key -out /etc/xray/hysteria.crt -days 3650 -subj "/CN=bing.com"
-
-    echo -e "  Membuat Konfigurasi Server..."
-    cat <<EOF > /etc/xray/config_hy2.yaml
-listen: :8443
-auth:
-  type: password
-  password: ajimaster-pass
-tls:
-  cert: /etc/xray/hysteria.crt
-  key: /etc/xray/hysteria.key
-quic:
-  initStreamReceiveWindow: 8388608
-  maxStreamReceiveWindow: 8388608
-  initConnReceiveWindow: 20971520
-  maxConnReceiveWindow: 20971520
-  maxIdleTimeout: 30s
-  keepAlivePeriod: 10s
-ignoreClientBandwidth: false
-disableUDP: false
-EOF
-
-    echo -e "  Membuat Service Sistem..."
-    cat <<EOF > /etc/systemd/system/hy2.service
-[Unit]
-Description=Hysteria2 Service
-After=network.target
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/hysteria server --config /etc/xray/config_hy2.yaml
-Restart=on-failure
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable hy2
-    systemctl restart hy2
+    echo -e "\e[1;35m🚀 MEMASANG HYSTERIA2 TURBO ULTIMATE (PING 20-30ms MODE)...\e[0m"
     
-    echo -e "  \e[1;32mINSTALASI HYSTERIA2 SELESAI!\e[0m"
-    echo -e "  Port     : 8443"
-    echo -e "  Password : ajimaster-pass"
-    echo ""
-    read -p "  Tekan Enter untuk kembali ke Menu"
+    # 1. Optimasi Kernel Linux (Agar Respon Server Secepat Kilat)
+    cat <<EOF > /etc/sysctl.d/99-ajimaster-turbo.conf
+net.core.default_qdisc=fq_codel
+net.ipv4.tcp_congestion_control=bbr
+net.core.rmem_max=67108864
+net.core.wmem_max=67108864
+net.core.netdev_max_backlog=10000
+net.ipv4.udp_rmem_min=16384
+net.ipv4.udp_wmem_min=16384
+EOF
+    sysctl --system &>/dev/null
+
+    # 2. Install Hysteria2 dengan Script Auto-Optimize
+    # Kita gunakan port 443/8443 yang biasanya diprioritaskan operator
+    bash <(curl -fsSL https://get.hy2.biz/) --check
+
+    # 3. Racikan Konfigurasi Server (Turbo Mode)
+    # Mas, ini bagian paling rahasia agar Ping stabil
+    cat <<EOF > /etc/hysteria/config.yaml
+listen: :8443
+
+tls:
+  cert: /etc/xray/xray.crt
+  key: /etc/xray/xray.key
+
+quic:
+  init_stream_receive_window: 8388608
+  max_stream_receive_window: 8388608
+  init_conn_receive_window: 20971520
+  max_conn_receive_window: 20971520
+  max_idle_timeout: 30s
+  keep_alive_interval: 10s
+
+bandwidth:
+  up: 1 gbps
+  down: 1 gbps
+
+ignore_client_bandwidth: true
+disable_mtu_discovery: false
+EOF
+
+    systemctl restart hysteria2
+    systemctl enable hysteria2
+    
+    echo -e "\e[1;32m✅ HYSTERIA2 TURBO ULTIMATE SUDAH AKTIF!\e[0m"
+    echo -e "Port: 8443 | Protokol: QUIC (Fastest)"
+    read -p "Tekan Enter untuk Kembali"
     menu
 }
 
@@ -998,9 +1032,11 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m19\e[1;33m]\e[0m \e[1;107;31m FIX REPAIR \e[0m \e[1;33m[\e[1;32m20\e[1;33m]\e[0m \e[1;107;32m CLEAR LOG/CACHE \e[0m  \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m21\e[1;33m]\e[0m \e[1;107;35m BACKUP TELEGRAM \e[0m \e[1;33m[\e[1;32m22\e[1;33m]\e[0m \e[1;107;34m EDIT BANNER \e[0m     \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m       \e[1;33m[\e[1;32m23\e[1;33m]\e[0m \e[1;95m INSTALL HYSTERIA2 (GACOR UDP) \e[0m      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                  \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m       \e[1;33m[\e[1;32m23\e[1;33m]\e[0m \e[1;95m INSTALL HYSTERIA2 \e[0m      \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣██████████████████████████████████████████████████━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m24\e[1;33m]\e[0m \e[1;107;35m  INSTALL VLESS gRPC \e[0m    \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣██████████████████████████████████████████████████━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m      \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
     read -p " Select Menu : " opt
     case $opt in
@@ -1123,6 +1159,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
          21) backup_telegram ;;
          22) drop_banner ;;
          23) install_hy2 ;;
+         24) istall_vless ;;
         0|00) exit ;;
         *) menu ;;
     esac
