@@ -447,14 +447,106 @@ create_ssl() {
     menu
 }
 
+# ==========================================
+# FUNGSI UDP-CUSTOM MAX PREMIUM (ANTI-BENGONG)
+# ==========================================
 install_udp() {
     clear
-    echo -e " Sedang Mengunduh & Menginstal UDP Custom..."
-    wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/udp-custom"
+    echo -e "\e[1;35m Menghapus Versi Lama & Menginstall UDP-Custom Max Premium...\e[0m"
+    
+    # Berhentikan service lama jika ada
+    systemctl stop udp-custom &>/dev/null
+    
+    # Download Binary Terbaru
+    mkdir -p /etc/udp
+    wget -qO /usr/bin/udp-custom https://github.com/mizustore/repostore/raw/main/udp-custom-linux-amd64
     chmod +x /usr/bin/udp-custom
-    /usr/bin/udp-custom install
-    echo -e " UDP Custom Berhasil Terpasang!"
-    sleep 2
+
+    # Konfigurasi Buffer Maksimal (Anti-Lag)
+    cat <<EOF > /etc/udp/config.json
+{
+  "listen": ":36600",
+  "stream_buffer": 33554432,
+  "receive_buffer": 33554432,
+  "auth": {
+    "type": "password",
+    "password": "ajimaster-udp"
+  },
+  "sniffing": {
+    "enabled": true,
+    "dest_override": ["http", "tls"]
+  }
+}
+EOF
+
+    # Service Auto-Restart dengan Timeout Khusus Opok
+    cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP-Custom Max Premium By Ajimaster
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/bin
+ExecStart=/usr/bin/udp-custom server -exclude 1-65535 -auth ajimaster-udp -buffer 65535 -sock-timeout 300
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable udp-custom
+    systemctl restart udp-custom
+    
+    echo -e "\e[1;32m UDP-CUSTOM BERHASIL DIOPTIMASI!\e[0m"
+    echo -e " Port: 1-65535 | Password: ajimaster-udp"
+    read -p " Tekan Enter untuk Kembali ke Menu"
+    menu
+}
+
+# ==========================================
+# FUNGSI VLESS gRPC RAJA OPOK (ANTI-LIMIT)
+# ==========================================
+install_grpc() {
+    clear
+    echo -e "\e[1;35m Mengonfigurasi VLESS gRPC Multi-Stream Premium...\e[0m"
+
+    # Membuat Inbound Khusus gRPC di Xray
+    # Menggunakan Multi-Mode agar bypass limit 200MB operator
+    cat > /etc/xray/vless_grpc.json <<EOF
+{
+    "inbounds": [
+        {
+            "port": 443,
+            "protocol": "vless",
+            "settings": {
+                "clients": [{ "id": "$(cat /proc/sys/kernel/random/uuid)", "level": 0 }],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "grpc",
+                "grpcSettings": {
+                    "serviceName": "vless-grpc",
+                    "multiMode": true
+                },
+                "sockopt": {
+                    "tcpFastOpen": true,
+                    "keepAlive": true,
+                    "keepAlivePeriod": 15
+                }
+            }
+        }
+    ]
+}
+EOF
+
+    systemctl restart xray
+    echo -e "\e[1;32m VLESS gRPC MAX PREMIUM BERHASIL TERPASANG!\e[0m"
+    echo -e " Service Name: vless-grpc | Port: 443"
+    read -p " Tekan Enter untuk Kembali ke Menu"
     menu
 }
 
