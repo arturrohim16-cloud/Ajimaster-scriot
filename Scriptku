@@ -14,6 +14,7 @@ clear
 echo "AKSES ILEGAL!"
 exit 0
 fi
+
 TOTAL_HARI=$TYPE
 START_DATE=$(cat /etc/aji/install_date 2>/dev/null)
 NOW=$(date +%s)
@@ -28,6 +29,34 @@ exit 0
 fi
 STATUS_SC="\e[1;33mEXP SCRIPT: $((SISA_HARI + 1))H\e[0m"
 fi
+# ... (Ini akhir dari kode lisensi Mas)
+STATUS_SC="\e[1;33mEXP SCRIPT: $((SISA_HARI + 1))H\e[0m"
+fi
+
+# ==========================================
+# BLOCK AUTO-ADAPTASI OS (TEMPEL DI SINI)
+# ==========================================
+OS_VER=$(grep -oP '(?<=^VERSION_ID=).+' /etc/os-release | tr -d '"')
+OS_NAME=$(grep -oP '(?<=^ID=).+' /etc/os-release | tr -d '"')
+
+echo -e "Menyesuaikan Sistem untuk $OS_NAME $OS_VER..."
+
+if [[ "$OS_NAME" == "ubuntu" && "$OS_VER" == "24.04" ]]; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt update -y
+    apt install -y iptables iptables-persistent net-tools gnutls-bin openssl
+    update-alternatives --set iptables /usr/sbin/iptables-legacy
+    update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+elif [[ "$OS_NAME" == "debian" ]]; then
+    apt update -y
+    apt install -y iptables net-tools openssl
+fi
+
+mkdir -p /etc/xray
+mkdir -p /var/log/xray
+chmod -R 755 /etc/xray
+# ==========================================
+# ... (Baris script Mas selanjutnya)
 # ==========================================
 #        DATA PEMILIK SCRIPT
 # ==========================================
