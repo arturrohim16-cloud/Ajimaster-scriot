@@ -588,6 +588,66 @@ EOF
     menu
 }
 
+# [25] FUNGSI AUTO-OPTIMIZE RAM & CPU (ANTI-LAG)
+auto_optimize() {
+    clear
+    echo -e "\e[1;35m🚀 AKTIVASI AUTO-OPTIMIZE & CLEANER PREMIUM...\e[0m"
+    # Membersihkan Cache RAM & Swap agar VPS enteng
+    sync; echo 3 > /proc/sys/vm/drop_caches
+    swapoff -a && swapon -a
+    
+    # Membuat Task Otomatis tiap 3 jam sekali
+    (crontab -l ; echo "0 */3 * * * sync; echo 3 > /proc/sys/vm/drop_caches") | sort -u | crontab -
+    
+    echo -e "\e[1;32m✅ VPS SEKARANG LEBIH ENTENG & AUTO-CLEAN AKTIF TIAP 3 JAM!\e[0m"
+    read -p " Tekan Enter untuk Kembali"
+    menu
+}
+
+# [26] FUNGSI UDP-REQUEST (BOOSTER GAME ALL PORT)
+install_udprequest() {
+    clear
+    echo -e "\e[1;35m🚀 INSTALLING UDP-REQUEST ALL PORT (GAME VVIP)...\e[0m"
+    # Mengarahkan trafik UDP agar lebih stabil di semua port
+    wget -qO /usr/bin/udp-request "https://github.com/mizustore/repostore/raw/main/udp-custom-linux-amd64"
+    chmod +x /usr/bin/udp-request
+    
+    cat <<EOF > /etc/systemd/system/udp-request.service
+[Unit]
+Description=UDP-Request By Ajimaster
+After=network.target
+[Service]
+Type=simple
+ExecStart=/usr/bin/udp-request server -exclude 1-65535 -auth ajimaster-udp -buffer 65535 -sock-timeout 600
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
+    systemctl enable udp-request
+    systemctl restart udp-request
+    echo -e "\e[1;32m✅ UDP-REQUEST BERHASIL DIAKTIFKAN (GAME SEMAKIN LANCAR)!\e[0m"
+    read -p " Tekan Enter untuk Kembali"
+    menu
+}
+
+# [27] FUNGSI BUG SCANNER (ALAT TEMPUR OPOK)
+bug_scanner() {
+    clear
+    echo -e "\e[1;35m🚀 AJIMASTER BUG SCANNER (CHECK STATUS 200 OK)...\e[0m"
+    read -p " Masukkan Bug/SNI (Contoh: v.whatsapp.net): " bugnya
+    if [ -z "$bugnya" ]; then
+        echo "Bug tidak boleh kosong!"
+        sleep 2
+        menu
+    fi
+    echo -e " Sedang mengecek status bug..."
+    status=$(curl -I -s --connect-timeout 5 https://$bugnya | head -n 1)
+    echo -e "\e[1;33m Hasil: $status\e[0m"
+    read -p " Tekan Enter untuk Kembali"
+    menu
+}
+
 function restart_services() {
     clear
     echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
@@ -1034,9 +1094,13 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
     echo -e "   \e[1;35m┃\e[0m       \e[1;33m[\e[1;32m23\e[1;33m]\e[0m \e[1;95m INSTALL HYSTERIA2 \e[0m      \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┣██████████████████████████████████████████████████━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m24\e[1;33m]\e[0m \e[1;107;35m  INSTALL VLESS gRPC \e[0m    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣██████████████████████████████████████████████████━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m      \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m24\e[1;33m]\e[0m \e[1;107;35m  INSTALL VLESS gRPC (TURBO OPOK)  \e[0m    \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m25\e[1;33m]\e[0m \e[1;36m AUTO-OPTIMIZE RAM/CPU (ANTI-LAG)  \e[0m   \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m26\e[1;33m]\e[0m \e[1;36m INSTALL UDP-REQUEST (GAME BOOSTER)\e[0m   \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m27\e[1;33m]\e[0m \e[1;36m BUG/SNI SCANNER (OPOK TOOLS)      \e[0m   \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                  \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
     read -p " Select Menu : " opt
     case $opt in
@@ -1160,7 +1224,10 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
          22) drop_banner ;;
          23) install_hy2 ;;
          24) install_grpc ;;
-        0|00) exit ;;
+         25) auto_optimize ;;
+         26) install_udprequest ;;
+         27) bug_scanner ;;
+         00) exit ;;
         *) menu ;;
     esac
 }
