@@ -1285,3 +1285,27 @@ update_script() {
     menu
 }
 dashboard_utama
+
+# --- AUTO CONFIG BANNER SSH BY AJIMASTER ---
+echo "Menyiapkan Banner SSH Mewah..."
+cat <<EOF > /etc/issue.net
+<font color="#FF0000">████████████████████████████████████████</font>
+<font color="#00FF00"><b>     🚀 WELCOME TO AJIMASTER VPN 🚀     </b></font>
+<font color="#FF0000">████████████████████████████████████████</font>
+<font color="#FFFF00">  <b>Owner</b>     : <b>AJI MASTER (CLOUDS)</b></font>
+<font color="#00FFFF">  <b>Server</b>    : PREMIUM PRIVATE</font>
+<font color="#FF00FF">  <b>Location</b>  : SINGAPORE HIGH SPEED</font>
+<font color="#FF0000">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</font>
+<font color="#FFFFFF">  🚫 NO TORRENT | 🚫 NO DDOS | 🚫 NO HACK </font>
+<font color="#FF0000">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</font>
+<font color="#00FF00"><b>     ✅ ENJOY YOUR HIGH INTERNET ✅     </b></font>
+<font color="#FF0000">████████████████████████████████████████</font>
+EOF
+
+# Mengaktifkan Banner di Konfigurasi SSH
+sed -i 's/#Banner none/Banner \/etc\/issue.net/g' /etc/ssh/sshd_config
+sed -i 's/Banner none/Banner \/etc\/issue.net/g' /etc/ssh/sshd_config
+
+# Restart layanan SSH agar banner aktif
+systemctl restart ssh
+echo "Banner SSH Berhasil Terpasang!"
