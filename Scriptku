@@ -414,19 +414,36 @@ shadow_manager() {
     esac
 }
 
-bot_settings() {
+install_bot_panel() {
     clear
-    echo -e "   \e[1;35m╔════════════════════════════════════════════╗\e[0m"
-    echo -e "   \e[1;35m║\e[0m          \e[1;107;32m MENU BOT PANEL SETTINGS \e[0m         \e[1;35m║\e[0m"
-    echo -e "   \e[1;35m╚════════════════════════════════════════════╝\e[0m"
-    mkdir -p /etc/aji
-    read -p "    Masukkan Bot Token : " b_token
-    read -p "    Masukkan Admin ID  : " b_id
-    echo "$b_token" > /etc/aji/bot.token
-    echo "$b_id" > /etc/aji/bot.id
-    echo -e "   ─────────────────────────────────────────────"
-    echo -e "    [\e[1;32m OK \e[0m] Pengaturan Bot Berhasil Disimpan!"
-    sleep 2
+    echo -e "🚀 Memasang Ajimaster Bot Panel..."
+    
+    # Download file bot dari GitHub Mas Aji
+    # Ganti URL di bawah dengan link raw file ajimaster-bot.sh milik Mas
+    wget -qO /usr/bin/ajimaster-bot.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ajimaster-bot.sh"
+    chmod +x /usr/bin/ajimaster-bot.sh
+    
+    # Buat Service otomatis
+    cat <<EOF > /etc/systemd/system/ajimaster-bot.service
+[Unit]
+Description=Ajimaster Telegram Bot Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/bin/ajimaster-bot.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable ajimaster-bot
+    systemctl restart ajimaster-bot
+    
+    echo -e "✅ Bot Panel Berhasil Diaktifkan!"
+    read -p "Tekan Enter untuk Kembali"
     menu
 }
 
@@ -1076,18 +1093,19 @@ printf "   \e[1;35m▌\e[0m \e[1;32mVLESS/WS/GRPC   =\e[0m \e[1;33m%-3s\e[0m \e[
 printf "   \e[1;35m▌\e[0m \e[1;32mTROJAN/WS/GRPC  =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_trojan"
 printf "   \e[1;35m▌\e[0m \e[1;32mSHADOW/WS/GRPC  =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_shadow"
 echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟\e[0m"
-    echo -e "   \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
-    echo -e "   \e[1;35m┃\e[0m   \e[1;97m[ \e[1;36m--MENU SYSTEM - AJI VPN--\e[1;97m ]\e[0m    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH/OVPN      \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SCRIPT  \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS MG      \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS     \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS MG      \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;36mEDIT SCRIPT    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN MG     \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;36mSHADOW MG      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;32mBOT SETTINGS  \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;36mSPEEDTEST      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;31mDELETE USER   \e[1;35m┃\e[0m \e[1;33m[14]\e[0m \e[1;36mCREATE SSL     \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND USER   \e[1;35m┃\e[0m \e[1;33m[15]\e[0m \e[1;36mINSTALL UDP    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[08]\e[0m \e[1;32mBACKUP/REST   \e[1;35m┃\e[0m \e[1;33m[16]\e[0m \e[1;36mRESTART SERV   \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e "   \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
+    echo -e "   \e[1;35m┃\e[0m            \e[1;97m[ \e[1;36m------------ MENU SYSTEM - AJI VPN ------------\e[1;97m ]\e[0m            \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH/OVPN MGMT  \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SCRIPT  \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS MGMT     \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS     \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS MGMT     \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;36mEDIT SCRIPT    \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN MGMT    \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;36mSHADOW MGMT    \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;45;107m 🚀 ACTIVATE AUTOMATIC TRIAL BOT PANEL 🚀 \e[0m             \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;31mDELETE USER    \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;36mSPEEDTEST      \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND USER    \e[1;35m┃\e[0m \e[1;33m[14]\e[0m \e[1;36mCREATE SSL     \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[08]\e[0m \e[1;32mBACKUP/REST    \e[1;35m┃\e[0m \e[1;33m[15]\e[0m \e[1;36mINSTALL UDP    \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┃\e[0m \e[1;33m[16]\e[0m \e[1;36mRESTART SERV   \e[1;35m┃\e[0m \e[1;33m[--]\e[0m \e[1;36m               \e[1;35m┃\e[0m"
+    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m17\e[1;33m]\e[0m \e[1;107;32m CEK ONLINE \e[0m \e[1;33m[\e[1;32m18\e[1;33m]\e[0m \e[1;107;34m LIST HARGA KUOTA \e[0m \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m19\e[1;33m]\e[0m \e[1;107;31m FIX REPAIR \e[0m \e[1;33m[\e[1;32m20\e[1;33m]\e[0m \e[1;107;32m CLEAR LOG/CACHE \e[0m  \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m21\e[1;33m]\e[0m \e[1;107;35m BACKUP TELEGRAM \e[0m \e[1;33m[\e[1;32m22\e[1;33m]\e[0m \e[1;107;34m EDIT BANNER \e[0m     \e[1;35m┃\e[0m"
@@ -1108,7 +1126,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
         2) add_vmess ;;
         3) add_vless ;;
         4) add_trojan ;;
-        5) bot_settings ;;
+        5) install_bot_panel ;;
         6) del_user ;;
         7) renew_user ;;
         8) backup_restore ;;
