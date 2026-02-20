@@ -1311,7 +1311,7 @@ sed -i 's/Banner none/Banner \/etc\/issue.net/g' /etc/ssh/sshd_config
 # Restart layanan SSH agar banner aktif
 systemctl restart ssh
 echo "Banner SSH Berhasil Terpasang!"
-
+apt install bc -y > /dev/null 2>&1
 # ==========================================
 # OPTIMASI JARINGAN TCP BBR - AJIMASTER
 # ==========================================
