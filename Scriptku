@@ -1118,6 +1118,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m26\e[1;33m]\e[0m \e[1;36m INSTALL UDP-REQUEST (GAME BOOSTER)\e[0m   \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m   \e[1;33m[\e[1;32m27\e[1;33m]\e[0m \e[1;36m BUG/SNI SCANNER (OPOK TOOLS)      \e[0m   \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;32m99\e[1;33m]\e[0m \e[1;32m PANEL POLISI KUOTA \e[0m         \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                  \e[1;35m┃\e[0m"
     echo -e "   \e[1;35m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
     read -p " Select Menu : " opt
@@ -1245,6 +1246,7 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
          25) auto_optimize ;;
          26) install_udprequest ;;
          27) bug_scanner ;;
+         99) menu-limit ;;
          00) exit ;;
         *) menu ;;
     esac
