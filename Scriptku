@@ -1309,3 +1309,22 @@ sed -i 's/Banner none/Banner \/etc\/issue.net/g' /etc/ssh/sshd_config
 # Restart layanan SSH agar banner aktif
 systemctl restart ssh
 echo "Banner SSH Berhasil Terpasang!"
+
+# ==========================================
+# OPTIMASI JARINGAN TCP BBR - AJIMASTER
+# ==========================================
+echo -e "\e[1;32m[*] Mengaktifkan Fitur Turbo (TCP BBR) agar Jaringan Kencang...\e[0m"
+
+# 1. Hapus settingan lama agar tidak terjadi konflik/error
+sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+
+# 2. Masukkan parameter optimasi terbaru
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+
+# 3. Terapkan perubahan ke sistem (tanpa restart VPS)
+sysctl -p > /dev/null 2>&1
+
+echo -e "\e[1;32m[OK] Jaringan Berhasil Dipercepat (Mode Turbo Aktif)!\e[0m"
+# ==========================================
