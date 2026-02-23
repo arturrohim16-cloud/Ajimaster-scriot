@@ -1184,7 +1184,13 @@ echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
         echo ""
         read -p "  Tekan Enter Untuk Kembali..."
         menu
-    ;;
+    # --- PENUTUP WAJIB (MENAMBAL YANG BOLONG) ---
+    esac # Menutup Case $opt
+} # Menutup Function dashboard_utama
+
+# Menjalankan Script
+dashboard_utama
+
         19)
         clear
         echo -e "   \e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
