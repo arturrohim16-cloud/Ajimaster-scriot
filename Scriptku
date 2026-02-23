@@ -1237,22 +1237,23 @@ mkdir -p /etc/iptables
 iptables-save > /etc/iptables.up.rules
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 
-# --- FUNGSI UPDATE SCRIPT ---
+    esac
+} # <--- Menutup fungsi menu-limit
+
+# --- PENUTUP FUNGSI DASHBOARD_UTAMA (YANG TADI BOLONG) ---
+    esac # <--- Menutup case utama $opt
+} # <--- Menutup function dashboard_utama
+
+# --- KONFIGURASI SISTEM & UPDATE ---
 update_script() {
     clear
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e "       \e[42;1;37m  UPDATE SCRIPT MANUALLY  \e[0m"
-    echo -e "${RED}═══════════════════════════════════════════════════${NC}"
-    echo -e ""
-    echo -e " ${YELLOW}Checking for updates from GitHub...${NC}"
-    sleep 2
+    echo -e "Updating Script..."
     wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Scriptku"
     chmod +x /usr/bin/menu
-    echo -e ""
-    echo -e " ${GREEN}SUCCESS! Script has been updated.${NC}"
+    echo -e "Update Success!"
     sleep 2
     dashboard_utama
 }
 
-# --- PEMANGGILAN UTAMA (WAJIB DI PALING BAWAH) ---
+# --- PEMANGGILAN FINAL (HANYA SEKALI DI PALING BAWAH) ---
 dashboard_utama
