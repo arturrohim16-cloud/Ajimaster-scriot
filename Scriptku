@@ -997,7 +997,6 @@ EOF
     menu
 }
 
-function dashboard_utama() {
 draw_bar() {
     local perc=$1
     local size=10
