@@ -15,15 +15,6 @@ SISA_DETIK=$((DETIK_TOTAL - DETIK_BERJALAN))
 SISA_HARI=$((SISA_DETIK / 86400))
 if [ "$SISA_DETIK" -le 0 ]; then
 clear
-echo "MASA AKTIF HABIS!"
-exit 0
-fi
-STATUS_SC="\e[1;33mEXP SCRIPT: $((SISA_HARI + 1))H\e[0m"
-fi
-# ... (Ini akhir dari kode lisensi Mas)
-STATUS_SC="\e[1;33mEXP SCRIPT: $((SISA_HARI + 1))H\e[0m"
-fi
-
 # ==========================================
 # BLOCK AUTO-ADAPTASI OS (TEMPEL DI SINI)
 # ==========================================
