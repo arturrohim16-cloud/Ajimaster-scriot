@@ -6,15 +6,6 @@ DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "Belum Terpasang")
 OS=$(cat /etc/os-release | grep -w PRETTY_NAME | head -1 | cut -d '"' -f 2)
 TYPE=$(cat /etc/aji_expire_type 2>/dev/null)
 
-if [[ "$TYPE" == "unlimited" ]]; then
-STATUS_SC="\e[1;32mUNLIMITED (OWNER)\e[0m"
-else
-if [ -z "$TYPE" ]; then
-clear
-echo "AKSES ILEGAL!"
-exit 0
-fi
-
 TOTAL_HARI=$TYPE
 START_DATE=$(cat /etc/aji/install_date 2>/dev/null)
 NOW=$(date +%s)
