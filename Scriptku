@@ -20,6 +20,8 @@ add_ssh() {
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
     useradd -e $exp -s /bin/false -M $user
     echo "$user:$pass" | chpasswd
+    usermod -c "MaxIP:$iplimit | MaxGB:$gblimit" $user
+
 
     # --- HASIL CREATE (KOTAK PUTIH TEKS HIJAU) ---
     clear
