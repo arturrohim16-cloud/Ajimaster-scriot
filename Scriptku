@@ -1212,13 +1212,14 @@ dashboard_utama
             3|03) bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install ;;
             4|04) systemctl restart haproxy; apt install --reinstall haproxy -y ;;
             5|05) systemctl restart ws-epro; systemctl enable ws-epro ;;
-            0|00) menu ;;
-            *) echo "Pilihan Salah"; sleep 1; menu ;;
+            0|00) dashboard_utama ;;
+            *) echo "Pilihan Salah"; sleep 1; dashboard_utama ;;
+
         esac
         echo -e "\e[1;32mSelesai Perbaikan!\e[0m"
         sleep 2
-        menu
-    ;;
+        dashboard_utama
+
          21) backup_telegram ;;
          22) drop_banner ;;
          23) install_hy2 ;;
