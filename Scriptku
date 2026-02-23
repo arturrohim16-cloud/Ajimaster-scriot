@@ -1344,48 +1344,40 @@ echo ""
 
 
 # ==========================================
-# MENU POLISI KUOTA (MODE NOMOR) - AJIMASTER
+# AKHIR SCRIPT - AJIMASTER (LOGIKA DIPERBAIKI)
 # ==========================================
+
+# 1. Definisikan dulu fungsi menu-limit agar bisa dipanggil
 function menu-limit() {
     clear
     echo -e "\e[1;33m      === PANEL POLISI KUOTA AJIMASTER ===\e[0m"
     echo -e "\e[1;36m ┌──────────────────────────────────────────┐\e[0m"
-    echo -e "\e[1;36m │\e[0m  \e[1;32m[1]\e[0m Setel Limit Kuota Baru (GB)       \e[1;36m│\e[0m"
-    echo -e "\e[1;36m │\e[0m  \e[1;32m[2]\e[0m Lihat Daftar Limit User           \e[1;36m│\e[0m"
-    echo -e "\e[1;36m │\e[0m  \e[1;32m[3]\e[0m Hapus Limit (Jadi Unlimited)      \e[1;36m│\e[0m"
-    echo -e "\e[1;36m │\e[0m  \e[1;31m[x]\e[0m Kembali ke Menu Utama             \e[1;36m│\e[0m"
+    echo -e " │  \e[1;32m[1]\e[0m Setel Limit Kuota Baru (GB)       │"
+    echo -e " │  \e[1;32m[2]\e[0m Lihat Daftar Limit User           │"
+    echo -e " │  \e[1;32m[3]\e[0m Hapus Limit (Jadi Unlimited)      │"
+    echo -e " │  \e[1;31m[x]\e[0m Kembali ke Menu Utama             │"
     echo -e "\e[1;36m └──────────────────────────────────────────┘\e[0m"
     echo ""
     read -p " Pilih Nomor [1-3 atau x]: " opt
-    echo -e "\e[1;36m ──────────────────────────────────────────\e[0m"
-
     case $opt in
-    1)
-        read -p " Nama User (Sesuai Akun): " user
-        read -p " Jatah Kuota (GB): " limit
-        mkdir -p /etc/ajimaster/limit/
-        echo "$limit" > /etc/ajimaster/limit/$user
-        echo -e "\e[1;32m [SUCCESS]\e[0m User \e[1;33m$user\e[0m resmi dibatasi \e[1;33m$limit GB\e[0m! ✅"
-        sleep 2; menu-limit
-        ;;
-    2)
-        echo -e " DAFTAR USER YANG DILIMIT:"
-        ls /etc/ajimaster/limit/ | while read file; do
-            limit_val=$(cat /etc/ajimaster/limit/$file)
-            echo -e " - User: \e[1;32m$file\e[0m | Limit: \e[1;33m$limit_val GB\e[0m"
-        done
-        echo ""
-        read -n 1 -s -r -p "Tekan Enter untuk kembali..."; menu-limit
-        ;;
-    3)
-        read -p " Masukkan Nama User yg akan dihapus limitnya: " user
-        rm -f /etc/ajimaster/limit/$user
-        echo -e "\e[1;32m [SUCCESS]\e[0m Limit user \e[1;33m$user\e[0m dihapus. (Sekarang Unlimited) ✅"
-        sleep 2; menu-limit
-        ;;
-    x) menu ;;
-    *) menu-limit ;;
-        esac
+        1)
+            read -p " Nama User: " user
+            read -p " Jatah Kuota (GB): " limit
+            mkdir -p /etc/ajimaster/limit/
+            echo "$limit" > /etc/ajimaster/limit/$user
+            echo -e "\e[1;32m [SUCCESS]\e[0m User $user dibatasi $limit GB!"; sleep 2; menu-limit ;;
+        2)
+            ls /etc/ajimaster/limit/ | while read file; do
+                limit_val=$(cat /etc/ajimaster/limit/$file)
+                echo -e " - User: $file | Limit: $limit_val GB"
+            done; read -p "Enter untuk kembali..."; menu-limit ;;
+        3)
+            read -p " Nama User: " user; rm -f /etc/ajimaster/limit/$user
+            echo -e " Limit dihapus!"; sleep 2; menu-limit ;;
+        x) dashboard_utama ;;
+        *) menu-limit ;;
+    esac
 }
-menu
 
+# 2. Terakhir, baru panggil Dashboard Utama untuk memunculkan menu
+dashboard_utama
