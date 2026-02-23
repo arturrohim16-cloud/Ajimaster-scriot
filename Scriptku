@@ -1023,6 +1023,7 @@ clear_log() {
     menu
 }
 
+dashboard_utama() {
     s_ssh=$(systemctl is-active ssh); [[ $s_ssh == "active" ]] && st_ssh="\e[1;32mON\e[0m" || st_ssh="\e[1;31mOFF\e[0m"
     s_ngx=$(systemctl is-active nginx); [[ $s_ngx == "active" ]] && st_ngx="\e[1;32mON\e[0m" || st_ngx="\e[1;31mOFF\e[0m"
     s_xry=$(systemctl is-active xray); [[ $s_xry == "active" ]] && st_xry="\e[1;32mON\e[0m" || st_xry="\e[1;31mOFF\e[0m"
@@ -1257,10 +1258,16 @@ update_script() {
     echo -e ""
     echo -e " ${GREEN}SUCCESS! Script has been updated.${NC}"
     sleep 2
-    menu
+    dashboard_utama
 }
-dashboard_utama
 
+# --- BAGIAN EKSEKUSI FINAL ---
+# Menutup fungsi dashboard_utama yang dibuka di atas
+    esac
+}
+
+# Menjalankan script
+dashboard_utama
 # --- AUTO CONFIG BANNER SSH BY AJIMASTER ---
 echo "Menyiapkan Banner SSH Mewah..."
 cat <<EOF > /etc/issue.net
