@@ -336,28 +336,27 @@ exp_cleaner() {
 
 fix_servis() {
     clear
-    echo -e "\e[1;33m===============================================\e[0m"
-    echo -e "\e[1;32m       MEMBERSIHKAN & MENYALAKAN XRAY...       \e[0m"
-    echo -e "\e[1;33m===============================================\e[0m"
+    echo "Memperbaiki & Mengunci Service Agar Permanen..."
     
-    # Matikan semua proses lama agar tidak tabrakan port
+    # Matikan proses manual agar tidak bentrok dengan service
     pkill -f xray
     pkill -f ws-python
-    pkill -f nginx
-    sleep 1
-
-    # 1. Pastikan Xray jalan (Sesuai kode Mas)
-    /usr/local/bin/xray -config /usr/local/etc/xray/config.json >/dev/null 2>&1 &
-
-    # 2. Restart Nginx
+    
+    # Jalankan lewat jalur resmi (Systemd)
+    systemctl daemon-reload
+    systemctl restart xray
     systemctl restart nginx
-
-    # 3. Jalankan WS
+    
+    # Jalankan WS Python
     screen -dmS ws python3 /usr/local/bin/ws-python 8080
     
-    echo -e "-----------------------------------------------"
-    echo -e "   \e[1;92mSERVICE BERHASIL DINYALAKAN (FORCE ON)!\e[0m"
-    echo -e "-----------------------------------------------"
+    # Pastikan enable agar saat reboot otomatis nyala
+    systemctl enable xray
+    systemctl enable nginx
+    
+    echo "---------------------------------------"
+    echo " Service Sekarang Terkunci & Permanen! "
+    echo "---------------------------------------"
     sleep 2
     dashboard_utama
 }
