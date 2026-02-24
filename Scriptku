@@ -1,4 +1,14 @@
 #!/bin/bash
+# --- IMPORT SEMUA FILE MENU ---
+# Pastikan jalur/path file ini sesuai dengan lokasi di VPS Mas
+source /usr/bin/trial_ssh 2>/dev/null
+source /usr/bin/trial_vmess 2>/dev/null
+source /usr/bin/trial_vless 2>/dev/null
+source /usr/bin/trial_trojan 2>/dev/null
+source /usr/bin/cek_online 2>/dev/null
+source /usr/bin/exp_cleaner 2>/dev/null
+source /usr/bin/del_user 2>/dev/null
+
 update_script() {
     clear
     echo -e "\e[1;33mMemeriksa pembaruan script...\e[0m"
