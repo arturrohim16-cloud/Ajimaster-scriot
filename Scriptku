@@ -165,105 +165,53 @@ add_ssh() {
     dashboard_utama
 }
 
-# Fungsi untuk memanggil dashboard utama
 dashboard_utama() {
-    # 1. Mengambil Data Sistem
+    # 1. Ambil Data Sistem
     MYIP=$(wget -qO- ipinfo.io/ip);
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null);
     [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
-    uptime_vps=$(uptime -p | cut -d " " -f 2-10)
-    
-    # 2. Statistik RAM
+    uptime_vps=$(uptime -p | cut -d " " -f 2-5)
     ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     
-    # 3. Cek Status Service (Running/Dead)
+    # 2. Status Services
     status_service() {
-        if systemctl is-active --quiet $1; then
-            echo -e "\e[1;92mON\e[0m"
-        else
-            echo -e "\e[1;31mOFF\e[0m"
-        fi
+        if systemctl is-active --quiet $1; then echo -e "\e[1;92mON\e[0m"; else echo -e "\e[1;31mOFF\e[0m"; fi
     }
-    st_ssh=$(status_service ssh)
-    st_ngx=$(status_service nginx)
-    st_xry=$(status_service xray)
-    st_drp=$(status_service dropbear)
-    # Cek Python WS (Manual check karena pake screen)
+    st_ssh=$(status_service ssh); st_xry=$(status_service xray); st_ngx=$(status_service nginx)
     if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON\e[0m"; else st_wse="\e[1;31mOFF\e[0m"; fi
-    st_hpx="\e[1;31mOFF\e[0m" # Default OFF jika tidak install
 
-    # 4. Hitung Total Akun
-    total_ssh=$(grep -c -E "^#sh" "/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_vmess=$(grep -c -E "email" "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_vless="0"
-    total_trojan="0"
-    total_shadow="0"
-
-    # Fungsi Draw Bar RAM
-    draw_bar() {
-        local perc=$1
-        local size=10
-        local dots=$((perc * size / 100))
-        local empty=$((size - dots))
-        printf "\e[1;31m[\e[1;32m"
-        for ((i=0; i<dots; i++)); do printf "■"; done
-        for ((i=0; i<empty; i++)); do printf " "; done
-        printf "\e[1;31m]\e[0m"
-    }
+    # 3. Hitung Akun (Ambil dari config Xray)
+    total_vmess=$(grep -c "id" /usr/local/etc/xray/config.json 2>/dev/null || echo "0")
 
     clear
-    echo -e "   \e[1;35m      █████╗      ██╗██╗     ██╗   ██╗██████╗ ███╗   ██╗\e[0m"
-    echo -e "   \e[1;35m     ██╔══██╗     ██║██║     ██║   ██║██╔══██╗████╗  ██║\e[0m"
-    echo -e "   \e[1;35m     ███████║     ██║██║     ██║   ██║██████╔╝██╔██╗ ██║\e[0m"
-    echo -e "   \e[1;35m     ██╔══██║██   ██║██║     ╚██╗ ██╔╝██╔═══╝ ██║╚██╗██║\e[0m"
-    echo -e "   \e[1;35m     ██║  ██║╚█████╔╝██║      ╚████╔╝ ██║     ██║ ╚████║\e[0m"
-    echo -e "   \e[1;35m     ╚═╝  ╚═╝ ╚════╝ ╚═╝       ╚═══╝  ╚═╝     ╚═╝  ╚═══╝\e[0m"
+    echo -e " \e[1;35m      █████╗      ██╗██╗██╗   ██╗██████╗ ███╗\e[0m"
+    echo -e " \e[1;35m      ██╔══██╗     ██║██║██║   ██║██╔══██╗████╗\e[0m"
+    echo -e " \e[1;35m      ███████║     ██║██║██║   ██║██████╔╝██╔██╗\e[0m"
+    echo -e " \e[1;35m      ██║  ██║╚█████╔╝██║╚████╔╝ ██║     ██║ ╚██\e[0m"
+    echo -e " \e[1;35m      ╚═╝  ╚═╝ ╚════╝ ╚═╝ ╚═══╝  ╚═╝     ╚═╝  ╚═\e[0m"
 
-    echo -e "   \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[41;1;37m           🔥 AJI SYSTEM MASTER V16 FINAL 🔥          \e[0m \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┝┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┯┥\e[0m"
-    printf "   \e[1;35m┃\e[0m  \e[1;33mIP ADDRESS  :\e[0m %-34s \e[1;35m┃\e[0m\n" "$MYIP"
-    printf "   \e[1;35m┃\e[0m  \e[1;36mDOMAIN NAME :\e[0m %-34s \e[1;35m┃\e[0m\n" "$DOMAIN"
-    printf "   \e[1;35m┃\e[0m  \e[1;32mRAM USAGE   :\e[0m %-4s " "$ram_usage%"
-    draw_bar $ram_usage
-    printf "                                                    \e[1;35m┃\e[0m\n"
-    printf "   \e[1;35m┃\e[0m  \e[1;34mUPTIME VPS  :\e[0m %-34s \e[1;35m┃\e[0m\n" "$uptime_vps"
-    echo -e "   \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
+    echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[41;1;37m        🔥 AJI SYSTEM MASTER V16 🔥         \e[0m \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┠────────────────────────────────────────────────┨\e[0m"
+    printf " \e[1;35m┃\e[0m  \e[1;33mIP     :\e[0m %-34s \e[1;35m┃\e[0m\n" "$MYIP"
+    printf " \e[1;35m┃\e[0m  \e[1;36mDOMAIN :\e[0m %-34s \e[1;35m┃\e[0m\n" "$DOMAIN"
+    printf " \e[1;35m┃\e[0m  \e[1;32mRAM    :\e[0m %-3s%% [\e[1;32m■■■■■      \e[1;31m] \e[1;34mUP: %-11s \e[1;35m┃\e[0m\n" "$ram_usage" "$uptime_vps"
+    echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
 
-    echo -e "   \e[1;38;5;201m▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜\e[0m"
-    echo -e "   \e[1;38;5;201m▌\e[0m \e[1;92mSSH    : $st_ssh\e[0m  \e[1;38;5;201m▐\e[0m \e[1;92mNGINX  : $st_ngx\e[0m  \e[1;38;5;201m▐\e[0m \e[1;92mXRAY   : $st_xry\e[0m  \e[1;38;5;201m▐\e[0m"
-    echo -e "   \e[1;38;5;201m▌\e[0m \e[1;92mHAPROXY: $st_hpx\e[0m  \e[1;38;5;201m▐\e[0m \e[1;92mWS-EPRO: $st_wse\e[0m  \e[1;38;5;201m▐\e[0m \e[1;92mDROPBR : $st_drp\e[0m  \e[1;38;5;201m▐\e[0m"
-    echo -e "   \e[1;38;5;201m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟\e[0m"
- 
-    echo -e "   \e[1;35m▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜\e[0m"
-    echo -e "   \e[1;35m▌\e[0m         \e[1;36m>>> INFORMATION ACCOUNT PREMIUM <<<\e[0m       \e[1;35m▐\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    printf "   \e[1;35m▌\e[0m \e[1;32mSSH/OPENVPN     =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_ssh"
-    printf "   \e[1;35m▌\e[0m \e[1;32mVMESS/WS/GRPC   =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_vmess"
-    printf "   \e[1;35m▌\e[0m \e[1;32mVLESS/WS/GRPC   =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_vless"
-    printf "   \e[1;35m▌\e[0m \e[1;32mTROJAN/WS/GRPC  =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_trojan"
-    printf "   \e[1;35m▌\e[0m \e[1;32mSHADOW/WS/GRPC  =\e[0m \e[1;33m%-3s\e[0m \e[1;32mACC\e[0m                    \e[1;35m▐\e[0m\n" "$total_shadow"
-    echo -e "   \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟\e[0m"
+    echo -e " \e[1;35m▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜\e[0m"
+    echo -e " \e[1;35m▌\e[0m \e[1;92mSSH: $st_ssh\e[0m │ \e[1;92mXRAY: $st_xry\e[0m │ \e[1;92mNGINX: $st_ngx\e[0m │ \e[1;92mWS: $st_wse\e[0m \e[1;35m▐\e[0m"
+    echo -e " \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟\e[0m"
 
-    echo -e "   \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
-    echo -e "   \e[1;35m┃\e[0m      \e[1;97m[ \e[1;36m------------ MENU SYSTEM - AJI VPN ------------\e[1;97m ]\e[0m      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH/OVPN MGMT  \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SCRIPT  \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS MGMT     \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS     \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS MGMT     \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;36mEDIT SCRIPT    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN MGMT    \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;36mSHADOW MGMT    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;45;107m 🚀 ACTIVATE AUTOMATIC TRIAL BOT PANEL 🚀 \e[0m        \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;31mDELETE USER    \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;36mSPEEDTEST      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND USER    \e[1;35m┃\e[0m \e[1;33m[14]\e[0m \e[1;36mCREATE SSL     \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[08]\e[0m \e[1;32mBACKUP/REST    \e[1;35m┃\e[0m \e[1;33m[15]\e[0m \e[1;36mINSTALL UDP    \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[16]\e[0m \e[1;36mRESTART SERV   \e[1;35m┃\e[0m \e[1;33m[17]\e[0m \e[1;107;32m CEK ONLINE \e[0m       \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[18]\e[0m \e[1;107;34m LIST HARGA \e[0m   \e[1;35m┃\e[0m \e[1;33m[19]\e[0m \e[1;107;31m FIX REPAIR \e[0m       \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m \e[1;33m[20]\e[0m \e[1;107;32m CLEAR CACHE \e[0m  \e[1;35m┃\e[0m \e[1;33m[21]\e[0m \e[1;107;35m BACKUP TELE \e[0m      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
-    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;32m99\e[1;33m]\e[0m \e[1;32m PANEL POLISI KUOTA \e[0m             \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┃\e[0m               \e[1;33m[\e[1;31m00\e[1;33m]\e[0m \e[1;31m EXIT MENU \e[0m                      \e[1;35m┃\e[0m"
-    echo -e "   \e[1;35m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
+    echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
+    echo -e " \e[1;35m┃\e[0m  \e[1;33m[01]\e[0m \e[1;32mSSH OVPN\e[0m    \e[1;35m┃\e[0m  \e[1;33m[06]\e[0m \e[1;31mDELETE USER\e[0m    \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m  \e[1;33m[02]\e[0m \e[1;32mVMESS MGMT\e[0m  \e[1;35m┃\e[0m  \e[1;33m[07]\e[0m \e[1;36mREBOOT VPS\e[0m     \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m  \e[1;33m[03]\e[0m \e[1;32mVLESS MGMT\e[0m  \e[1;35m┃\e[0m  \e[1;33m[08]\e[0m \e[1;36mSPEEDTEST\e[0m      \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m  \e[1;33m[04]\e[0m \e[1;32mTROJAN MGMT\e[0m \e[1;35m┃\e[0m  \e[1;33m[09]\e[0m \e[1;36mBACKUP/REST\e[0m    \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m  \e[1;33m[05]\e[0m \e[1;45;107m 🚀 TRIAL BOT 🚀 \e[0m \e[1;33m[10]\e[0m \e[1;36mRESTART SERV\e[0m   \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;107;32m CEK ONLINE \e[0m \e[1;33m[12]\e[0m \e[1;107;31m FIX REPAIR \e[0m  \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;107;34m EDIT BANNER \e[0m \e[1;33m[00]\e[0m \e[1;107;31m EXIT MENU \e[0m   \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
     echo ""
     read -p "  Pilih Nomor: " opt
     case $opt in
