@@ -327,57 +327,66 @@ cek_online() {
 
 hapus_manual() {
     clear
-    # --- DEFINISI WARNA ---
     BIRU='\033[1;34m'
     KUNING='\033[1;33m'
     CYAN='\033[1;36m'
-    NC='\033[0m' # No Color
-    
+    NC='\033[0m'
     CONF="/usr/local/etc/xray/config.json"
-    
+
     echo -e "${BIRU}=======================================${NC}"
-    echo -e "       ${KUNING}DAFTAR AKUN AKTIF (ALL)${NC}          "
+    echo -e "       ${KUNING}PENGHAPUSAN AKUN (PER KATEGORI)${NC}  "
     echo -e "${BIRU}=======================================${NC}"
-    
+
+    # --- 1. DAFTAR SSH ---
     echo -e "  ${CYAN}[ SSH Users ]${NC}"
-    # Menampilkan user SSH sistem dengan teks kuning
     echo -ne "${KUNING}"
     awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
-    
-    echo -e "  ${CYAN}[ XRAY Users (Vmess/Vless/Trojan) ]${NC}"
-    # Menampilkan user Xray dengan teks kuning
+
+    # --- 2. DAFTAR VMESS ---
+    echo -e "  ${CYAN}[ VMESS Users ]${NC}"
     echo -ne "${KUNING}"
-    grep "\"email\":" $CONF | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Mencari baris email yang punya alterId (ciri khas Vmess di config Mas)
+    grep -B 2 "alterId" $CONF | grep "email" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    echo -ne "${NC}"
+    echo -e "${BIRU}---------------------------------------${NC}"
+
+    # --- 3. DAFTAR VLESS ---
+    echo -e "  ${CYAN}[ VLESS Users ]${NC}"
+    echo -ne "${KUNING}"
+    # Mencari baris email yang TIDAK punya alterId (ciri khas Vless)
+    grep -v "alterId" $CONF | grep "email" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    echo -ne "${NC}"
+    echo -e "${BIRU}---------------------------------------${NC}"
+
+    # --- 4. DAFTAR TROJAN ---
+    echo -e "  ${CYAN}[ TROJAN Users ]${NC}"
+    echo -ne "${KUNING}"
+    grep "password" $CONF -B 2 | grep "email" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}=======================================${NC}"
     echo ""
-    
-    # Input prompt dengan teks kuning
+
     echo -ne "${KUNING}Ketik Nama User yang ingin dihapus: ${NC}"
     read -r user
-    
+
     if [[ -z $user ]]; then
-        echo -e "${KUNING}Nama tidak boleh kosong, King!${NC}"
-        sleep 1
-        return
+        echo -e "${KUNING}Nama tidak boleh kosong!${NC}"
+        sleep 1; return
     fi
 
-    # Proses Hapus Akun dari Config
-    sed -i "/$user/,/}/d" $CONF
-    
-    # Proses Hapus User SSH dari Sistem
+    # PROSES HAPUS (Mencari blok email user sampai tutup kurung)
+    sed -i "/\"email\": \"$user\"/,/}/d" $CONF
     userdel -f "$user" &>/dev/null
     
-    # Restart agar perubahan langsung OFF
+    # Restart agar OFF
     systemctl restart xray &>/dev/null
     systemctl restart ssh &>/dev/null
-    
+
     echo -e "${BIRU}---------------------------------------${NC}"
-    echo -e "  ${KUNING}User [ $user ] Berhasil Dihapus!${NC}      "
+    echo -e "  ${KUNING}User [ $user ] Berhasil Dihapus!${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
-    
     echo -ne "${KUNING}Press any key to back to menu${NC}"
     read -n 1 -s -r
     dashboard_utama
