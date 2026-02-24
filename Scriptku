@@ -296,32 +296,49 @@ cek_online() {
     menu_manager
 }
 
-del_user() {
+hapus_manual() {
     clear
-    echo -e "\e[1;31m      HAPUS USER (SSH & XRAY) PERMANEN\e[0m"
-    echo -e "-----------------------------------------------"
-    read -p "   Masukkan Username yg akan dihapus : " user
+    echo -e " ======================================="
+    echo -e "       DAFTAR AKUN AKTIF (ALL)          "
+    echo -e " ======================================="
+    echo -e "  [ SSH Users ]"
+    grep -E "^### " "/etc/xray/ssh.db" | cut -d ' ' -f 2 | nl -s '. '
+    echo -e " ---------------------------------------"
+    echo -e "  [ VMESS Users ]"
+    grep -E "^### " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2 | nl -s '. '
+    echo -e " ---------------------------------------"
+    echo -e "  [ VLESS Users ]"
+    grep -E "^#& " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2 | nl -s '. '
+    echo -e " ---------------------------------------"
+    echo -e "  [ TROJAN Users ]"
+    grep -E "^#! " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2 | nl -s '. '
+    echo -e " ======================================="
+    echo ""
+    read -rp " Ketik Nama User yang ingin dihapus: " user
     
-    # 1. Hapus dari Sistem SSH
-    if grep -w "^$user" /etc/passwd > /dev/null; then
-        userdel -f $user
-        echo -e "   - Akun SSH [$user] Berhasil Dihapus!"
+    if [[ -z $user ]]; then
+        echo " Nama tidak boleh kosong, King!"
+        sleep 1
+        return
     fi
+
+    # Proses Hapus dari Config Xray (Vmess/Vless/Trojan)
+    sed -i "/^### $user/,/^#vmess/d" /usr/local/etc/xray/config.json
+    sed -i "/^#& $user/,/^#vless/d" /usr/local/etc/xray/config.json
+    sed -i "/^#! $user/,/^#trojan/d" /usr/local/etc/xray/config.json
     
-    # 2. Hapus dari Config Xray (Vmess, Vless, Trojan)
-    if grep -qw "$user" /etc/xray/config.json; then
-        # Menghapus blok user berdasarkan nama di config xray
-        sed -i "/### $user/,/^},{/d" /etc/xray/config.json
-        systemctl restart xray
-        echo -e "   - Akun Xray [$user] Berhasil Dihapus!"
-    else
-        echo -e "   - Akun Xray [$user] Tidak Ditemukan!"
-    fi
+    # Proses Hapus User SSH (Jika ada)
+    userdel -f "$user" &>/dev/null
+    sed -i "/^### $user/d" /etc/xray/ssh.db &>/dev/null
+
+    # Restart Service agar perubahan efek
+    systemctl restart xray
     
-    echo -e "-----------------------------------------------"
-    echo -e "   Proses Selesai!"
-    sleep 2
-    menu_manager
+    echo -e " ---------------------------------------"
+    echo -e "  User [ $user ] Berhasil Dihapus!      "
+    echo -e " ---------------------------------------"
+    read -n 1 -s -r -p " Press any key to back to menu"
+    menu
 }
 
 exp_cleaner() {
