@@ -206,29 +206,21 @@ add_ssh() {
     [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
     RAM=$(free -m | awk 'NR==2{printf "%.0f%%", $3*100/$2}')
     UPTIME=$(uptime -p | cut -d " " -f 2-5)
-
-    # 2. CEK STATUS SERVICE (METODE ASLI - PASTI ON)
-    
+    # 2. CEK STATUS SERVICE (FINAL FIX)
     # Cek SSH
-    if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON \e[0m"; else st_ssh="\e[1;31mOFF\e[0m"; fi
-    
-    # Cek XRAY (Tanpa ampun, kalau ada prosesnya = ON)
-    if pgrep -f "xray" > /dev/null; then 
+    pgrep -x sshd >/dev/null && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
+    # Cek XRAY (Cek nama proses apa saja yang ada kata 'xray')
+    if pgrep -f "xray" > /dev/null; then
         st_xry="\e[1;92mON \e[0m"
-    else 
+    else
         st_xry="\e[1;31mOFF\e[0m"
     fi
     
     # Cek NGINX
-    if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON \e[0m"; else st_ngx="\e[1;31mOFF\e[0m"; fi
+    pgrep -x nginx >/dev/null && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
     
-    # Cek WS (Websocket)
-    if pgrep -f "ws" > /dev/null; then 
-        st_wse="\e[1;92mON \e[0m"
-    else 
-        st_wse="\e[1;31mOFF\e[0m"
-    fi
-
+    # Cek WS (Cek proses python yang bawa websocket)
+    pgrep -f "ws" >/dev/null && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
     echo -e "  \e[1;35m     ██╔══██╗     ██║██║██║   ██║\e[0m"
