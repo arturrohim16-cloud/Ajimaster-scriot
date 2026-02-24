@@ -1,12 +1,40 @@
 #!/bin/bash
+# [1] TARUH DI SINI (Bagian Perhitungan & Pembersihan)
+total_ssh=$(grep -c -E "^### " "/etc/xray/ssh.db" 2>/dev/null || echo "0")
+total_vmess=$(grep -c -E "^### " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+total_vless=$(grep -c -E "^#& " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+total_trojan=$(grep -c -E "^#! " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+
+total_ssh=$(echo $total_ssh | tr -dc '0-9')
+total_vmess=$(echo $total_vmess | tr -dc '0-9')
+total_vless=$(echo $total_vless | tr -dc '0-9')
+total_trojan=$(echo $total_trojan | tr -dc '0-9')
+
+[ -z "$total_ssh" ] && total_ssh="0"
+[ -z "$total_vmess" ] && total_vmess="0"
+[ -z "$total_vless" ] && total_vless="0"
+[ -z "$total_trojan" ] && total_trojan="0"
+
+# [2] BARU KEMUDIAN PERINTAH CLEAR & TAMPILAN
+clear
+echo "┌──────────────────────────────────────────┐"
+echo "│  SSH/VPN   : $total_ssh"
+echo "│  VMESS/WS  : $total_vmess"
+echo "│  VLESS/WS  : $total_vless"
+echo "│  TROJAN/WS : $total_trojan"
+echo "└──────────────────────────────────────────┘"
+
+# [3] BARU DAFTAR MENU DI BAWAHNYA...
+
 update_script() {
     clear
-    echo -e "\e[1;33m Memeriksa pembaruan script...\e[0m"
-    # Masukkan link github script Mas di sini jika ada
-    # wget -O /usr/bin/menu "link-github-mas"; chmod +x /usr/bin/menu
-    echo -e "\e[1;32m Script sudah versi terbaru!\e[0m"
+    echo -e "\e[1;33mMemeriksa pembaruan script...\e[0m"
+    # Ganti link di bawah ini dengan link RAW github menu Mas
+    wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/username/repo/main/menu"
+    chmod +x /usr/bin/menu
+    echo -e "\e[1;32mScript berhasil diperbarui ke versi terbaru!\e[0m"
     sleep 2
-    dashboard_utama4
+    menu # Kembali ke menu utama
 }
 
 # Fungsi Backup Data Akun
@@ -465,8 +493,6 @@ menu_manager() {
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
     echo -e "${P}│${NC} ${B}SSH:${W}${st_ssh}${B} │ XRAY:${W}${st_xry}${B} │ NGINX:${W}${st_ngx}${B} │ WS:${W}${st_wse}${B} ${NC}  ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    echo -e "${P}│${NC}  ${B}SSH:${W}$total_ssh${B} │ VMESS:${W}$total_vmess${B} │ VLESS:${W}$total_vless${B} │ TRJ:${W}$total_trojan${B}${NC}  ${P}│${NC}"
-    echo -e "${P}└──────────────────────────────────────────────────────────┘${NC}"
     # --- BOX MENU ONLY (PURPLE & BLUE BOLD) ---
     echo -e "${PURPLE}┌──────────────────────────────────────────────────────────┐${NC}"
     printf "${PURPLE}│${NC} ${BLUE} [01] • SSH MENU    ${NC}  ${PURPLE}│${NC} ${BLUE} [08] • BACKUP DA   ${NC}  ${PURPLE}│${NC}\n"
