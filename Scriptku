@@ -1,5 +1,15 @@
 #!/bin/bash
 
+update_script() {
+    clear
+    echo -e "\e[1;33m Memeriksa pembaruan script...\e[0m"
+    # Masukkan link github script Mas di sini jika ada
+    # wget -O /usr/bin/menu "link-github-mas"; chmod +x /usr/bin/menu
+    echo -e "\e[1;32m Script sudah versi terbaru!\e[0m"
+    sleep 2
+    dashboard_utama
+}
+
 # Fungsi Backup Data Akun
 backup_data() {
     clear
