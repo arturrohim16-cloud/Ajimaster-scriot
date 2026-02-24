@@ -355,8 +355,13 @@ hapus_manual() {
     # --- 3. DAFTAR VLESS ---
     echo -e "  ${CYAN}[ VLESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mengambil email yang mengandung kata vless
-    grep -oP '(?<="email": ")[^"]*' $CONF | grep "vless" | nl -s '. '
+    # Mencari email di inbound yang protokolnya benar-benar 'vless'
+    jq -r '.inbounds[] | select(.protocol=="vless") | .settings.clients[].email' $CONF 2>/dev/null | grep -v "admin" | sort | uniq | nl -s '. '
+    
+    # Jika jq gagal, kita pakai cara grep manual sebagai cadangan
+    if [[ $(jq -r '.inbounds[] | select(.protocol=="vless") | .settings.clients[].email' $CONF 2>/dev/null | wc -l) -eq 0 ]]; then
+        grep -E "\"email\":" $CONF | grep -i "vless" | cut -d '"' -f 4 | nl -s '. '
+    fi
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
