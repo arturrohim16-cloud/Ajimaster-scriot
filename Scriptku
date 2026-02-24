@@ -1,4 +1,84 @@
 #!/bin/bash
+# ==========================================
+# JANTUNG TRIAL GENERATOR (AUTO CREATE)
+# ==========================================
+
+trial_ssh() {
+    clear
+    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
+    pass=1
+    exp=1
+    IP=$(wget -qO- ipinfo.io/ip)
+    useradd -e $(date -d "$exp days" +"%Y-%m-%d") -s /bin/false -M $user
+    echo -e "$pass\n$pass" | passwd $user &> /dev/null
+    clear
+    echo -e "### SSH TRIAL ACCOUNT ###"
+    echo -e "IP       : $IP"
+    echo -e "User     : $user"
+    echo -e "Pass     : $pass"
+    echo -e "Created  : $(date)"
+    echo -e "Expired  : $exp Day"
+    echo -e "-------------------------"
+    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    menu_manager
+}
+
+trial_vmess() {
+    clear
+    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
+    exp=1
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+    domain=$(cat /etc/xray/domain)
+    sed -i '/#vmess$/i ### '"$user $exp"'\n},{"id": "'"$uuid"'"\n#vmess' /etc/xray/config.json
+    systemctl restart xray
+    clear
+    echo -e "### VMESS TRIAL ACCOUNT ###"
+    echo -e "Domain   : $domain"
+    echo -e "User     : $user"
+    echo -e "UUID     : $uuid"
+    echo -e "Expired  : $exp Day"
+    echo -e "-------------------------"
+    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    menu_manager
+}
+
+trial_vless() {
+    clear
+    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
+    exp=1
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+    domain=$(cat /etc/xray/domain)
+    sed -i '/#vless$/i ### '"$user $exp"'\n},{"id": "'"$uuid"'"\n#vless' /etc/xray/config.json
+    systemctl restart xray
+    clear
+    echo -e "### VLESS TRIAL ACCOUNT ###"
+    echo -e "Domain   : $domain"
+    echo -e "User     : $user"
+    echo -e "UUID     : $uuid"
+    echo -e "Expired  : $exp Day"
+    echo -e "-------------------------"
+    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    menu_manager
+}
+
+trial_trojan() {
+    clear
+    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
+    exp=1
+    pass=$(</dev/urandom tr -dc a-z0-9 | head -c8)
+    domain=$(cat /etc/xray/domain)
+    sed -i '/#trojan$/i ### '"$user $exp"'\n},{"password": "'"$pass"'"\n#trojan' /etc/xray/config.json
+    systemctl restart xray
+    clear
+    echo -e "### TROJAN TRIAL ACCOUNT ###"
+    echo -e "Domain   : $domain"
+    echo -e "User     : $user"
+    echo -e "Pass     : $pass"
+    echo -e "Expired  : $exp Day"
+    echo -e "-------------------------"
+    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    menu_manager
+}
 
 update_script() {
     clear
