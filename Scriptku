@@ -224,28 +224,28 @@ dashboard_utama() {
     echo -e " \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟\e[0m"
 
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH OVPN \e[1;35m┃\e[0m \e[1;33m[08]\e[0m \e[1;36mSPEEDTEST \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS    \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mBACKUP    \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS    \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mRESTART   \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN   \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;32mCEK ON    \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;31mDEL USER \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;31mFIX REPAIR\e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;32mREBOOT   \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;34mBANNER    \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND   \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mEXIT      \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH OVPN \e[1;35m┃\e[0m \e[1;33m[08]\e[0m \e[1;36mBACKUP DA \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS    \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SC \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS    \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS\e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN   \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;32mEDIT SCRIPT\e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;31mBOT PANEL\e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;31mSHADOW MG \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;32mDEL USER \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;34mSPEEDTEST \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND   \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mEXIT MENU \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
     echo -e " \e[1;35m┃\e[0m    \e[1;45;107m  🚀 ACTIVATE TRIAL BOT PANEL 🚀  \e[0m    \e[1;35m┃\e[0m"
     echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
     echo ""
     read -p "  Pilih Nomor: " opt
     case $opt in
-        1) add_ssh ;;
-        2) add_vmess ;;
-        3) add_vless ;;
-        4) add_trojan ;;
-        5) install_bot_panel ;;
-        6) del_user ;;
-        7) renew_user ;;
-        8) backup_data ;;
-        9) update_script ;;
+        1|01) add_ssh ;;
+        2|02) add_vmess ;;
+        3|03) add_vless ;;
+        4|04) add_trojan ;;
+        5|05) install_bot_panel ;;
+        6|06) del_user ;;
+        7|07) renew_user ;;
+        8|08) backup_data ;;
+        9|09) update_script ;;
         10) reboot ;;
         11) nano $0 ;;
         12) shadow_manager ;;
