@@ -1,4 +1,20 @@
 #!/bin/bash
+
+total_ssh=$(grep -c -E "^### " "/etc/xray/ssh.db" 2>/dev/null || echo "0")
+total_vmess=$(grep -c -E "^### " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+total_vless=$(grep -c -E "^#& " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+total_trojan=$(grep -c -E "^#! " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+
+total_ssh=$(echo $total_ssh | tr -dc '0-9')
+total_vmess=$(echo $total_vmess | tr -dc '0-9')
+total_vless=$(echo $total_vless | tr -dc '0-9')
+total_trojan=$(echo $total_trojan | tr -dc '0-9')
+
+[ -z "$total_ssh" ] && total_ssh="0"
+[ -z "$total_vmess" ] && total_vmess="0"
+[ -z "$total_vless" ] && total_vless="0"
+[ -z "$total_trojan" ] && total_trojan="0"
+
 update_script() {
     clear
     echo -e "\e[1;33mMemeriksa pembaruan script...\e[0m"
@@ -448,15 +464,6 @@ menu_manager() {
     W='\033[1;37m'   # Putih Tebal (Data)
     NC='\033[0m'     # Reset
 
-    total_ssh=$(grep -c -E "^### " "/etc/xray/ssh.db" 2>/dev/null || echo "0")
-    total_vmess=$(grep -c -E "^### " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_vless=$(grep -c -E "^#& " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_trojan=$(grep -c -E "^#! " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_ssh=$(echo $total_ssh | tr -dc '0-9')
-    total_vmess=$(echo $total_vmess | tr -dc '0-9')
-    total_vless=$(echo $total_vless | tr -dc '0-9')
-    total_trojan=$(echo $total_trojan | tr -dc '0-9')
- 
     clear
     echo -e "${P}┌──────────────────────────────────────────────────────────┐${NC}"
     echo -e "${P}│${NC}             ${B}• AJI SYSTEM VPN PANEL MENU •${NC}            ${P}│${NC}"
@@ -469,12 +476,6 @@ menu_manager() {
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
     echo -e "${P}│${NC} ${B}SSH:${W}${st_ssh}${B} │ XRAY:${W}${st_xry}${B} │ NGINX:${W}${st_ngx}${B} │ WS:${W}${st_wse}${B} ${NC}  ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-      
-    [ -z "$total_ssh" ] && total_ssh="0"
-    [ -z "$total_vmess" ] && total_vmess="0"
-    [ -z "$total_vless" ] && total_vless="0"
-    [ -z "$total_trojan" ] && total_trojan="0"
-    clear
     echo "┌──────────────────────────────────────────┐"
     echo "│  SSH/VPN   : $total_ssh"
     echo "│  VMESS/WS  : $total_vmess"
