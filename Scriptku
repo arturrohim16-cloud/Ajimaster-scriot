@@ -76,8 +76,7 @@ add_trojan() {
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
     # Input ke bagian TROJAN
-    sed -i '/"protocol": "trojan"/,/"clients": \[/ s/"clients": \[/"clients": [\n          {"password": "'$pass'", "email": "'$user'"},/' $CONF
-    
+    sed -i 's/8080/2087/g' /usr/local/etc/xray/config.json    
     systemctl restart xray
     trj_link="trojan://$pass@$DOMAIN:10002?path=%2Ftrojan&security=none&type=ws#$user"
     clear
