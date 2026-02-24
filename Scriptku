@@ -409,23 +409,28 @@ menu_manager() {
     esac
 }
 
-    # --- 1. HITUNG TOTAL AKUN ---
-    total_ssh=$(grep -c "###" /etc/xray/ssh.db 2>/dev/null || echo "0")
-    total_vmess=$(grep -c "###" /usr/local/etc/xray/config.json 2>/dev/null || echo "0")
-    total_vless=$(grep -c "#&" /usr/local/etc/xray/config.json 2>/dev/null || echo "0")
-    total_trojan=$(grep -c "#!" /usr/local/etc/xray/config.json 2>/dev/null || echo "0")
+   # --- 1. HITUNG TOTAL AKUN (JALUR YANG BENAR) ---
 
-    # --- 2. CUCI VARIABEL (WAJIB BIAR RAPI) ---
-    total_ssh=$(echo $total_ssh | tr -dc '0-9')
-    total_vmess=$(echo $total_vmess | tr -dc '0-9')
-    total_vless=$(echo $total_vless | tr -dc '0-9')
-    total_trojan=$(echo $total_trojan | tr -dc '0-9')
+# Cara 1: Hitung User SSH dari sistem (User yang bisa login VPN)
+total_ssh=$(grep -c -E ":/bin/false|:/usr/sbin/nologin" /etc/passwd)
 
-    # --- 3. FAILSAFE JIKA KOSONG ---
-    [ -z "$total_ssh" ] && total_ssh="0"
-    [ -z "$total_vmess" ] && total_vmess="0"
-    [ -z "$total_vless" ] && total_vless="0"
-    [ -z "$total_trojan" ] && total_trojan="0"
+# Cara 2: Cari config Xray di jalur standar Ubuntu
+if [ -f "/etc/xray/config.json" ]; then
+    CONF="/etc/xray/config.json"
+else
+    CONF="/usr/local/etc/xray/config.json"
+fi
+
+   # Hitung Vmess, Vless, Trojan berdasarkan tanda pengenal di config
+   total_vmess=$(grep -c "###" $CONF 2>/dev/null || echo "0")
+   total_vless=$(grep -c "#&" $CONF 2>/dev/null || echo "0")
+   total_trojan=$(grep -c "#!" $CONF 2>/dev/null || echo "0")
+
+   # --- 2. CUCI VARIABEL (Wajib biar rapi) ---
+   total_ssh=$(echo $total_ssh | tr -dc '0-9')
+   total_vmess=$(echo $total_vmess | tr -dc '0-9')
+   total_vless=$(echo $total_vless | tr -dc '0-9')
+   total_trojan=$(echo $total_trojan | tr -dc '0-9')
 
   dashboard_utama() {
     # 1. AMBIL DATA SISTEM
