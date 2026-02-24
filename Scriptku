@@ -200,23 +200,24 @@ add_ssh() {
 }
 
 dashboard_utama() {
-    # Ambil Data Sistem
-    MYIP=$(wget -qO- ipinfo.io/ip);
-    DOMAIN=$(cat /etc/xray/domain 2>/dev/null);
-    [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
-    uptime_vps=$(uptime -p | cut -d " " -f 2-5)
-    ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
-    
-            # --- KODE STATUS PRECISION ---
-    # Cek SSH
+    # 1. DETEKSI STATUS (WAJIB DI ATAS)
+    # Deteksi SSH
     if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON\e[0m "; else st_ssh="\e[1;31mOFF\e[0m"; fi
-    # Cek XRAY (Lebih teliti)
-    if systemctl is-active --quiet xray; then st_xry="\e[1;92mON\e[0m "; else st_xry="\e[1;31mOFF\e[0m"; fi
-    # Cek NGINX
+    
+    # Deteksi XRAY (Paling Penting)
+    if systemctl is-active --quiet xray; then 
+        st_xry="\e[1;92mON\e[0m "
+    elif pgrep -x "xray" > /dev/null; then
+        st_xry="\e[1;92mON\e[0m "
+    else 
+        st_xry="\e[1;31mOFF\e[0m"
+    fi
+    
+    # Deteksi NGINX
     if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON\e[0m "; else st_ngx="\e[1;31mOFF\e[0m"; fi
-    # Cek WS Python
-    pgrep -f "ws-python" >/dev/null && st_wse="\e[1;92mON\e[0m " || st_wse="\e[1;31mOFF\e[0m"
-
+    
+    # Deteksi WS PYTHON
+    if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON\e[0m "; else st_wse="\e[1;31mOFF\e[0m"; fi
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
     echo -e "  \e[1;35m     ██╔══██╗     ██║██║██║   ██║\e[0m"
