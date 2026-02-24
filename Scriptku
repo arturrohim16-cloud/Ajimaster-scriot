@@ -399,9 +399,9 @@ menu_manager() {
     echo -e " \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mCreate Trial Vless    \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mCreate Trial Trojan   \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;36mCek User Online       \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;36mCek Online            \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;31mHapus User Expired    \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;31mHapus User Manual     \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;31mHapus  Manual         \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mKembali Ke Menu Utama \e[1;35m┃\e[0m"
     echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
     echo ""
@@ -413,7 +413,7 @@ menu_manager() {
         4|04) trial_trojan ;;
         5|05) cek_online ;;
         6|06) exp_cleaner ;;
-        7|07) del_user ;;
+        7|07) hapus_manual ;;
         0|00) dashboard_utama ;;
         *) menu_manager ;;
     esac
