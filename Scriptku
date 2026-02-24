@@ -207,18 +207,12 @@ dashboard_utama() {
     uptime_vps=$(uptime -p | cut -d " " -f 2-5)
     ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     
-    # Status Services
-    status_service() {
-        # Gunakan ini untuk deteksi yang lebih akurat
-if systemctl is-active --quiet xray; then
-    st_xry="\e[1;92mON\e[0m"
-else
-    st_xry="\e[1;31mOFF\e[0m"
-fi
-
-    }
-    st_ssh=$(status_service ssh); st_xry=$(status_service xray); st_ngx=$(status_service nginx)
-    if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON\e[0m"; else st_wse="\e[1;31mOFF\e[0m"; fi
+        # --- COPY DARI SINI ---
+    st_ssh=$(systemctl is-active ssh | sed 's/active/\\e[1;92mON\\e[0m/;s/inactive/\\e[1;31mOFF\\e[0m/')
+    st_xry=$(systemctl is-active xray | sed 's/active/\\e[1;92mON\\e[0m/;s/inactive/\\e[1;31mOFF\\e[0m/')
+    st_ngx=$(systemctl is-active nginx | sed 's/active/\\e[1;92mON\\e[0m/;s/inactive/\\e[1;31mOFF\\e[0m/')
+    pgrep -f "ws-python" >/dev/null && st_wse="\e[1;92mON\e[0m" || st_wse="\e[1;31mOFF\e[0m"
+    # --- SAMPAI SINI ---
 
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
