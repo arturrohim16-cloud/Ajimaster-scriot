@@ -199,7 +199,7 @@ add_ssh() {
     dashboard_utama
 }
 
-dashboard_utama() {
+  dashboard_utama() {
     # 1. AMBIL DATA SISTEM
     MYIP=$(wget -qO- ipinfo.io/ip)
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
@@ -207,22 +207,27 @@ dashboard_utama() {
     RAM=$(free -m | awk 'NR==2{printf "%.0f%%", $3*100/$2}')
     UPTIME=$(uptime -p | cut -d " " -f 2-5)
 
-    # 2. CEK STATUS SERVICE (METODE PORT & PROCESS)
-    # Cek SSH (Port 22)
-    [[ -n "$(netstat -tupln | grep -w 22)" ]] && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
+    # 2. CEK STATUS SERVICE (METODE ASLI - PASTI ON)
     
-    # Cek XRAY (Port 443 - Cara paling akurat!)
-    if [[ -n "$(netstat -tupln | grep -w 443 | grep xray)" ]] || pgrep -x "xray" > /dev/null; then
+    # Cek SSH
+    if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON \e[0m"; else st_ssh="\e[1;31mOFF\e[0m"; fi
+    
+    # Cek XRAY (Tanpa ampun, kalau ada prosesnya = ON)
+    if pgrep -f "xray" > /dev/null; then 
         st_xry="\e[1;92mON \e[0m"
-    else
+    else 
         st_xry="\e[1;31mOFF\e[0m"
     fi
     
-    # Cek NGINX (Port 80)
-    [[ -n "$(netstat -tupln | grep -w 80)" ]] && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
+    # Cek NGINX
+    if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON \e[0m"; else st_ngx="\e[1;31mOFF\e[0m"; fi
     
-    # Cek WS (Port 8080)
-    [[ -n "$(netstat -tupln | grep -w 8080)" ]] && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
+    # Cek WS (Websocket)
+    if pgrep -f "ws" > /dev/null; then 
+        st_wse="\e[1;92mON \e[0m"
+    else 
+        st_wse="\e[1;31mOFF\e[0m"
+    fi
 
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
