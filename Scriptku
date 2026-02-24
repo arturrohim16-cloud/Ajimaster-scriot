@@ -146,15 +146,21 @@ add_vmess() {
     echo -e "\e[1;34m╔════════════════════════════════════════╗\e[0m"
     echo -e "\e[1;34m║\e[0m \e[1;33m      CREATE VMESS PREMIUM          \e[0m \e[1;34m║\e[0m"
     echo -e "\e[1;34m╚════════════════════════════════════════╝\e[0m"
+    
     read -p " 👤 Username : " user
-    grep -qw "$user" "$CONF" && { echo -e "\e[1;31mUser sudah ada!\e[0m"; sleep 2; return; }
+    if grep -qw "$user" "$CONF"; then
+        echo -e "\e[1;31m User [ $user ] sudah ada!\e[0m"; sleep 2; return
+    fi
     read -p " 📅 Exp (Days) : " masaaktif
     
     uuid=$(uuidgen)
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
-    # Injeksi JQ ke Inbound Index 1 (Vmess)
-    jq '.inbounds |= map(if .protocol == "vmess" then .settings.clients += [{"id": "'$uuid'", "alterId": 0, "email": "'$user'"}] else . end)' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    # --- JURUS PENGUNCI JQ (ANTI SALAH KAMAR) ---
+    # Perintah ini memaksa JQ mencari objek yang punya protocol "vmess" secara spesifik
+    jq --arg id "$uuid" --arg mail "$user" \
+    '(.inbounds[] | select(.protocol == "vmess")).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' \
+    $CONF > $CONF.tmp && mv $CONF.tmp $CONF
 
     systemctl restart xray
 
@@ -167,7 +173,6 @@ add_vmess() {
     echo -e "\e[1;34m║\e[0m \e[1;32m      VMESS ACCOUNT DETAILS         \e[0m \e[1;34m║\e[0m"
     echo -e "\e[1;34m╠════════════════════════════════════════╝\e[0m"
     echo -e "\e[1;34m║\e[0m \e[1;37mUser     : $user\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;37mUUID     : $uuid\e[0m"
     echo -e "\e[1;34m║\e[0m \e[1;37mExpired  : $exp\e[0m"
     echo -e "\e[1;34m╠════════════════════════════════════════╗\e[0m"
     echo -e "\e[1;34m║\e[0m \e[1;33m🔐 URL VMESS TLS (443)\e[0m"
