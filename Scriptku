@@ -207,11 +207,23 @@ dashboard_utama() {
     RAM=$(free -m | awk 'NR==2{printf "%.0f%%", $3*100/$2}')
     UPTIME=$(uptime -p | cut -d " " -f 2-5)
 
-    # 2. CEK STATUS SERVICE (DETEKSI AKURAT)
-    if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON \e[0m"; else st_ssh="\e[1;31mOFF\e[0m"; fi
-    if pgrep -x "xray" > /dev/null; then st_xry="\e[1;92mON \e[0m"; else st_xry="\e[1;31mOFF\e[0m"; fi
-    if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON \e[0m"; else st_ngx="\e[1;31mOFF\e[0m"; fi
-    if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON \e[0m"; else st_wse="\e[1;31mOFF\e[0m"; fi
+    # 2. CEK STATUS SERVICE (DETEKSI ANTI-GAGAL)
+    
+    # Cek SSH
+    systemctl is-active --quiet ssh && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
+    
+    # Cek XRAY (Pakai 3 Metode Sekaligus: Systemctl, Pgrep, dan Port Check)
+    if systemctl is-active --quiet xray || pgrep -f "xray" > /dev/null || lsof -i:443 | grep -q "xray"; then
+        st_xry="\e[1;92mON \e[0m"
+    else
+        st_xry="\e[1;31mOFF\e[0m"
+    fi
+    
+    # Cek NGINX
+    systemctl is-active --quiet nginx && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
+    
+    # Cek WS PYTHON
+    pgrep -f "ws-python" > /dev/null && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
 
     # 3. TAMPILAN DASHBOARD
     clear
