@@ -409,29 +409,35 @@ menu_manager() {
     esac
 }
 
-# --- 1. HITUNG TOTAL AKUN (FIXED VERSION) ---
-# Mengambil jumlah user SSH langsung dari sistem (Hasilnya pasti 50)
-total_ssh=$(grep -c -E ":/bin/false|:/usr/sbin/nologin" /etc/passwd)
+# ==========================================
+#      HITUNG AKUN REAL-TIME (FIXED)
+# ==========================================
 
-# Mencari file config Xray (Cek dua lokasi umum)
-if [ -f "/etc/xray/config.json" ]; then
-    XRAY_CONF="/etc/xray/config.json"
-elif [ -f "/usr/local/etc/xray/config.json" ]; then
-    XRAY_CONF="/usr/local/etc/xray/config.json"
-fi
+# 1. Hitung SSH (Sudah Berhasil)
+total_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
 
-# Hitung akun Xray berdasarkan tanda pengenal (###, #&, #!)
-total_vmess=$(grep -c "###" $XRAY_CONF 2>/dev/null || echo "0")
-total_vless=$(grep -c "#&" $XRAY_CONF 2>/dev/null || echo "0")
-total_trojan=$(grep -c "#!" $XRAY_CONF 2>/dev/null || echo "0")
+# 2. Lokasi Config
+CONF="/usr/local/etc/xray/config.json"
 
-# --- 2. CUCI VARIABEL (Agar Dashboard Tetap Rapi) ---
+# 3. Hitung VMESS
+# Mencari baris yang mengandung "id" dan "alterId" (ciri khas Vmess di config Mas)
+total_vmess=$(grep "id" $CONF | grep "alterId" | grep -v "admin@vmess" | wc -l)
+
+# 4. Hitung VLESS
+# Mencari baris yang mengandung "id" tapi TIDAK ada "alterId" (ciri khas Vless)
+total_vless=$(grep "id" $CONF | grep -v "alterId" | grep -v "admin@vless" | wc -l)
+
+# 5. Hitung TROJAN
+# Mencari baris yang mengandung "password"
+total_trojan=$(grep -c "password" $CONF 2>/dev/null || echo "0")
+
+# 6. Pembersihan Variabel (Wajib agar Dashboard Rapi)
 total_ssh=$(echo $total_ssh | tr -dc '0-9')
 total_vmess=$(echo $total_vmess | tr -dc '0-9')
 total_vless=$(echo $total_vless | tr -dc '0-9')
 total_trojan=$(echo $total_trojan | tr -dc '0-9')
 
-# Jika kosong paksa jadi 0
+# Failsafe jika kosong
 [ -z "$total_ssh" ] && total_ssh="0"
 [ -z "$total_vmess" ] && total_vmess="0"
 [ -z "$total_vless" ] && total_vless="0"
