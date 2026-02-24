@@ -493,7 +493,34 @@ menu_manager() {
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
     echo -e "${P}│${NC} ${B}SSH:${W}${st_ssh}${B} │ XRAY:${W}${st_xry}${B} │ NGINX:${W}${st_ngx}${B} │ WS:${W}${st_wse}${B} ${NC}  ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    # --- BOX MENU ONLY (PURPLE & BLUE BOLD) ---
+   # [1] TARUH DI SINI (Bagian Perhitungan & Pembersihan)
+    total_ssh=$(grep -c -E "^### " "/etc/xray/ssh.db" 2>/dev/null || echo "0")
+    total_vmess=$(grep -c -E "^### " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_vless=$(grep -c -E "^#& " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_trojan=$(grep -c -E "^#! " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+
+    total_ssh=$(echo $total_ssh | tr -dc '0-9')
+    total_vmess=$(echo $total_vmess | tr -dc '0-9')
+    total_vless=$(echo $total_vless | tr -dc '0-9')
+    total_trojan=$(echo $total_trojan | tr -dc '0-9')
+
+    [ -z "$total_ssh" ] && total_ssh="0"
+    [ -z "$total_vmess" ] && total_vmess="0"
+    [ -z "$total_vless" ] && total_vless="0"
+    [ -z "$total_trojan" ] && total_trojan="0"
+
+# [2] BARU KEMUDIAN PERINTAH CLEAR & TAMPILAN
+    clear
+    echo "┌──────────────────────────────────────────┐"
+    echo "│  SSH/VPN   : $total_ssh"
+    echo "│  VMESS/WS  : $total_vmess"
+    echo "│  VLESS/WS  : $total_vless"
+    echo "│  TROJAN/WS : $total_trojan"
+    echo "└──────────────────────────────────────────┘"
+
+# [3] BARU DAFTAR MENU DI BAWAHNYA...
+
+# --- BOX MENU ONLY (PURPLE & BLUE BOLD) ---
     echo -e "${PURPLE}┌──────────────────────────────────────────────────────────┐${NC}"
     printf "${PURPLE}│${NC} ${BLUE} [01] • SSH MENU    ${NC}  ${PURPLE}│${NC} ${BLUE} [08] • BACKUP DA   ${NC}  ${PURPLE}│${NC}\n"
     printf "${PURPLE}│${NC} ${BLUE} [02] • VMESS MENU  ${NC}  ${PURPLE}│${NC} ${BLUE} [09] • UPDATE SC   ${NC}  ${PURPLE}│${NC}\n"
