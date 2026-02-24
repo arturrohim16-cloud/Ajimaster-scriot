@@ -199,7 +199,13 @@ dashboard_utama() {
     
     # Status Services
     status_service() {
-        if systemctl is-active --quiet $1; then echo -e "\e[1;92mON\e[0m"; else echo -e "\e[1;31mOFF\e[0m"; fi
+        # Gunakan ini untuk deteksi yang lebih akurat
+if systemctl is-active --quiet xray; then
+    st_xry="\e[1;92mON\e[0m"
+else
+    st_xry="\e[1;31mOFF\e[0m"
+fi
+
     }
     st_ssh=$(status_service ssh); st_xry=$(status_service xray); st_ngx=$(status_service nginx)
     if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON\e[0m"; else st_wse="\e[1;31mOFF\e[0m"; fi
