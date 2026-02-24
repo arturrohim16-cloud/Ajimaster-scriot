@@ -207,12 +207,15 @@ dashboard_utama() {
     uptime_vps=$(uptime -p | cut -d " " -f 2-5)
     ram_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     
-        # --- COPY DARI SINI ---
-    st_ssh=$(systemctl is-active ssh | sed 's/active/\\e[1;92mON\\e[0m/;s/inactive/\\e[1;31mOFF\\e[0m/')
-    st_xry=$(systemctl is-active xray | sed 's/active/\\e[1;92mON\\e[0m/;s/inactive/\\e[1;31mOFF\\e[0m/')
-    st_ngx=$(systemctl is-active nginx | sed 's/active/\\e[1;92mON\\e[0m/;s/inactive/\\e[1;31mOFF\\e[0m/')
-    pgrep -f "ws-python" >/dev/null && st_wse="\e[1;92mON\e[0m" || st_wse="\e[1;31mOFF\e[0m"
-    # --- SAMPAI SINI ---
+            # --- KODE STATUS PRECISION ---
+    # Cek SSH
+    if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON\e[0m "; else st_ssh="\e[1;31mOFF\e[0m"; fi
+    # Cek XRAY (Lebih teliti)
+    if systemctl is-active --quiet xray; then st_xry="\e[1;92mON\e[0m "; else st_xry="\e[1;31mOFF\e[0m"; fi
+    # Cek NGINX
+    if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON\e[0m "; else st_ngx="\e[1;31mOFF\e[0m"; fi
+    # Cek WS Python
+    pgrep -f "ws-python" >/dev/null && st_wse="\e[1;92mON\e[0m " || st_wse="\e[1;31mOFF\e[0m"
 
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
