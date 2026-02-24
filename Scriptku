@@ -336,31 +336,28 @@ exp_cleaner() {
 
 fix_servis() {
     clear
-    echo -e "\e[1;33mMemperbaiki Konfigurasi SSL & Xray...\e[0m"
+    echo -e "\e[1;33m===============================================\e[0m"
+    echo -e "\e[1;32m       MEMBERSIHKAN & MENYALAKAN XRAY...       \e[0m"
+    echo -e "\e[1;33m===============================================\e[0m"
     
-    # 1. Bersihkan semua proses Xray yang nyangkut agar tidak tabrakan
-    systemctl stop xray >/dev/null 2>&1
+    # Matikan semua proses lama agar tidak tabrakan port
     pkill -f xray
+    pkill -f ws-python
+    pkill -f nginx
     sleep 1
 
-    # 2. Pastikan file Sertifikat siap (Gunakan nama yang paling umum dicari script)
-    cp /etc/xray/xray.crt /etc/xray/v2ray.crt >/dev/null 2>&1
-    cp /etc/xray/xray.key /etc/xray/v2ray.key >/dev/null 2>&1
-    chmod 644 /etc/xray/*.crt /etc/xray/*.key
-
-    # 3. JALANKAN XRAY (Pakai satu jalur manual saja agar stabil)
-    # Kita arahkan ke path config yang benar
+    # 1. Pastikan Xray jalan (Sesuai kode Mas)
     /usr/local/bin/xray -config /usr/local/etc/xray/config.json >/dev/null 2>&1 &
-    
-    # 4. Restart Nginx & WS Python
-    systemctl restart nginx >/dev/null 2>&1
-    pkill -f ws-python
+
+    # 2. Restart Nginx
+    systemctl restart nginx
+
+    # 3. Jalankan WS
     screen -dmS ws python3 /usr/local/bin/ws-python 8080
     
-    echo "---------------------------------------"
-    echo -e "\e[1;92m PERBAIKAN SELESAI! STATUS: ON \e[0m"
-    echo " Silahkan cek Dashboard Utama."
-    echo "---------------------------------------"
+    echo -e "-----------------------------------------------"
+    echo -e "   \e[1;92mSERVICE BERHASIL DINYALAKAN (FORCE ON)!\e[0m"
+    echo -e "-----------------------------------------------"
     sleep 2
     dashboard_utama
 }
