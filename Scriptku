@@ -347,29 +347,24 @@ hapus_manual() {
     # --- 2. DAFTAR VMESS ---
     echo -e "  ${CYAN}[ VMESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mengambil teks hanya di antara "email": " dan "
-    grep -oP '(?<="email": ")[^"]*' $CONF | grep -v "admin" | grep -v "vless" | grep -v "trojan" | nl -s '. '
+    # Mengambil email dari baris yang ada kata 'alterId' (ciri Vmess)
+    grep "alterId" $CONF | grep -oP '(?<="email": ")[^"]*' | grep -v "admin" | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
     # --- 3. DAFTAR VLESS ---
     echo -e "  ${CYAN}[ VLESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mencari email di inbound yang protokolnya benar-benar 'vless'
-    jq -r '.inbounds[] | select(.protocol=="vless") | .settings.clients[].email' $CONF 2>/dev/null | grep -v "admin" | sort | uniq | nl -s '. '
-    
-    # Jika jq gagal, kita pakai cara grep manual sebagai cadangan
-    if [[ $(jq -r '.inbounds[] | select(.protocol=="vless") | .settings.clients[].email' $CONF 2>/dev/null | wc -l) -eq 0 ]]; then
-        grep -E "\"email\":" $CONF | grep -i "vless" | cut -d '"' -f 4 | nl -s '. '
-    fi
+    # Mengambil email dari baris yang ada ID tapi TIDAK ada alterId (ciri Vless Mas)
+    grep "\"id\":" $CONF | grep -v "alterId" | grep -oP '(?<="email": ")[^"]*' | grep -v "admin" | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
     # --- 4. DAFTAR TROJAN ---
     echo -e "  ${CYAN}[ TROJAN Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mengambil email yang mengandung kata trojan
-    grep -oP '(?<="email": ")[^"]*' $CONF | grep "trojan" | nl -s '. '
+    # Mengambil email dari baris yang ada kata 'password' (ciri Trojan)
+    grep "password" $CONF | grep -oP '(?<="email": ")[^"]*' | grep -v "admin" | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}=======================================${NC}"
     echo ""
