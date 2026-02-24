@@ -207,25 +207,23 @@ dashboard_utama() {
     RAM=$(free -m | awk 'NR==2{printf "%.0f%%", $3*100/$2}')
     UPTIME=$(uptime -p | cut -d " " -f 2-5)
 
-    # 2. CEK STATUS SERVICE (DETEKSI ANTI-GAGAL)
+    # 2. CEK STATUS SERVICE (METODE PORT & PROCESS)
+    # Cek SSH (Port 22)
+    [[ -n "$(netstat -tupln | grep -w 22)" ]] && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
     
-    # Cek SSH
-    systemctl is-active --quiet ssh && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
-    
-    # Cek XRAY (Pakai 3 Metode Sekaligus: Systemctl, Pgrep, dan Port Check)
-    if systemctl is-active --quiet xray || pgrep -f "xray" > /dev/null || lsof -i:443 | grep -q "xray"; then
+    # Cek XRAY (Port 443 - Cara paling akurat!)
+    if [[ -n "$(netstat -tupln | grep -w 443 | grep xray)" ]] || pgrep -x "xray" > /dev/null; then
         st_xry="\e[1;92mON \e[0m"
     else
         st_xry="\e[1;31mOFF\e[0m"
     fi
     
-    # Cek NGINX
-    systemctl is-active --quiet nginx && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
+    # Cek NGINX (Port 80)
+    [[ -n "$(netstat -tupln | grep -w 80)" ]] && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
     
-    # Cek WS PYTHON
-    pgrep -f "ws-python" > /dev/null && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
+    # Cek WS (Port 8080)
+    [[ -n "$(netstat -tupln | grep -w 8080)" ]] && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
 
-    # 3. TAMPILAN DASHBOARD
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
     echo -e "  \e[1;35m     ██╔══██╗     ██║██║██║   ██║\e[0m"
@@ -235,9 +233,9 @@ dashboard_utama() {
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[41;1;37m       🔥 AJI SYSTEM V16 FINAL 🔥      \e[0m \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
-    printf " \e[1;35m┃\e[0m \e[1;33m IP    :\e[0m %-29s \e[1;35m┃\e[0m\n" "$MYIP"
-    printf " \e[1;35m┃\e[0m \e[1;36m DOM   :\e[0m %-29s \e[1;35m┃\e[0m\n" "$DOMAIN"
-    printf " \e[1;35m┃\e[0m \e[1;32m RAM   :\e[0m %-4s \e[1;34mUPTIME: %-15s \e[1;35m┃\e[0m\n" "$RAM" "$UPTIME"
+    printf " \e[1;35m┃\e[0m \e[1;33m IP             :\e[0m %-29s \e[1;35m┃\e[0m\n" "$MYIP"
+    printf " \e[1;35m┃\e[0m \e[1;36m DOM            :\e[0m %-29s \e[1;35m┃\e[0m\n" "$DOMAIN"
+    printf " \e[1;35m┃\e[0m \e[1;32m RAM :\e[0m %-4s \e[1;34mUPTIME: %-15s \e[1;35m┃\e[0m\n" "$RAM" "$UPTIME"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
     echo -e " \e[1;35m┃\e[0m  SSH: $st_ssh │ XRY: $st_xry │ NGX: $st_ngx │ WS: $st_wse \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
