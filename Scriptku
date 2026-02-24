@@ -336,40 +336,27 @@ exp_cleaner() {
 
 fix_servis() {
     clear
-    echo -e "\e[1;33m===============================================\e[0m"
-    echo -e "\e[1;32m      MEMPERBAIKI & MENGUNCI SERVICE (FIX)     \e[0m"
-    echo -e "\e[1;33m===============================================\e[0m"
-    echo -e "  [>] Cleaning old processes..."
-    # Matikan sisa proses yang nyangkut
+    echo "Memperbaiki Konfigurasi SSL & Xray..."
+    
+    # 1. Samakan nama file agar terbaca Config
+    cp /etc/xray/xray.crt /etc/xray/v2ray.crt >/dev/null 2>&1
+    cp /etc/xray/xray.key /etc/xray/v2ray.key >/dev/null 2>&1
+    chmod 644 /etc/xray/*.crt /etc/xray/*.key
+    
+    # 2. Restart Xray Core secara bersih
     pkill -f xray
-    pkill -f ws-python
-    systemctl stop xray >/dev/null 2>&1
-    systemctl stop nginx >/dev/null 2>&1
-
-    echo -e "  [>] Starting Xray Core..."
-    # Menjalankan Xray langsung dari binary agar lebih stabil
+    systemctl restart xray
     /usr/local/bin/xray -config /usr/local/etc/xray/config.json >/dev/null 2>&1 &
     
-    echo -e "  [>] Starting Nginx Service..."
-    systemctl enable nginx >/dev/null 2>&1
+    # 3. Restart Nginx & WS
     systemctl restart nginx
-    
-    echo -e "  [>] Starting Python WS..."
-    # Menggunakan screen agar proses python tidak mati saat terminal ditutup
     screen -dmS ws python3 /usr/local/bin/ws-python 8080
     
-    echo -e "  [>] Verifying Status..."
-    sleep 2
-    
-    # Cek apakah sudah benar-benar jalan
-    if pgrep -f "xray" > /dev/null; then
-        echo -e "  [\e[1;92m SUCCESS \e[0m] Xray is now Running!"
-    else
-        echo -e "  [\e[1;31m FAILED \e[0m] Xray failed to start, check config!"
-    fi
-
-    echo -e "\e[1;33m===============================================\e[0m"
-    echo -e "  Service Berhasil Diperbaiki & Dikunci!"
+    echo "---------------------------------------"
+    echo " Perbaikan Selesai! Silahkan Coba Konek."
+    echo " Tips: Pastikan SNI di App adalah:"
+    echo " aji.izz-store.my.id"
+    echo "---------------------------------------"
     sleep 2
     dashboard_utama
 }
