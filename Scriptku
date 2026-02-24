@@ -99,7 +99,9 @@ add_vless() {
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
     # Input ke bagian VLESS
-    sed -i '/"protocol": "vless"/,/"clients": \[/ s/"clients": \[/"clients": [\n          {"id": "'$uuid'", "email": "'$user'"},/' $CONF
+    vless_tls="vless://$uuid@$DOMAIN:443?path=%2Fvless&security=tls&encryption=none&type=ws&host=$DOMAIN#$user"
+    vless_http="vless://$uuid@$DOMAIN:80?path=%2Fvless&security=none&encryption=none&type=ws&host=$DOMAIN#$user"
+
     
     systemctl restart xray
     vless_link="vless://$uuid@$DOMAIN:443?path=%2Fvless&security=tls&encryption=none&type=ws#$user"
@@ -112,25 +114,53 @@ add_vmess() {
     clear
     CONF="/usr/local/etc/xray/config.json"
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null); [[ -z $DOMAIN ]] && DOMAIN="aji.izz-store.my.id"
-    echo -e "\e[1;33m--- CREATE VMESS PREMIUM ---\e[0m"
+    
+    echo -e "\e[1;34m┌──────────────────────────────────────────┐\e[0m"
+    echo -e "\e[1;34m│\e[0m \e[1;33m      CREATE VMESS PREMIUM          \e[0m \e[1;34m│\e[0m"
+    echo -e "\e[1;34m└──────────────────────────────────────────┘\e[0m"
+    
     read -p " 👤 Username : " user
     if grep -qw "$user" "$CONF"; then
         echo -e "\e[1;31m User [ $user ] sudah ada!\e[0m"; sleep 2; return
     fi
     read -p " 📅 Exp (Days) : " masaaktif
+    
     uuid=$(uuidgen)
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
-    # Input ke bagian VMESS
+    # --- INPUT KE CONFIG XRAY ---
     sed -i '/"protocol": "vmess"/,/"clients": \[/ s/"clients": \[/"clients": [\n          {"id": "'$uuid'", "alterId": 0, "email": "'$user'"},/' $CONF
     
     systemctl restart xray
-    # Link Vmess harus di-encode base64 (Ini contoh format dasarnya)
-    vmess_json='{"v":"2","ps":"'$user'","add":"'$DOMAIN'","port":"80","id":"'$uuid'","aid":"0","net":"ws","path":"/vmess","type":"none","tls":"none"}'
-    vmess_link="vmess://$(echo -n $vmess_json | base64 -w 0)"
+
+    # --- PEMBUATAN LINK BASE64 ---
+    # VMESS TLS (Port 443)
+    vmess_tls_json='{"v":"2","ps":"'$user'","add":"'$DOMAIN'","port":"443","id":"'$uuid'","aid":"0","net":"ws","path":"/vmess","type":"none","host":"'$DOMAIN'","tls":"tls"}'
+    # VMESS HTTP (Port 80)
+    vmess_http_json='{"v":"2","ps":"'$user'","add":"'$DOMAIN'","port":"80","id":"'$uuid'","aid":"0","net":"ws","path":"/vmess","type":"none","host":"'$DOMAIN'","tls":"none"}'
+    # VMESS GRPC (Port 443)
+    vmess_grpc_json='{"v":"2","ps":"'$user'","add":"'$DOMAIN'","port":"443","id":"'$uuid'","aid":"0","net":"grpc","path":"vmess-grpc","type":"none","host":"'$DOMAIN'","tls":"tls"}'
+
+    vm_tls="vmess://$(echo -n $vmess_tls_json | base64 -w 0)"
+    vm_http="vmess://$(echo -n $vmess_http_json | base64 -w 0)"
+    vm_grpc="vmess://$(echo -n $vmess_grpc_json | base64 -w 0)"
+
     clear
-    echo -e "--- VMESS WS ---\nUser: $user\nExp: $exp\nLink:\n$vmess_link"
-    read -p " Enter to menu..." dashboard_utama
+    echo -e "\e[1;32m ╔════════════════════════════════════════╗\e[0m"
+    echo -e "   👤 User      : $user"
+    echo -e "   📅 Expired   : $exp"
+    echo -e "   🔒 UUID      : $uuid"
+    echo -e "\e[1;32m ╠════════════════════════════════════════╣\e[0m"
+    echo -e "   🔐 URL VMESS TLS"
+    echo -e "   $vm_tls"
+    echo -e ""
+    echo -e "   🔓 URL VMESS HTTP"
+    echo -e "   $vm_http"
+    echo -e ""
+    echo -e "   🔒 URL VMESS GRPC"
+    echo -e "   $vm_grpc"
+    echo -e "\e[1;32m ╚════════════════════════════════════════╝\e[0m"
+    read -p " Tekan Enter untuk kembali..." dashboard_utama
 }
 
 add_ssh() {
