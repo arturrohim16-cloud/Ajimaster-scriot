@@ -436,7 +436,7 @@ menu_manager() {
     echo -e "  \e[1;35m     ███████║     ██║██║██║   ██║\e[0m"
     echo -e "  \e[1;35m     ██║  ██║██   ██║██║╚████╔╝ \e[0m"
     echo -e "  \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝  \e[0m"
-    # --- WARNA DASAR (FIXED) ---
+    # --- WARNA & SETTING ---
     PURPLE='\033[1;95m'
     BG_RED='\033[41;1;37m'
     BG_WHITE='\033[47;1;30m'
@@ -453,29 +453,40 @@ menu_manager() {
     total_vless=$(grep -c -E "^#& " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
     total_trojan=$(grep -c -E "^#! " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
 
-    # --- BERSIHKAN LAYAR & MULAI ---
-    clear
-    echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${PURPLE}┃${NC}      ${BG_RED}     🔥 AJI SYSTEM VPN 🔥     ${NC}      ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
-    printf "${PURPLE}┃${NC} ${YELLOW}IP     :${NC} %-33s ${PURPLE}┃${NC}\n" "${WHITE}$MYIP${NC}"
-    printf "${PURPLE}┃${NC} ${CYAN}DOM    :${NC} %-33s ${PURPLE}┃${NC}\n" "${WHITE}$DOMAIN${NC}"
-    printf "${PURPLE}┃${NC} ${GREEN}RAM :${NC} %-5s ${CYAN}UPTIME : %-15s ${PURPLE}┃${NC}\n" "${WHITE}$RAM${NC}" "${WHITE}$UPTIME${NC}"
-    echo -e "${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
-    echo -e "${PURPLE}┃${NC} ${PURPLE}SSH:${NC}${WHITE}$total_ssh${NC} ${PURPLE}│ VMS:${NC}${WHITE}$total_vmess${NC} ${PURPLE}│ VLS:${NC}${WHITE}$total_vless${NC} ${PURPLE}│ TRJ:${NC}${WHITE}$total_trojan${NC} ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
-    echo -e "${PURPLE}┃${NC} ${WHITE}SSH:$st_ssh │ XRY:$st_xry │ NGX:$st_ngx │ WS:$st_wse${NC}  ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[01]${NC} ${GREEN}SSH OVPN ${NC}  ${PURPLE}┃${NC} ${YELLOW}[08]${NC} ${CYAN}BACKUP DA ${NC}  ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[02]${NC} ${GREEN}VMESS    ${NC}  ${PURPLE}┃${NC} ${YELLOW}[09]${NC} ${CYAN}UPDATE SC ${NC}  ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[03]${NC} ${GREEN}VLESS    ${NC}  ${PURPLE}┃${NC} ${YELLOW}[10]${NC} ${CYAN}REBOOT VPS${NC}  ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[04]${NC} ${GREEN}TROJAN   ${NC}  ${PURPLE}┃${NC} ${YELLOW}[11]${NC} ${GREEN}EDIT SCRIPT${NC} ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[05]${NC} ${RED}DEL USER ${NC}  ${PURPLE}┃${NC} ${YELLOW}[12]${NC} ${RED}FIX SERVICE${NC} ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[06]${NC} ${GREEN}REBOOT   ${NC}  ${PURPLE}┃${NC} ${YELLOW}[13]${NC} ${CYAN}BANNER     ${NC} ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┃${NC} ${YELLOW}[07]${NC} ${GREEN}EXTEND   ${NC}  ${PURPLE}┃${NC} ${YELLOW}[00]${NC} ${RED}EXIT       ${NC} ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
-    echo -e "${PURPLE}┃${NC}    ${BG_WHITE}   🚀 ACTIVATE TRIAL BOT PANEL 🚀   ${NC}    ${PURPLE}┃${NC}"
-    echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+   clear
+    echo -e "${PURPLE} ╔══════════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE} ║${NC}     ${BG_RED}       🔥 AJI SYSTEM VPN FINAL 🔥       ${NC}     ${PURPLE}║${NC}"
+    echo -e "${PURPLE} ╚══════════════════════════════════════════════════╝${NC}"
+    echo -e "${PURPLE} ┌──────────────────────────────────────────────────┐${NC}"
+    printf "${PURPLE} │${NC}  ${YELLOW}System OS${NC}       ${WHITE}= Debian GNU/Linux 10${NC}         ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}  ${YELLOW}Server RAM${NC}      ${WHITE}= $RAM${NC}                         ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}  ${YELLOW}Uptime Server${NC}   ${WHITE}= $UPTIME${NC}              ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}  ${YELLOW}IP VPS${NC}          ${WHITE}= $MYIP${NC}                ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}  ${YELLOW}Domain${NC}          ${WHITE}= $DOMAIN${NC}      ${PURPLE}│${NC}\n"
+    echo -e "${PURPLE} └──────────────────────────────────────────────────┘${NC}"
+    echo -e "${PURPLE}             >>> ${CYAN}INFORMATION ACCOUNT${NC} <<<${NC}"
+    echo -e "${PURPLE} ┌──────────────────────────────────────────────────┐${NC}"
+    printf "${PURPLE} │${NC}     ${PURPLE}SSH/OPENVPN${NC}     ${WHITE}= $total_ssh${NC}   ${CYAN}ACCOUNT PREMIUM${NC}    ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}     ${PURPLE}VMESS/WS/GRPC${NC}   ${WHITE}= $total_vmess${NC}   ${CYAN}ACCOUNT PREMIUM${NC}    ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}     ${PURPLE}VLESS/WS/GRPC${NC}   ${WHITE}= $total_vless${NC}   ${CYAN}ACCOUNT PREMIUM${NC}    ${PURPLE}│${NC}\n"
+    printf "${PURPLE} │${NC}     ${PURPLE}TROJAN/WS/GRPC${NC}  ${WHITE}= $total_trojan${NC}   ${CYAN}ACCOUNT PREMIUM${NC}    ${PURPLE}│${NC}\n"
+    echo -e "${PURPLE} └──────────────────────────────────────────────────┘${NC}"
+    echo -e "${PURPLE}                >>> ${CYAN}STATUS SERVER${NC} <<<${NC}"
+    echo -e "${PURPLE} ┌──────────────┬──────────────┬──────────────┐${NC}"
+    echo -e "${PURPLE} │${NC}  SSH : ${GREEN}$st_ssh${NC}  ${PURPLE}│${NC} NGINX : ${GREEN}$st_ngx${NC} ${PURPLE}│${NC} XRAY : ${GREEN}$st_xry${NC}  ${PURPLE}│${NC}"
+    echo -e "${PURPLE} └──────────────┴──────────────┴──────────────┘${NC}"
+    echo -e "${PURPLE} ┌────────────────────────────────────────────┐${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[01]${NC} ${GREEN}SSH MENU    ${NC} ${PURPLE}│${NC} ${YELLOW}[08]${NC} ${CYAN}BACKUP DA ${NC} ${PURPLE}│${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[02]${NC} ${GREEN}VMESS MENU  ${NC} ${PURPLE}│${NC} ${YELLOW}[09]${NC} ${CYAN}UPDATE SC ${NC} ${PURPLE}│${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[03]${NC} ${GREEN}VLESS MENU  ${NC} ${PURPLE}│${NC} ${YELLOW}[10]${NC} ${CYAN}REBOOT VPS${NC} ${PURPLE}│${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[04]${NC} ${GREEN}TROJAN MENU ${NC} ${PURPLE}│${NC} ${YELLOW}[11]${NC} ${GREEN}EDIT SCRIPT${NC}${PURPLE}│${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[05]${NC} ${RED}DEL USER    ${NC} ${PURPLE}│${NC} ${YELLOW}[12]${NC} ${RED}FIX SERVICE${NC}${PURPLE}│${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[06]${NC} ${GREEN}REBOOT      ${NC} ${PURPLE}│${NC} ${YELLOW}[13]${NC} ${CYAN}BANNER     ${NC}${PURPLE}│${NC}"
+    echo -e "${PURPLE} │${NC} ${YELLOW}[07]${NC} ${GREEN}EXTEND      ${NC} ${PURPLE}│${NC} ${YELLOW}[00]${NC} ${RED}EXIT       ${NC}${PURPLE}│${NC}"
+    echo -e "${PURPLE} └────────────────────────────────────────────┘${NC}"
+    echo -e "${PURPLE} ┌────────────────────────────────────────────┐${NC}"
+    echo -e "${PURPLE} │${NC}   ${BG_WHITE}    🚀 ACTIVATE TRIAL BOT PANEL 🚀    ${NC}   ${PURPLE}│${NC}"
+    echo -e "${PURPLE} └────────────────────────────────────────────┘${NC}"
     echo ""
     read -p "  Pilih Nomor: " opt
     case $opt in
