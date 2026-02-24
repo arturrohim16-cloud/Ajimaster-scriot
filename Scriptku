@@ -78,7 +78,7 @@ add_trojan() {
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
     # Injeksi JQ ke Inbound Index 2 (Trojan)
-    jq ".inbounds[2].settings.clients += [{\"password\": \"$pass\", \"email\": \"$user\"}]" $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    jq '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": "'$pass'", "email": "'$user'"}]' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
     systemctl restart xray
 
     tr_link="trojan://$pass@$DOMAIN:2087?path=%2Ftrojan&security=none&type=ws#$user"
@@ -113,7 +113,7 @@ add_vless() {
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
     # Injeksi JQ ke Inbound Index 0 (Vless)
-    jq ".inbounds[0].settings.clients += [{\"id\": \"$uuid\", \"email\": \"$user\"}]" $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    jq '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": "'$uuid'", "email": "'$user'"}]' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
     systemctl restart xray
 
     vless_tls="vless://$uuid@$DOMAIN:443?path=%2Fvless&security=tls&encryption=none&type=ws&host=$DOMAIN#$user"
@@ -153,7 +153,7 @@ add_vmess() {
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
     # Injeksi JQ ke Inbound Index 1 (Vmess)
-    jq ".inbounds[1].settings.clients += [{\"id\": \"$uuid\", \"alterId\": 0, \"email\": \"$user\"}]" $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    jq '(.inbounds[] | select(.protocol == "vmess")).settings.clients += [{"id": "'$uuid'", "alterId": 0, "email": "'$user'"}]' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
     systemctl restart xray
 
     # Link Generator
