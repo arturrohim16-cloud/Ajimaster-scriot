@@ -200,51 +200,42 @@ add_ssh() {
 }
 
 dashboard_utama() {
-    # 1. DETEKSI STATUS (WAJIB DI ATAS)
-    # Deteksi SSH
-    if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON\e[0m "; else st_ssh="\e[1;31mOFF\e[0m"; fi
-    
-    # Deteksi XRAY (Paling Penting)
-    if systemctl is-active --quiet xray; then 
-        st_xry="\e[1;92mON\e[0m "
-    elif pgrep -x "xray" > /dev/null; then
-        st_xry="\e[1;92mON\e[0m "
-    else 
-        st_xry="\e[1;31mOFF\e[0m"
-    fi
-    
-    # Deteksi NGINX
-    if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON\e[0m "; else st_ngx="\e[1;31mOFF\e[0m"; fi
-    
-    # Deteksi WS PYTHON
-    if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON\e[0m "; else st_wse="\e[1;31mOFF\e[0m"; fi
+    # 1. AMBIL DATA SISTEM
+    MYIP=$(wget -qO- ipinfo.io/ip)
+    DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
+    [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
+    RAM=$(free -m | awk 'NR==2{printf "%.0f%%", $3*100/$2}')
+    UPTIME=$(uptime -p | cut -d " " -f 2-5)
+
+    # 2. CEK STATUS SERVICE (DETEKSI AKURAT)
+    if systemctl is-active --quiet ssh; then st_ssh="\e[1;92mON \e[0m"; else st_ssh="\e[1;31mOFF\e[0m"; fi
+    if pgrep -x "xray" > /dev/null; then st_xry="\e[1;92mON \e[0m"; else st_xry="\e[1;31mOFF\e[0m"; fi
+    if systemctl is-active --quiet nginx; then st_ngx="\e[1;92mON \e[0m"; else st_ngx="\e[1;31mOFF\e[0m"; fi
+    if pgrep -f "ws-python" > /dev/null; then st_wse="\e[1;92mON \e[0m"; else st_wse="\e[1;31mOFF\e[0m"; fi
+
+    # 3. TAMPILAN DASHBOARD
     clear
     echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
     echo -e "  \e[1;35m     ██╔══██╗     ██║██║██║   ██║\e[0m"
     echo -e "  \e[1;35m     ███████║     ██║██║██║   ██║\e[0m"
     echo -e "  \e[1;35m     ██║  ██║██   ██║██║╚████╔╝ \e[0m"
     echo -e "  \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝  \e[0m"
-
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[41;1;37m       🔥 AJI SYSTEM V16 FINAL 🔥      \e[0m \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
-    printf " \e[1;35m┃\e[0m \e[1;33mIP    :\e[0m %-29s \e[1;35m┃\e[0m\n" "$MYIP"
-    printf " \e[1;35m┃\e[0m \e[1;36mDOM   :\e[0m %-29s \e[1;35m┃\e[0m\n" "$DOMAIN"
-    printf " \e[1;35m┃\e[0m \e[1;32mRAM   :\e[0m %-3s%%  \e[1;34mUPTIME: %-16s \e[1;35m┃\e[0m\n" "$ram_usage" "$uptime_vps"
-    echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
-
-    echo -e " \e[1;35m▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜\e[0m"
-    echo -e " \e[1;35m▌\e[0m \e[1;92mSSH: $st_ssh\e[0m │ \e[1;92mXRY: $st_xry\e[0m │ \e[1;92mNGX: $st_ngx\e[0m │ \e[1;92mWS: $st_wse\e[0m \e[1;35m▐\e[0m"
-    echo -e " \e[1;35m▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟\e[0m"
-
-    echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
+    printf " \e[1;35m┃\e[0m \e[1;33m IP    :\e[0m %-29s \e[1;35m┃\e[0m\n" "$MYIP"
+    printf " \e[1;35m┃\e[0m \e[1;36m DOM   :\e[0m %-29s \e[1;35m┃\e[0m\n" "$DOMAIN"
+    printf " \e[1;35m┃\e[0m \e[1;32m RAM   :\e[0m %-4s \e[1;34mUPTIME: %-15s \e[1;35m┃\e[0m\n" "$RAM" "$UPTIME"
+    echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
+    echo -e " \e[1;35m┃\e[0m  SSH: $st_ssh │ XRY: $st_xry │ NGX: $st_ngx │ WS: $st_wse \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[01]\e[0m \e[1;32mSSH OVPN \e[1;35m┃\e[0m \e[1;33m[08]\e[0m \e[1;36mBACKUP DA \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS    \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SC \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS    \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS\e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN   \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;32mEDIT SCRIPT\e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;31mBOT PANEL\e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;31mSHADOW MG \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;32mDEL USER \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;34mSPEEDTEST \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND   \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mEXIT MENU \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;31mDEL USER \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;31mFIX REPAIR\e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;32mREBOOT   \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;34mBANNER    \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND   \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mEXIT      \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
     echo -e " \e[1;35m┃\e[0m    \e[1;45;107m  🚀 ACTIVATE TRIAL BOT PANEL 🚀  \e[0m    \e[1;35m┃\e[0m"
     echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
@@ -255,30 +246,16 @@ dashboard_utama() {
         2|02) add_vmess ;;
         3|03) add_vless ;;
         4|04) add_trojan ;;
-        5|05) install_bot_panel ;;
-        6|06) del_user ;;
+        5|05) del_user ;;
+        6|06) reboot ;;
         7|07) renew_user ;;
-        8|08) backup_data ;;
-        9|09) update_script ;;
-        10) reboot ;;
-        11) nano $0 ;;
-        12) shadow_manager ;;
-        13) run_speedtest ;;
-        14) create_ssl ;;
-        15) install_udp ;;
-        16) restart_services ;;
-        17) cek_user ;;
-        18) list_harga_kuota ;;
-        19) repair_system ;;
-        21) backup_telegram ;;
-        22) drop_banner ;;
-        23) install_hy2 ;;
-        24) install_grpc ;;
-        25) auto_optimize ;;
-        26) install_udprequest ;;
-        27) bug_scanner ;;
-        99) menu_limit ;;
-        00) exit ;;
+        8|08) run_speedtest ;;
+        9|09) backup_data ;;
+        10) restart_services ;;
+        11) cek_online ;;
+        12) fix_repair ;;
+        13) edit_banner ;;
+        0|00) exit ;;
         *) dashboard_utama ;;
     esac
 }
