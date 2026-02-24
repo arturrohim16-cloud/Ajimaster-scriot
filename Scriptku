@@ -467,6 +467,16 @@ menu_manager() {
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
     echo -e "${P}│${NC}  ${B}SSH:${W}$total_ssh${B} │ VMESS:${W}$total_vmess${B} │ VLESS:${W}$total_vless${B} │ TRJ:${W}$total_trojan${B}${NC}  ${P}│${NC}"
     echo -e "${P}└──────────────────────────────────────────────────────────┘${NC}"
+    # --- BOX MENU ONLY (PURPLE & BLUE BOLD) ---
+    echo -e "${PURPLE}┌──────────────────────────────────────────────────────────┐${NC}"
+    printf "${PURPLE}│${NC} ${BLUE} [01] • SSH MENU    ${NC}  ${PURPLE}│${NC} ${BLUE} [08] • BACKUP DA   ${NC}  ${PURPLE}│${NC}\n"
+    printf "${PURPLE}│${NC} ${BLUE} [02] • VMESS MENU  ${NC}  ${PURPLE}│${NC} ${BLUE} [09] • UPDATE SC   ${NC}  ${PURPLE}│${NC}\n"
+    printf "${PURPLE}│${NC} ${BLUE} [03] • VLESS MENU  ${NC}  ${PURPLE}│${NC} ${BLUE} [10] • REBOOT VPS  ${NC}  ${PURPLE}│${NC}\n"
+    printf "${PURPLE}│${NC} ${BLUE} [04] • TROJAN MENU ${NC}  ${PURPLE}│${NC} ${BLUE} [11] • EDIT SCRIPT ${NC}  ${PURPLE}│${NC}\n"
+    printf "${PURPLE}│${NC} ${BLUE} [05] • DEL USER    ${NC}  ${PURPLE}│${NC} ${BLUE} [12] • FIX SERVICE ${NC}  ${PURPLE}│${NC}\n"
+    printf "${PURPLE}│${NC} ${BLUE} [06] • REBOOT      ${NC}  ${PURPLE}│${NC} ${BLUE} [13] • BANNER      ${NC}  ${PURPLE}│${NC}\n"
+    printf "${PURPLE}│${NC} ${BLUE} [07] • EXTEND      ${NC}  ${PURPLE}│${NC} ${BLUE} [00] • EXIT MENU   ${NC}  ${PURPLE}│${NC}\n"
+    echo -e "${PURPLE}└──────────────────────────────────────────────────────────┘${NC}"
     echo ""
     read -p "  Pilih Nomor: " opt
     case $opt in
