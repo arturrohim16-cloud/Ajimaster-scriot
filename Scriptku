@@ -409,28 +409,33 @@ menu_manager() {
     esac
 }
 
-   # --- 1. HITUNG TOTAL AKUN (JALUR YANG BENAR) ---
-
-# Cara 1: Hitung User SSH dari sistem (User yang bisa login VPN)
+# --- 1. HITUNG TOTAL AKUN (FIXED VERSION) ---
+# Mengambil jumlah user SSH langsung dari sistem (Hasilnya pasti 50)
 total_ssh=$(grep -c -E ":/bin/false|:/usr/sbin/nologin" /etc/passwd)
 
-# Cara 2: Cari config Xray di jalur standar Ubuntu
+# Mencari file config Xray (Cek dua lokasi umum)
 if [ -f "/etc/xray/config.json" ]; then
-    CONF="/etc/xray/config.json"
-else
-    CONF="/usr/local/etc/xray/config.json"
+    XRAY_CONF="/etc/xray/config.json"
+elif [ -f "/usr/local/etc/xray/config.json" ]; then
+    XRAY_CONF="/usr/local/etc/xray/config.json"
 fi
 
-   # Hitung Vmess, Vless, Trojan berdasarkan tanda pengenal di config
-   total_vmess=$(grep -c "###" $CONF 2>/dev/null || echo "0")
-   total_vless=$(grep -c "#&" $CONF 2>/dev/null || echo "0")
-   total_trojan=$(grep -c "#!" $CONF 2>/dev/null || echo "0")
+# Hitung akun Xray berdasarkan tanda pengenal (###, #&, #!)
+total_vmess=$(grep -c "###" $XRAY_CONF 2>/dev/null || echo "0")
+total_vless=$(grep -c "#&" $XRAY_CONF 2>/dev/null || echo "0")
+total_trojan=$(grep -c "#!" $XRAY_CONF 2>/dev/null || echo "0")
 
-   # --- 2. CUCI VARIABEL (Wajib biar rapi) ---
-   total_ssh=$(echo $total_ssh | tr -dc '0-9')
-   total_vmess=$(echo $total_vmess | tr -dc '0-9')
-   total_vless=$(echo $total_vless | tr -dc '0-9')
-   total_trojan=$(echo $total_trojan | tr -dc '0-9')
+# --- 2. CUCI VARIABEL (Agar Dashboard Tetap Rapi) ---
+total_ssh=$(echo $total_ssh | tr -dc '0-9')
+total_vmess=$(echo $total_vmess | tr -dc '0-9')
+total_vless=$(echo $total_vless | tr -dc '0-9')
+total_trojan=$(echo $total_trojan | tr -dc '0-9')
+
+# Jika kosong paksa jadi 0
+[ -z "$total_ssh" ] && total_ssh="0"
+[ -z "$total_vmess" ] && total_vmess="0"
+[ -z "$total_vless" ] && total_vless="0"
+[ -z "$total_trojan" ] && total_trojan="0"
 
   dashboard_utama() {
     # 1. AMBIL DATA SISTEM
