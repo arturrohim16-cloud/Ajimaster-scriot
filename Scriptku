@@ -347,25 +347,24 @@ hapus_manual() {
     # --- 2. DAFTAR VMESS ---
     echo -e "  ${CYAN}[ VMESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Hanya mengambil email yang ada di blok vmess (mengandung alterId)
-    grep -B 3 "alterId" $CONF | grep "\"email\":" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Mengambil teks hanya di antara "email": " dan "
+    grep -oP '(?<="email": ")[^"]*' $CONF | grep -v "admin" | grep -v "vless" | grep -v "trojan" | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
     # --- 3. DAFTAR VLESS ---
     echo -e "  ${CYAN}[ VLESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mengambil email dari blok vless (yang biasanya ada kata 'vless' di komentarnya atau letaknya unik)
-    # Jika tidak ada tanda, kita ambil email yang TIDAK ada alterId dan TIDAK ada password
-    grep "\"email\":" $CONF | grep -v "alterId" | grep -v "password" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Mengambil email yang mengandung kata vless
+    grep -oP '(?<="email": ")[^"]*' $CONF | grep "vless" | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
     # --- 4. DAFTAR TROJAN ---
     echo -e "  ${CYAN}[ TROJAN Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mengambil email yang satu blok dengan "password"
-    grep -B 3 "password" $CONF | grep "\"email\":" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Mengambil email yang mengandung kata trojan
+    grep -oP '(?<="email": ")[^"]*' $CONF | grep "trojan" | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}=======================================${NC}"
     echo ""
@@ -378,8 +377,13 @@ hapus_manual() {
         sleep 1; return
     fi
 
-    # PROSES HAPUS (Mencari baris email user sampai penutup blok)
-    sed -i "/\"email\": \"$user\"/,/}/d" $CONF
+    # PROSES HAPUS SANGAT AKURAT
+    # Menghapus satu blok klien yang mengandung email tersebut
+    sed -i "/\"email\": \"$user\"/d" $CONF
+    # Menghapus jika ada sisa baris kosong
+    sed -i '/^$/d' $CONF
+    
+    # Hapus User SSH jika ada
     userdel -f "$user" &>/dev/null
     
     systemctl restart xray &>/dev/null
