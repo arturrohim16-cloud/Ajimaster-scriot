@@ -334,6 +334,46 @@ exp_cleaner() {
     menu_manager
 }
 
+fix_servis() {
+    clear
+    echo -e "\e[1;33m===============================================\e[0m"
+    echo -e "\e[1;32m      MEMPERBAIKI & MENGUNCI SERVICE (FIX)     \e[0m"
+    echo -e "\e[1;33m===============================================\e[0m"
+    echo -e "  [>] Cleaning old processes..."
+    # Matikan sisa proses yang nyangkut
+    pkill -f xray
+    pkill -f ws-python
+    systemctl stop xray >/dev/null 2>&1
+    systemctl stop nginx >/dev/null 2>&1
+
+    echo -e "  [>] Starting Xray Core..."
+    # Menjalankan Xray langsung dari binary agar lebih stabil
+    /usr/local/bin/xray -config /usr/local/etc/xray/config.json >/dev/null 2>&1 &
+    
+    echo -e "  [>] Starting Nginx Service..."
+    systemctl enable nginx >/dev/null 2>&1
+    systemctl restart nginx
+    
+    echo -e "  [>] Starting Python WS..."
+    # Menggunakan screen agar proses python tidak mati saat terminal ditutup
+    screen -dmS ws python3 /usr/local/bin/ws-python 8080
+    
+    echo -e "  [>] Verifying Status..."
+    sleep 2
+    
+    # Cek apakah sudah benar-benar jalan
+    if pgrep -f "xray" > /dev/null; then
+        echo -e "  [\e[1;92m SUCCESS \e[0m] Xray is now Running!"
+    else
+        echo -e "  [\e[1;31m FAILED \e[0m] Xray failed to start, check config!"
+    fi
+
+    echo -e "\e[1;33m===============================================\e[0m"
+    echo -e "  Service Berhasil Diperbaiki & Dikunci!"
+    sleep 2
+    dashboard_utama
+}
+
 menu_manager() {
     clear
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
@@ -405,7 +445,7 @@ menu_manager() {
     echo -e " \e[1;35m┃\e[0m \e[1;33m[02]\e[0m \e[1;32mVMESS    \e[1;35m┃\e[0m \e[1;33m[09]\e[0m \e[1;36mUPDATE SC \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mVLESS    \e[1;35m┃\e[0m \e[1;33m[10]\e[0m \e[1;36mREBOOT VPS\e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mTROJAN   \e[1;35m┃\e[0m \e[1;33m[11]\e[0m \e[1;32mEDIT SCRIPT\e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;31mDEL USER \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;31mFIX REPAIR\e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;31mDEL USER \e[1;35m┃\e[0m \e[1;33m[12]\e[0m \e[1;31mFIX SEVICSH\e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;32mREBOOT   \e[1;35m┃\e[0m \e[1;33m[13]\e[0m \e[1;34mBANNER    \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;32mEXTEND   \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mEXIT      \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
@@ -425,7 +465,7 @@ menu_manager() {
         9|09) backup_data ;;
         10) restart_services ;;
         11) cek_online ;;
-        12) fix_repair ;;
+        12) fix_servis ;;
         13) edit_banner ;;
         0|00) exit ;;
         *) dashboard_utama ;;
