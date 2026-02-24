@@ -242,17 +242,13 @@ trial_vmess() {
     read -p "   Username Trial : " user
     exp_date=$(date -d "1 days" +"%Y-%m-%d")
     uuid=$(cat /proc/sys/kernel/random/uuid)
-    domain=$(cat /etc/xray/domain 2>/dev/null)
-    
-    # Jika file domain kosong, ambil IP
-    [[ -z "$domain" ]] && domain=$(wget -qO- ipinfo.io/ip)
+    domain=$(cat /etc/xray/domain)
     
     # Masukkan ke Config Xray
     sed -i '/#vmess$/i ### '"$user $exp_date"'\n},{"id": "'"$uuid"'"\n#vmess' /etc/xray/config.json
     systemctl restart xray > /dev/null 2>&1
 
-    # Buat Link Vmess (FIX Domain untuk HTTP Custom/V2Ray)
-    # Kita pastikan host dan add terisi domain
+    # Buat Link Vmess (Pastikan domain terkunci di 'add' dan 'host')
     vmess_json='{"v":"2","ps":"'${user}'","add":"'${domain}'","port":"443","id":"'${uuid}'","aid":"0","scy":"auto","net":"ws","type":"none","host":"'${domain}'","path":"/vmess","tls":"tls"}'
     vmess_link="vmess://$(echo -n $vmess_json | base64 -w 0)"
 
@@ -261,12 +257,9 @@ trial_vmess() {
     echo -e "-----------------------------------------------"
     echo -e "   Remarks  : $user"
     echo -e "   Domain   : $domain"
-    echo -e "   UUID     : $uuid"
-    echo -e "   Port     : 443"
-    echo -e "   Path     : /vmess"
     echo -e "   Expired  : $exp_date (1 Hari)"
     echo -e "-----------------------------------------------"
-    echo -e "   \e[1;33mFULL LINK VMESS :\e[0m"
+    echo -e "   LINK VMESS (HTTP CUSTOM) :"
     echo -e "   $vmess_link"
     echo -e "-----------------------------------------------"
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
@@ -302,26 +295,41 @@ cek_online() {
     read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
     menu_manager
 }
-# --- FUNGSI HAPUS EXPIRED ---
+
+del_user() {
+    clear
+    echo -e "\e[1;31m      HAPUS USER (SSH & XRAY) PERMANEN\e[0m"
+    echo -e "-----------------------------------------------"
+    read -p "   Masukkan Username yg akan dihapus : " user
+    
+    # 1. Hapus dari Sistem SSH
+    if grep -w "^$user" /etc/passwd > /dev/null; then
+        userdel -f $user
+        echo -e "   - Akun SSH [$user] Berhasil Dihapus!"
+    fi
+    
+    # 2. Hapus dari Config Xray (Vmess, Vless, Trojan)
+    if grep -qw "$user" /etc/xray/config.json; then
+        # Menghapus blok user berdasarkan nama di config xray
+        sed -i "/### $user/,/^},{/d" /etc/xray/config.json
+        systemctl restart xray
+        echo -e "   - Akun Xray [$user] Berhasil Dihapus!"
+    else
+        echo -e "   - Akun Xray [$user] Tidak Ditemukan!"
+    fi
+    
+    echo -e "-----------------------------------------------"
+    echo -e "   Proses Selesai!"
+    sleep 2
+    menu_manager
+}
+
 exp_cleaner() {
     clear
-    echo "Membersihkan User Expired..."
-    # Hapus SSH Expired
-    /usr/bin/xp
-    # Hapus Xray Expired
-    # Biasanya script xray Mas punya pembersih sendiri, jika tidak ada pakai ini:
-    data=( `cat /etc/xray/config.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq` )
-    now=`date +"%Y-%m-%d"`
-    for user in "${data[@]}"; do
-        exp=`grep -w "^### $user" "/etc/xray/config.json" | cut -d ' ' -f 3`
-        d1=`date -d "$exp" +%s`
-        d2=`date -d "$now" +%s`
-        if [[ "$d1" -le "$d2" ]]; then
-            sed -i "/^### $user $exp/,/^},{/d" /etc/xray/config.json
-        fi
-    done
-    systemctl restart xray
-    echo "Pembersihan selesai!"
+    echo -e "\e[1;33m   MEMBERSIHKAN SEMUA USER EXPIRED...\e[0m"
+    # Menjalankan script pembersih bawaan
+    /usr/bin/xp > /dev/null 2>&1
+    echo -e "   Semua sampah expired sudah dibuang!"
     sleep 2
     menu_manager
 }
