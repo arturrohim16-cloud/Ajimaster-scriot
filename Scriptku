@@ -309,20 +309,19 @@ cek_online() {
 
 hapus_manual() {
     clear
+    CONF="/usr/local/etc/xray/config.json"
     echo -e " ======================================="
     echo -e "       DAFTAR AKUN AKTIF (ALL)          "
     echo -e " ======================================="
+    
     echo -e "  [ SSH Users ]"
-    grep -E "^### " "/etc/xray/ssh.db" | cut -d ' ' -f 2 | nl -s '. '
+    # Mengambil user sistem (UID 1000+) agar tidak perlu file .db
+    awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | nl -s '. '
     echo -e " ---------------------------------------"
-    echo -e "  [ VMESS Users ]"
-    grep -E "^### " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2 | nl -s '. '
-    echo -e " ---------------------------------------"
-    echo -e "  [ VLESS Users ]"
-    grep -E "^#& " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2 | nl -s '. '
-    echo -e " ---------------------------------------"
-    echo -e "  [ TROJAN Users ]"
-    grep -E "^#! " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2 | nl -s '. '
+    
+    echo -e "  [ XRAY Users (Vmess/Vless/Trojan) ]"
+    # Mengambil nama dari baris "email" di config Xray Mas
+    grep "\"email\":" $CONF | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
     echo -e " ======================================="
     echo ""
     read -rp " Ketik Nama User yang ingin dihapus: " user
@@ -333,23 +332,25 @@ hapus_manual() {
         return
     fi
 
-    # Proses Hapus dari Config Xray (Vmess/Vless/Trojan)
-    sed -i "/^### $user/,/^#vmess/d" /usr/local/etc/xray/config.json
-    sed -i "/^#& $user/,/^#vless/d" /usr/local/etc/xray/config.json
-    sed -i "/^#! $user/,/^#trojan/d" /usr/local/etc/xray/config.json
+    # Proses Hapus dari Config Xray (Mencari baris email user tersebut)
+    # Ini akan menghapus blok akun berdasarkan nama emailnya
+    sed -i "/$user/,/}/d" $CONF
     
-    # Proses Hapus User SSH (Jika ada)
+    # Proses Hapus User SSH dari Sistem
     userdel -f "$user" &>/dev/null
-    sed -i "/^### $user/d" /etc/xray/ssh.db &>/dev/null
+    
+    # Bersihkan baris kosong yang mungkin tersisa di config
+    sed -i '/^$/d' $CONF
 
-    # Restart Service agar perubahan efek
-    systemctl restart xray
+    # Restart Service agar akun otomatis OFF
+    systemctl restart xray &>/dev/null
+    systemctl restart ssh &>/dev/null
     
     echo -e " ---------------------------------------"
-    echo -e "  User [ $user ] Berhasil Dihapus!      "
+    echo -e "  User [ $user ] Berhasil Dihapus & OFF! "
     echo -e " ---------------------------------------"
     read -n 1 -s -r -p " Press any key to back to menu"
-    menu
+    dashboard_utama
 }
 
 exp_cleaner() {
