@@ -436,44 +436,44 @@ menu_manager() {
     echo -e "  \e[1;35m     ███████║     ██║██║██║   ██║\e[0m"
     echo -e "  \e[1;35m     ██║  ██║██   ██║██║╚████╔╝ \e[0m"
     echo -e "  \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝  \e[0m"
-        # --- HITUNG TOTAL AKUN ---
+    # --- WARNA DASAR ---
+    PURPLE='\e[1;95m'      # Ungu Terang
+    BG_RED='\e[41;1;37m'   # Background Merah Teks Putih
+    BG_WHITE='\e[47;1;30m' # Background Putih Teks Hitam
+    WHITE='\e[1;37m'
+    YELLOW='\e[1;33m'
+    CYAN='\e[1;36m'
+    GREEN='\e[1;32m'
+    RED='\e[1;31m'
+    NC='\e[0m'
+    # --- HITUNG TOTAL AKUN ---
     total_ssh=$(grep -c -E "^### " "/etc/xray/ssh.db" 2>/dev/null || echo "0")
     total_vmess=$(grep -c -E "^### " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
     total_vless=$(grep -c -E "^#& " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
     total_trojan=$(grep -c -E "^#! " "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-
-    # --- WARNA ---
-    PURPLE='\e[1;95m'
-    YELLOW='\e[1;33m'
-    WHITE='\e[1;37m'
-    CYAN='\e[1;36m'
-    GREEN='\e[1;32m'
-    RED='\e[1;31m'
-    BLUE='\e[1;34m'
-    NC='\e[0m'
-
-    # --- TAMPILAN MENU PREMIUM ---
-    echo -e " ${PURPLE}╔══════════════════════════════════════════╗${NC}"
-    echo -e " ${PURPLE}║${NC} ${WHITE}      🔥 AJI SYSTEM VPN 🔥      ${NC} ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}╠══════════════════════════════════════════╣${NC}"
-    printf " ${PURPLE}║${NC} ${YELLOW}IP      :${NC} %-28s ${PURPLE}║${NC}\n" "${WHITE}$MYIP${NC}"
-    printf " ${PURPLE}║${NC} ${CYAN}DOM     :${NC} %-28s ${PURPLE}║${NC}\n" "${WHITE}$DOMAIN${NC}"
-    printf " ${PURPLE}║${NC} ${GREEN}RAM :${NC} %-4s ${BLUE}UPTIME: %-14s ${PURPLE}║${NC}\n" "${WHITE}$RAM${NC}" "${WHITE}$UPTIME${NC}"
-    echo -e " ${PURPLE}╠══════════════════════════════════════════╣${NC}"
-    echo -e " ${PURPLE}║${NC} ${PURPLE}SSH:${NC}${WHITE}$total_ssh${NC} ${PURPLE}│ VMS:${NC}${WHITE}$total_vmess${NC} ${PURPLE}│ VLS:${NC}${WHITE}$total_vless${NC} ${PURPLE}│ TRJ:${NC}${WHITE}$total_trojan${NC} ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}╠══════════════════════════════════════════╣${NC}"
-    echo -e " ${PURPLE}║${NC} ${WHITE}SSH:$st_ssh │ XRY:$st_xry │ NGX:$st_ngx │ WS:$st_wse${NC} ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}╠══════════════════════════════════════════╣${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[01]${NC} ${GREEN}SSH OVPN ${NC} ${PURPLE}║${NC} ${YELLOW}[08]${NC} ${CYAN}BACKUP DA ${NC} ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[02]${NC} ${GREEN}VMESS    ${NC} ${PURPLE}║${NC} ${YELLOW}[09]${NC} ${CYAN}UPDATE SC ${NC} ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[03]${NC} ${GREEN}VLESS    ${NC} ${PURPLE}║${NC} ${YELLOW}[10]${NC} ${CYAN}REBOOT VPS${NC} ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[04]${NC} ${GREEN}TROJAN   ${NC} ${PURPLE}║${NC} ${YELLOW}[11]${NC} ${GREEN}EDIT SCRIPT${NC}${PURPLE}║${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[05]${NC} ${RED}DEL USER ${NC} ${PURPLE}║${NC} ${YELLOW}[12]${NC} ${RED}FIX SERVICE${NC}${PURPLE}║${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[06]${NC} ${GREEN}REBOOT   ${NC} ${PURPLE}║${NC} ${YELLOW}[13]${NC} ${BLUE}BANNER     ${NC}${PURPLE}║${NC}"
-    echo -e " ${PURPLE}║${NC} ${YELLOW}[07]${NC} ${GREEN}EXTEND   ${NC} ${PURPLE}║${NC} ${YELLOW}[00]${NC} ${RED}EXIT       ${NC}${PURPLE}║${NC}"
-    echo -e " ${PURPLE}╠══════════════════════════════════════════╣${NC}"
-    echo -e " ${PURPLE}║${NC}    ${RED}🚀${NC} ${WHITE}${PURPLE}ACTIVATE TRIAL BOT PANEL${NC} ${RED}🚀${NC}    ${PURPLE}║${NC}"
-    echo -e " ${PURPLE}╚══════════════════════════════════════════╝${NC}"
+    # --- TAMPILAN DASHBOARD SOLID TEBAL ---
+    clear
+    echo -e " ${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e " ${PURPLE}┃${NC}     ${BG_RED}      🔥 AJI SYSTEM VPN 🔥      ${NC}     ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
+    printf " ${PURPLE}┃${NC} ${YELLOW}IP      :${NC} %-26s ${PURPLE}┃${NC}\n" "${WHITE}$MYIP${NC}"
+    printf " ${PURPLE}┃${NC} ${CYAN}DOM     :${NC} %-26s ${PURPLE}┃${NC}\n" "${WHITE}$DOMAIN${NC}"
+    printf " ${PURPLE}┃${NC} ${GREEN}RAM :${NC} %-4s ${CYAN}UPTIME: %-13s ${PURPLE}┃${NC}\n" "${WHITE}$RAM${NC}" "${WHITE}$UPTIME${NC}"
+    echo -e " ${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
+    echo -e " ${PURPLE}┃${NC} ${PURPLE}SSH:${NC}${WHITE}$total_ssh${NC} ${PURPLE}│ VMS:${NC}${WHITE}$total_vmess${NC} ${PURPLE}│ VLS:${NC}${WHITE}$total_vless${NC} ${PURPLE}│ TRJ:${NC}${WHITE}$total_trojan${NC} ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
+    echo -e " ${PURPLE}┃${NC} ${WHITE}SSH:$st_ssh │ XRY:$st_xry │ NGX:$st_ngx │ WS:$st_wse${NC} ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[01]${NC} ${GREEN}SSH OVPN ${NC}  ${PURPLE}┃${NC} ${YELLOW}[08]${NC} ${CYAN}BACKUP DA ${NC}  ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[02]${NC} ${GREEN}VMESS    ${NC}  ${PURPLE}┃${NC} ${YELLOW}[09]${NC} ${CYAN}UPDATE SC ${NC}  ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[03]${NC} ${GREEN}VLESS    ${NC}  ${PURPLE}┃${NC} ${YELLOW}[10]${NC} ${CYAN}REBOOT VPS${NC}  ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[04]${NC} ${GREEN}TROJAN   ${NC}  ${PURPLE}┃${NC} ${YELLOW}[11]${NC} ${GREEN}EDIT SCRIPT${NC} ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[05]${NC} ${RED}DEL USER ${NC}  ${PURPLE}┃${NC} ${YELLOW}[12]${NC} ${RED}FIX SERVICE${NC} ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[06]${NC} ${GREEN}REBOOT   ${NC}  ${PURPLE}┃${NC} ${YELLOW}[13]${NC} ${CYAN}BANNER     ${NC} ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┃${NC} ${YELLOW}[07]${NC} ${GREEN}EXTEND   ${NC}  ${PURPLE}┃${NC} ${YELLOW}[00]${NC} ${RED}EXIT       ${NC} ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}┠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┨${NC}"
+    echo -e " ${PURPLE}┃${NC}   ${BG_WHITE}    🚀 MASS AJI PREMIUM STORE 🚀    ${NC}   ${PURPLE}┃${NC}"
+    echo -e " ${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     read -p "  Pilih Nomor: " opt
     case $opt in
