@@ -336,26 +336,30 @@ exp_cleaner() {
 
 fix_servis() {
     clear
-    echo "Memperbaiki Konfigurasi SSL & Xray..."
+    echo -e "\e[1;33mMemperbaiki Konfigurasi SSL & Xray...\e[0m"
     
-    # 1. Samakan nama file agar terbaca Config
+    # 1. Bersihkan semua proses Xray yang nyangkut agar tidak tabrakan
+    systemctl stop xray >/dev/null 2>&1
+    pkill -f xray
+    sleep 1
+
+    # 2. Pastikan file Sertifikat siap (Gunakan nama yang paling umum dicari script)
     cp /etc/xray/xray.crt /etc/xray/v2ray.crt >/dev/null 2>&1
     cp /etc/xray/xray.key /etc/xray/v2ray.key >/dev/null 2>&1
     chmod 644 /etc/xray/*.crt /etc/xray/*.key
-    
-    # 2. Restart Xray Core secara bersih
-    pkill -f xray
-    systemctl restart xray
+
+    # 3. JALANKAN XRAY (Pakai satu jalur manual saja agar stabil)
+    # Kita arahkan ke path config yang benar
     /usr/local/bin/xray -config /usr/local/etc/xray/config.json >/dev/null 2>&1 &
     
-    # 3. Restart Nginx & WS
-    systemctl restart nginx
+    # 4. Restart Nginx & WS Python
+    systemctl restart nginx >/dev/null 2>&1
+    pkill -f ws-python
     screen -dmS ws python3 /usr/local/bin/ws-python 8080
     
     echo "---------------------------------------"
-    echo " Perbaikan Selesai! Silahkan Coba Konek."
-    echo " Tips: Pastikan SNI di App adalah:"
-    echo " aji.izz-store.my.id"
+    echo -e "\e[1;92m PERBAIKAN SELESAI! STATUS: ON \e[0m"
+    echo " Silahkan cek Dashboard Utama."
     echo "---------------------------------------"
     sleep 2
     dashboard_utama
