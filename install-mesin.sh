@@ -1,64 +1,93 @@
 #!/bin/bash
+# Installer Mesin All-in-One: Xray, Nginx, SSL
+# Domain: aji.izz-store.my.id
+
+DOMAIN="aji.izz-store.my.id"
+IP=$(wget -qO- ipinfo.io/ip)
 
 # 1. Update & Install Tools Dasar
-apt update -y
-apt install python3 stunnel4 net-tools screen -y
+apt update && apt install -y nginx socat curl tar uuid-runtime
 
-# 2. Buat Mesin Websocket (Port 80)
-cat <<EOF > /usr/bin/ws-python
-import socket, threading
-def proxy(client_socket):
-    try:
-        data = client_socket.recv(1024)
-        if b"Upgrade: websocket" in data:
-            client_socket.send(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
-            target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            target.connect(("127.0.0.1", 22))
-            def forward(src, dst):
-                try:
-                    while True:
-                        buf = src.recv(4096)
-                        if not buf: break
-                        dst.send(buf)
-                except: pass
-            threading.Thread(target=forward, args=(client_socket, target)).start()
-            forward(target, client_socket)
-    except: pass
-    finally: client_socket.close()
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server.bind(("0.0.0.0", 80))
-server.listen(100)
-while True:
-    client, addr = server.accept()
-    threading.Thread(target=proxy, args=(client,)).start()
-EOF
-chmod +x /usr/bin/ws-python
+# 2. Install Xray Core Terbaru
+bash <(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)
 
-# 3. Buat Mesin Stunnel (Port 443)
-cat <<EOF > /etc/stunnel/stunnel.conf
-pid = /var/run/stunnel4.pid
-[ssh]
-accept = 443
-connect = 127.0.0.1:22
-EOF
-sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
-
-# 4. Buat Mesin UDP Custom (Port 1-65535) - Versi Simple
-wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/udp-custom"
-chmod +x /usr/bin/udp-custom
-
-# 5. Jalankan Semua Mesin
+# 3. Setup Sertifikat SSL (Acme.sh)
+pkill nginx
 pkill python3
-screen -dmS ws-python python3 /usr/bin/ws-python
-systemctl restart stunnel4
-screen -dmS udp-custom /usr/bin/udp-custom server
+mkdir -p /etc/xray
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --register-account -m admin@$DOMAIN
+~/.acme.sh/acme.sh --issue -d $DOMAIN --standalone -k ec-256
+~/.acme.sh/acme.sh --install-cert -d $DOMAIN --fullchain-file /etc/xray/xray.crt --key-file /etc/xray/xray.key --ecc
 
-# 6. Buka Firewall
-ufw disable
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-iptables -A INPUT -p udp --dport 1:65535 -j ACCEPT
+# 4. Config Nginx (Sebagai Pintu Utama Port 443 & 80)
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name $DOMAIN;
 
-echo "SEMUA PORT (80, 443, 1-65535) BERHASIL DIAKTIFKAN!"
+    ssl_certificate /etc/xray/xray.crt;
+    ssl_certificate_key /etc/xray/xray.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
 
+    location /vmess {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:10001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$http_host;
+    }
+
+    location /vless {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:10002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$http_host;
+    }
+
+    location /trojan {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:10003;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$http_host;
+    }
+}
+EOF
+
+# 5. Config Xray (Menerima operan dari Nginx)
+cat <<EOF > /usr/local/etc/xray/config.json
+{
+    "inbounds": [
+        {
+            "port": 10001, "listen": "127.0.0.1", "protocol": "vmess",
+            "settings": {"clients": []}, "streamSettings": {"network": "ws", "wsSettings": {"path": "/vmess"}}
+        },
+        {
+            "port": 10002, "listen": "127.0.0.1", "protocol": "vless",
+            "settings": {"clients": [], "decryption": "none"}, "streamSettings": {"network": "ws", "wsSettings": {"path": "/vless"}}
+        },
+        {
+            "port": 10003, "listen": "127.0.0.1", "protocol": "trojan",
+            "settings": {"clients": []}, "streamSettings": {"network": "ws", "wsSettings": {"path": "/trojan"}}
+        }
+    ],
+    "outbounds": [{"protocol": "freedom"}]
+}
+EOF
+
+# 6. Izin Akses & Restart
+chown -R www-data:www-data /etc/xray
+chmod +x /usr/local/bin/xray
+systemctl restart nginx
+systemctl restart xray
+echo "$DOMAIN" > /etc/xray/domain
+
+echo "INSTALASI BERHASIL! SEMUA PORT SUDAH TERKONEKSI KE NGINX."
