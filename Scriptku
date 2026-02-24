@@ -199,6 +199,69 @@ add_ssh() {
     dashboard_utama
 }
 
+# --- FUNGSI TRIAL ---
+trial_ssh() {
+    # Memanggil script trial ssh bawaan biasanya: trial
+    if [[ -f /usr/bin/trial ]]; then /usr/bin/trial; else echo "Script trial SSH tidak ditemukan!"; sleep 2; fi
+}
+
+trial_vmess() {
+    if [[ -f /usr/bin/trial-vmess ]]; then /usr/bin/trial-vmess; else echo "Script trial Vmess tidak ditemukan!"; sleep 2; fi
+}
+
+trial_vless() {
+    if [[ -f /usr/bin/trial-vless ]]; then /usr/bin/trial-vless; else echo "Script trial Vless tidak ditemukan!"; sleep 2; fi
+}
+
+trial_trojan() {
+    if [[ -f /usr/bin/trial-trojan ]]; then /usr/bin/trial-trojan; else echo "Script trial Trojan tidak ditemukan!"; sleep 2; fi
+}
+
+# --- FUNGSI CEK ONLINE ---
+cek_online() {
+    clear
+    echo -e " \e[1;32mCEK USER ONLINE\e[0m"
+    echo "----------------------------"
+    # Cek SSH Online
+    echo -e "\e[1;33m[ SSH ONLINE ]\e[0m"
+    if [[ -e /etc/openvpn/server/openvpn-status.log ]]; then
+        grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" /etc/openvpn/server/openvpn-status.log | cut -d ',' -f 1,2 | sed 's/,/ -> /'
+    fi
+    # Cek Xray Online (biasanya butuh jq)
+    echo -e "\n\e[1;33m[ XRAY ONLINE ]\e[0m"
+    data=( `cat /etc/xray/config.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq` )
+    for user in "${data[@]}"; do
+        log=$(grep "email: $user" /var/log/xray/access.log | tail -n 1)
+        if [[ -n "$log" ]]; then echo "User: $user [Active]"; fi
+    done
+    echo "----------------------------"
+    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    menu_manager
+}
+# --- FUNGSI HAPUS EXPIRED ---
+exp_cleaner() {
+    clear
+    echo "Membersihkan User Expired..."
+    # Hapus SSH Expired
+    /usr/bin/xp
+    # Hapus Xray Expired
+    # Biasanya script xray Mas punya pembersih sendiri, jika tidak ada pakai ini:
+    data=( `cat /etc/xray/config.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq` )
+    now=`date +"%Y-%m-%d"`
+    for user in "${data[@]}"; do
+        exp=`grep -w "^### $user" "/etc/xray/config.json" | cut -d ' ' -f 3`
+        d1=`date -d "$exp" +%s`
+        d2=`date -d "$now" +%s`
+        if [[ "$d1" -le "$d2" ]]; then
+            sed -i "/^### $user $exp/,/^},{/d" /etc/xray/config.json
+        fi
+    done
+    systemctl restart xray
+    echo "Pembersihan selesai!"
+    sleep 2
+    menu_manager
+}
+
 menu_manager() {
     clear
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
