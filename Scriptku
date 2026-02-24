@@ -430,67 +430,60 @@ menu_manager() {
     MYIP=$(wget -qO- ipinfo.io/ip)
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
     [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
-    RAM=$(free -m | awk 'NR==2{printf "%.0f%%", $3*100/$2}')
     UPTIME=$(uptime -p | cut -d " " -f 2-5)
-    # 2. CEK STATUS SERVICE (FINAL FIX)
-    # Cek SSH
-    pgrep -x sshd >/dev/null && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
-    # Cek XRAY (Cek nama proses apa saja yang ada kata 'xray')
-    if pgrep -f "xray" > /dev/null; then
-        st_xry="\e[1;92mON \e[0m"
-    else
-        st_xry="\e[1;31mOFF\e[0m"
-    fi
     
-    # Cek NGINX
-    pgrep -x nginx >/dev/null && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
-    
-    # Cek WS (Cek proses python yang bawa websocket)
-    pgrep -f "ws" >/dev/null && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
-    clear
-    echo -e "  \e[1;35m      █████╗      ██╗██╗██╗   ██╗\e[0m"
-    echo -e "  \e[1;35m     ██╔══██╗     ██║██║██║   ██║\e[0m"
-    echo -e "  \e[1;35m     ███████║     ██║██║██║   ██║\e[0m"
-    echo -e "  \e[1;35m     ██║  ██║██   ██║██║╚████╔╝ \e[0m"
-    echo -e "  \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝  \e[0m"
-# --- DATA VPS (RAM ANGKA) ---
+    # --- DATA VPS (RAM ANGKA) ---
     total_ram=$(free -m | grep Mem | awk '{print $2}')
     ram_usage=$(free -m | grep Mem | awk '{print $3}')
     RAM_VAL="${ram_usage}MB / ${total_ram}MB"
 
-# --- WARNA (PURPLE & BLUE BOLD) ---
-    P='\033[1;95m'   # Ungu Tebal (Garis)
-    B='\033[1;34m'   # Biru Tebal (Teks)
-    W='\033[1;37m'   # Putih Tebal (Data)
-    NC='\033[0m'     # Reset
+    # 2. CEK STATUS SERVICE
+    pgrep -x sshd >/dev/null && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
+    if pgrep -f "xray" > /dev/null; then st_xry="\e[1;92mON \e[0m"; else st_xry="\e[1;31mOFF\e[0m"; fi
+    pgrep -x nginx >/dev/null && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
+    pgrep -f "ws" >/dev/null && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
+
+    # --- DEFINISI WARNA ---
+    P='\033[1;95m' # Ungu (Garis)
+    B='\033[1;34m' # Biru (Teks)
+    W='\033[1;37m' # Putih (Data)
+    NC='\033[0m'
 
     clear
+    # --- HEADER LOGO ---
+    echo -e " \e[1;35m      █████╗ ██╗██╗██╗  ██╗\e[0m"
+    echo -e " \e[1;35m     ██╔══██╗ ██║██║██║  ██║\e[0m"
+    echo -e " \e[1;35m     ███████║ ██║██║██║  ██║\e[0m"
+    echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
+    echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
+
+    # --- BOX 1: DATA SERVER ---
     echo -e "${P}┌──────────────────────────────────────────────────────────┐${NC}"
-    echo -e "${P}│${NC}             ${B}• AJI SYSTEM VPN PANEL MENU •${NC}            ${P}│${NC}"
+    echo -e "${P}│${NC}          ${B}• AJI SYSTEM VPN PANEL MENU •${NC}           ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    printf "${P}│${NC}  ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "System OS" "Debian GNU/Linux 10"
-    printf "${P}│${NC}  ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "Server RAM" "$RAM_VAL"
-    printf "${P}│${NC}  ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "System Uptime" "$UPTIME"
-    printf "${P}│${NC}  ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "Current Domain" "$DOMAIN"
-    printf "${P}│${NC}  ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "IP-VPS" "$MYIP"
+    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "System OS" "Debian GNU/Linux 10"
+    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "Server RAM" "$RAM_VAL"
+    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "System Uptime" "$UPTIME"
+    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "Current Domain" "$DOMAIN"
+    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "IP-VPS" "$MYIP"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    echo -e "${P}│${NC} ${B}SSH:${W}${st_ssh}${B} │ XRAY:${W}${st_xry}${B} │ NGINX:${W}${st_ngx}${B} │ WS:${W}${st_wse}${B} ${NC}  ${P}│${NC}"
+    echo -e "${P}│${NC} ${B}SSH:${st_ssh}${B} │ XRAY:${st_xry}${B} │ NGINX:${st_ngx}${B} │ WS:${st_wse}${NC}   ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    echo "┌──────────────────────────────────────────┐"
-    echo "│  SSH/VPN   : $total_ssh"
-    echo "│  VMESS/WS  : $total_vmess"
-    echo "│  VLESS/WS  : $total_vless"
-    echo "│  TROJAN/WS : $total_trojan"
-    echo "└──────────────────────────────────────────┘"
-    echo -e "${PURPLE}┌──────────────────────────────────────────────────────────┐${NC}"
-    printf "${PURPLE}│${NC} ${BLUE} [01] • SSH MENU    ${NC}  ${PURPLE}│${NC} ${BLUE} [08] • BACKUP DA   ${NC}  ${PURPLE}│${NC}\n"
-    printf "${PURPLE}│${NC} ${BLUE} [02] • VMESS MENU  ${NC}  ${PURPLE}│${NC} ${BLUE} [09] • UPDATE SC   ${NC}  ${PURPLE}│${NC}\n"
-    printf "${PURPLE}│${NC} ${BLUE} [03] • VLESS MENU  ${NC}  ${PURPLE}│${NC} ${BLUE} [10] • REBOOT VPS  ${NC}  ${PURPLE}│${NC}\n"
-    printf "${PURPLE}│${NC} ${BLUE} [04] • TROJAN MENU ${NC}  ${PURPLE}│${NC} ${BLUE} [11] • EDIT SCRIPT ${NC}  ${PURPLE}│${NC}\n"
-    printf "${PURPLE}│${NC} ${BLUE} [05] • DEL USER    ${NC}  ${PURPLE}│${NC} ${BLUE} [12] • FIX SERVICE ${NC}  ${PURPLE}│${NC}\n"
-    printf "${PURPLE}│${NC} ${BLUE} [06] • REBOOT      ${NC}  ${PURPLE}│${NC} ${BLUE} [13] • BANNER      ${NC}  ${PURPLE}│${NC}\n"
-    printf "${PURPLE}│${NC} ${BLUE} [07] • EXTEND      ${NC}  ${PURPLE}│${NC} ${BLUE} [00] • EXIT MENU   ${NC}  ${PURPLE}│${NC}\n"
-    echo -e "${PURPLE}└──────────────────────────────────────────────────────────┘${NC}"
+
+    # --- BOX 2: TOTAL AKUN (MENGGUNAKAN VARIABEL YANG SUDAH DICUCI) ---
+    printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}      ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "SSH/VPN" "$total_ssh" "VMESS/WS" "$total_vmess"
+    printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}      ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "VLESS/WS" "$total_vless" "TROJAN/WS" "$total_trojan"
+    echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
+
+    # --- BOX 3: DAFTAR MENU ---
+    printf "${P}│${NC} ${B} [01] • SSH MENU    ${NC}  ${P}│${NC} ${B} [08] • BACKUP DA   ${NC}  ${P}│${NC}\n"
+    printf "${P}│${NC} ${B} [02] • VMESS MENU  ${NC}  ${P}│${NC} ${B} [09] • UPDATE SC   ${NC}  ${P}│${NC}\n"
+    printf "${P}│${NC} ${B} [03] • VLESS MENU  ${NC}  ${P}│${NC} ${B} [10] • REBOOT VPS  ${NC}  ${P}│${NC}\n"
+    printf "${P}│${NC} ${B} [04] • TROJAN MENU ${NC}  ${P}│${NC} ${B} [11] • EDIT SCRIPT ${NC}  ${P}│${NC}\n"
+    printf "${P}│${NC} ${B} [05] • DEL USER    ${NC}  ${P}│${NC} ${B} [12] • FIX SERVICE ${NC}  ${P}│${NC}\n"
+    printf "${P}│${NC} ${B} [06] • REBOOT      ${NC}  ${P}│${NC} ${B} [13] • BANNER      ${NC}  ${P}│${NC}\n"
+    printf "${P}│${NC} ${B} [07] • EXTEND      ${NC}  ${P}│${NC} ${B} [00] • EXIT MENU   ${NC}  ${P}│${NC}\n"
+    echo -e "${P}└──────────────────────────────────────────────────────────┘${NC}"
     echo ""
     read -p "  Pilih Nomor: " opt
     case $opt in
