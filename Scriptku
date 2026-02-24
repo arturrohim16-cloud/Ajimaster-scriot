@@ -347,23 +347,24 @@ hapus_manual() {
     # --- 2. DAFTAR VMESS ---
     echo -e "  ${CYAN}[ VMESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mencari baris email yang punya alterId (ciri khas Vmess di config Mas)
-    grep -B 2 "alterId" $CONF | grep "email" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Mencari baris email khusus di dalam blok VMESS
+    grep -E "\"email\":" $CONF | grep -v "admin" | grep -v "vless" | grep -v "trojan" | cut -d '"' -f 4 | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
     # --- 3. DAFTAR VLESS ---
     echo -e "  ${CYAN}[ VLESS Users ]${NC}"
     echo -ne "${KUNING}"
-    # Mencari baris email yang TIDAK punya alterId (ciri khas Vless)
-    grep -v "alterId" $CONF | grep "email" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Jika script Mas memberikan tanda khusus di email vless
+    grep -E "\"email\":" $CONF | grep "vless" | cut -d '"' -f 4 | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}---------------------------------------${NC}"
 
     # --- 4. DAFTAR TROJAN ---
     echo -e "  ${CYAN}[ TROJAN Users ]${NC}"
     echo -ne "${KUNING}"
-    grep "password" $CONF -B 2 | grep "email" | cut -d '"' -f 4 | grep -v "admin" | sort | uniq | nl -s '. '
+    # Jika script Mas memberikan tanda khusus di email trojan
+    grep -E "\"email\":" $CONF | grep "trojan" | cut -d '"' -f 4 | sort | uniq | nl -s '. '
     echo -ne "${NC}"
     echo -e "${BIRU}=======================================${NC}"
     echo ""
@@ -376,11 +377,10 @@ hapus_manual() {
         sleep 1; return
     fi
 
-    # PROSES HAPUS (Mencari blok email user sampai tutup kurung)
+    # PROSES HAPUS (Mencari blok email user)
     sed -i "/\"email\": \"$user\"/,/}/d" $CONF
     userdel -f "$user" &>/dev/null
     
-    # Restart agar OFF
     systemctl restart xray &>/dev/null
     systemctl restart ssh &>/dev/null
 
