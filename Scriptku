@@ -1,82 +1,63 @@
 #!/bin/bash
-# ==========================================
-# JANTUNG TRIAL GENERATOR (AUTO CREATE)
-# ==========================================
-
 trial_ssh() {
     clear
-    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
-    pass=1
-    exp=1
+    echo -e " \e[1;33mCREATE TRIAL SSH & OVPN (1 DAY)\e[0m"
+    echo -e "---------------------------------------"
+    read -p "  Username Trial : " user
+    if grep -w "^$user" /etc/passwd > /dev/null; then
+        echo -e "  Error: Username [$user] sudah ada!"
+        sleep 2 ; menu_manager
+    fi
+    read -p "  Password       : " pass
+    
     IP=$(wget -qO- ipinfo.io/ip)
-    useradd -e $(date -d "$exp days" +"%Y-%m-%d") -s /bin/false -M $user
+    domain=$(cat /etc/xray/domain)
+    exp_date=$(date -d "1 days" +"%Y-%m-%d")
+    
+    # Eksekusi sistem
+    useradd -e $exp_date -s /bin/false -M $user
     echo -e "$pass\n$pass" | passwd $user &> /dev/null
+    
     clear
-    echo -e "### SSH TRIAL ACCOUNT ###"
-    echo -e "IP       : $IP"
-    echo -e "User     : $user"
-    echo -e "Pass     : $pass"
-    echo -e "Created  : $(date)"
-    echo -e "Expired  : $exp Day"
-    echo -e "-------------------------"
-    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    echo -e "  \e[1;32mSuksess Membuat Akun Trial SSH\e[0m"
+    echo -e "  ---------------------------------------"
+    echo -e "  Username   : $user"
+    echo -e "  Password   : $pass"
+    echo -e "  Domain     : $domain"
+    echo -e "  IP         : $IP"
+    echo -e "  Expired    : $exp_date (1 Hari)"
+    echo -e "  ---------------------------------------"
+    read -n 1 -s -r -p "  Tekan sembarang tombol untuk kembali"
     menu_manager
 }
 
 trial_vmess() {
     clear
-    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
-    exp=1
+    echo -e " \e[1;33mCREATE TRIAL VMESS (1 DAY)\e[0m"
+    echo -e "---------------------------------------"
+    read -p "  Username Trial : " user
+    exp_date=$(date -d "1 days" +"%Y-%m-%d")
     uuid=$(cat /proc/sys/kernel/random/uuid)
     domain=$(cat /etc/xray/domain)
-    sed -i '/#vmess$/i ### '"$user $exp"'\n},{"id": "'"$uuid"'"\n#vmess' /etc/xray/config.json
+    
+    # Memasukkan ke config Xray
+    sed -i '/#vmess$/i ### '"$user $exp_date"'\n},{"id": "'"$uuid"'"\n#vmess' /etc/xray/config.json
     systemctl restart xray
+    
+    # Format Link (Contoh sederhana)
+    vmess_link="vmess://$(echo '{"v":"2","ps":"'$user'","add":"'$domain'","port":"443","id":"'$uuid'","aid":"0","scy":"auto","net":"ws","type":"none","host":"'$domain'","path":"/vmess","tls":"tls"}' | base64 -w 0)"
+    
     clear
-    echo -e "### VMESS TRIAL ACCOUNT ###"
-    echo -e "Domain   : $domain"
-    echo -e "User     : $user"
-    echo -e "UUID     : $uuid"
-    echo -e "Expired  : $exp Day"
-    echo -e "-------------------------"
-    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
-    menu_manager
-}
-
-trial_vless() {
-    clear
-    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
-    exp=1
-    uuid=$(cat /proc/sys/kernel/random/uuid)
-    domain=$(cat /etc/xray/domain)
-    sed -i '/#vless$/i ### '"$user $exp"'\n},{"id": "'"$uuid"'"\n#vless' /etc/xray/config.json
-    systemctl restart xray
-    clear
-    echo -e "### VLESS TRIAL ACCOUNT ###"
-    echo -e "Domain   : $domain"
-    echo -e "User     : $user"
-    echo -e "UUID     : $uuid"
-    echo -e "Expired  : $exp Day"
-    echo -e "-------------------------"
-    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
-    menu_manager
-}
-
-trial_trojan() {
-    clear
-    user=trial$(</dev/urandom tr -dc 0-9 | head -c4)
-    exp=1
-    pass=$(</dev/urandom tr -dc a-z0-9 | head -c8)
-    domain=$(cat /etc/xray/domain)
-    sed -i '/#trojan$/i ### '"$user $exp"'\n},{"password": "'"$pass"'"\n#trojan' /etc/xray/config.json
-    systemctl restart xray
-    clear
-    echo -e "### TROJAN TRIAL ACCOUNT ###"
-    echo -e "Domain   : $domain"
-    echo -e "User     : $user"
-    echo -e "Pass     : $pass"
-    echo -e "Expired  : $exp Day"
-    echo -e "-------------------------"
-    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali"
+    echo -e "  \e[1;32mSuksess Membuat Akun Trial Vmess\e[0m"
+    echo -e "  ---------------------------------------"
+    echo -e "  Username   : $user"
+    echo -e "  Domain     : $domain"
+    echo -e "  UUID       : $uuid"
+    echo -e "  Expired    : $exp_date (1 Hari)"
+    echo -e "  Link VMESS : "
+    echo -e "  $vmess_link"
+    echo -e "  ---------------------------------------"
+    read -n 1 -s -r -p "  Tekan sembarang tombol untuk kembali"
     menu_manager
 }
 
