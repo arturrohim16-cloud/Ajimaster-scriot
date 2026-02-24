@@ -88,25 +88,46 @@ add_vless() {
     clear
     CONF="/usr/local/etc/xray/config.json"
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null); [[ -z $DOMAIN ]] && DOMAIN="aji.izz-store.my.id"
+    
     echo -e "\e[1;33m--- CREATE VLESS PREMIUM ---\e[0m"
     read -p " 👤 Username : " user
+    
+    # Validasi jika user sudah ada
     if grep -qw "$user" "$CONF"; then
         echo -e "\e[1;31m User [ $user ] sudah ada!\e[0m"; sleep 2; return
     fi
+    
     read -p " 📅 Exp (Days) : " masaaktif
     uuid=$(uuidgen)
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
-    # Input ke bagian VLESS
+    # --- PROSES INPUT KE CONFIG XRAY (SED PATEN) ---
+    # Perintah ini mencari blok vless, lalu menyelipkan user baru tepat di bawah "clients": [
+    sed -i '/"protocol": "vless"/,/"clients": \[/ s/"clients": \[/"clients": [\n          {"id": "'$uuid'", "email": "'$user'"},/' $CONF
+
+    # Restart Xray agar akun aktif
+    systemctl restart xray
+    
+    # Link Vless
     vless_tls="vless://$uuid@$DOMAIN:443?path=%2Fvless&security=tls&encryption=none&type=ws&host=$DOMAIN#$user"
     vless_http="vless://$uuid@$DOMAIN:80?path=%2Fvless&security=none&encryption=none&type=ws&host=$DOMAIN#$user"
 
-    
-    systemctl restart xray
-    vless_link="vless://$uuid@$DOMAIN:443?path=%2Fvless&security=tls&encryption=none&type=ws#$user"
     clear
-    echo -e "--- VLESS WS TLS ---\nUser: $user\nExp: $exp\nLink:\n$vless_link"
-    read -p " Enter to menu..." dashboard_utama
+    echo -e "\e[1;32m ╔════════════════════════════════════════╗\e[0m"
+    echo -e "   👤 User      : $user"
+    echo -e "   📅 Expired   : $exp"
+    echo -e "   🔒 UUID      : $uuid"
+    echo -e "\e[1;32m ╠════════════════════════════════════════╣\e[0m"
+    echo -e "   🔐 URL VLESS TLS (443)"
+    echo -e "   $vless_tls"
+    echo -e ""
+    echo -e "   🔓 URL VLESS NON-TLS (80)"
+    echo -e "   $vless_http"
+    echo -e "\e[1;32m ╚════════════════════════════════════════╝\e[0m"
+    
+    # Catatan: ganti dashboard_utama sesuai nama fungsi menu utama Mas
+    read -p " Tekan Enter untuk kembali ke menu..." 
+    menu 
 }
 
 add_vmess() {
