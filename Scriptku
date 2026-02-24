@@ -6,7 +6,7 @@ update_script() {
     # wget -O /usr/bin/menu "link-github-mas"; chmod +x /usr/bin/menu
     echo -e "\e[1;32m Script sudah versi terbaru!\e[0m"
     sleep 2
-    dashboard_utama
+    dashboard_utama4
 }
 
 # Fungsi Backup Data Akun
@@ -209,23 +209,27 @@ trial_ssh() {
     fi
     read -p "   Password       : " pass
     
-    # Setting Otomatis 1 Hari
     exp_date=$(date -d "1 days" +"%Y-%m-%d")
     IP=$(wget -qO- ipinfo.io/ip)
     domain=$(cat /etc/xray/domain 2>/dev/null)
-    [[ -z "$domain" ]] && domain="aji.izz-store.my.id"
+    [[ -z "$domain" ]] && domain=$IP
 
-    # Eksekusi Pembuatan User di OS
+    # Eksekusi Pembuatan User
     useradd -e $exp_date -s /bin/false -M $user
     echo -e "$pass\n$pass" | passwd $user &> /dev/null
 
     clear
     echo -e "   \e[1;32mSUCCESS CREATE TRIAL SSH PREMIUM\e[0m"
     echo -e "-----------------------------------------------"
-    echo -e "   Host/IP  : $domain / $IP"
     echo -e "   Username : $user"
     echo -e "   Password : $pass"
+    echo -e "   Domain   : $domain"
     echo -e "   Expired  : $exp_date (1 Hari)"
+    echo -e "-----------------------------------------------"
+    echo -e "   \e[1;33mFORMAT LOGIN :\e[0m"
+    echo -e "   SSH WS    : $domain:80@$user:$pass"
+    echo -e "   SSH SSL   : $domain:443@$user:$pass"
+    echo -e "   SSH OVPN  : $domain:1194@$user:$pass"
     echo -e "-----------------------------------------------"
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
     menu_manager
@@ -240,12 +244,16 @@ trial_vmess() {
     uuid=$(cat /proc/sys/kernel/random/uuid)
     domain=$(cat /etc/xray/domain 2>/dev/null)
     
-    # Masukkan ke Config Xray (Cari tag #vmess)
+    # Jika file domain kosong, ambil IP
+    [[ -z "$domain" ]] && domain=$(wget -qO- ipinfo.io/ip)
+    
+    # Masukkan ke Config Xray
     sed -i '/#vmess$/i ### '"$user $exp_date"'\n},{"id": "'"$uuid"'"\n#vmess' /etc/xray/config.json
     systemctl restart xray > /dev/null 2>&1
 
-    # Buat Link Vmess Base64
-    vmess_json='{"v":"2","ps":"'$user'","add":"'$domain'","port":"443","id":"'$uuid'","aid":"0","scy":"auto","net":"ws","type":"none","host":"'$domain'","path":"/vmess","tls":"tls"}'
+    # Buat Link Vmess (FIX Domain untuk HTTP Custom/V2Ray)
+    # Kita pastikan host dan add terisi domain
+    vmess_json='{"v":"2","ps":"'${user}'","add":"'${domain}'","port":"443","id":"'${uuid}'","aid":"0","scy":"auto","net":"ws","type":"none","host":"'${domain}'","path":"/vmess","tls":"tls"}'
     vmess_link="vmess://$(echo -n $vmess_json | base64 -w 0)"
 
     clear
@@ -254,9 +262,11 @@ trial_vmess() {
     echo -e "   Remarks  : $user"
     echo -e "   Domain   : $domain"
     echo -e "   UUID     : $uuid"
+    echo -e "   Port     : 443"
+    echo -e "   Path     : /vmess"
     echo -e "   Expired  : $exp_date (1 Hari)"
     echo -e "-----------------------------------------------"
-    echo -e "   Link Vmess :"
+    echo -e "   \e[1;33mFULL LINK VMESS :\e[0m"
     echo -e "   $vmess_link"
     echo -e "-----------------------------------------------"
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
