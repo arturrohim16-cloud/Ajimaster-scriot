@@ -221,7 +221,7 @@ add_ssh() {
     echo -e "   $DOMAIN:80@$user:$pass"
     echo -e " "
     echo -e "   FORMAT HTTP CUSTOM (TLS/SSL):"
-    echo -e "   $DOMAIN:443@$user:$pass"
+    echo -e "   $DOMAIN:2053@$user:$pass"
     echo -e " ╠══════════════════════════════════════════════╣ "
     echo -e "   PAYLOAD WEBSOCKET (PORT 80):"
     echo -e "   GET / HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]"
