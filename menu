@@ -428,7 +428,7 @@ SSH_LOG="╔════════════════════╗
 🚪 **Port TLS** : 444
 🚪 **Port UDP** : 7100, 7200
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
+✅ *SIAP DI GUNAKAN BOSS🤙🏻*"
 
 # Kirim ke Telegram
 send_log "SSH" "$SSH_LOG"
