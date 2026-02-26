@@ -3,16 +3,22 @@
 # Auto-Installer VPN Premium By Gemini AI
 # ==========================================
 
+# --- KONFIGURASI GITHUB ---
+TOKEN="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"
+REPO_URL="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main"
+
 # 1. Update & Instal Komponen Dasar
+echo -e "Update & Install Software Dasar..."
 apt update -y
 apt install nginx xray jq python3 python3-pip curl wget screen -y
 
-# 2. Buat Direktori yang Dibutuhkan
+# 2. Buat Direktori Sistem
 mkdir -p /etc/xray
 mkdir -p /usr/local/etc/xray
 mkdir -p /var/log/xray
 
-# 3. Download & Pasang Mesin Xray (Config)
+# 3. Pasang Mesin Xray (Config Utama)
+echo -e "Memasang Konfigurasi Xray..."
 cat <<EOF > /usr/local/etc/xray/config.json
 {
   "log": {
@@ -51,6 +57,7 @@ cat <<EOF > /usr/local/etc/xray/config.json
 EOF
 
 # 4. Pasang Mesin Websocket SSH (Port 2082)
+echo -e "Memasang Websocket Python..."
 cat <<EOF > /usr/local/bin/ws-python
 import socket, threading
 def proxy(client, address):
@@ -79,13 +86,22 @@ while True:
     threading.Thread(target=proxy, args=(c, addr)).start()
 EOF
 chmod +x /usr/local/bin/ws-python
-
-# 5. Jalankan WS-Python di Background
 screen -dmS ws python3 /usr/local/bin/ws-python
 
-# 6. Download File MENU (Script Mewah Kita)
-# GANTI LINK DI BAWAH INI DENGAN LINK RAW MENU GITHUB KAMU
-wget --header="Authorization: token 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" -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu" && chmod +x /usr/bin/menu
+# 5. Download File MENU Utama (Dashboard Mewah)
+echo -e "Mengambil File Menu dari GitHub..."
+wget --header="Authorization: token $TOKEN" -O /usr/bin/menu "$REPO_URL/menu"
+chmod +x /usr/bin/menu
+
+# 6. Download File Pendukung (Trial, Cek Online, dll)
+# Catatan: Pastikan file-file ini ada di GitHub kamu di dalam folder Scriptku/
+echo -e "Mengambil File Pendukung..."
+FILES=("trial_ssh" "trial_vmess" "trial_vless" "trial_trojan" "cek_online" "exp_cleaner" "del_user")
+
+for FILE in "${FILES[@]}"; do
+    wget --header="Authorization: token $TOKEN" -O /usr/bin/$FILE "$REPO_URL/Scriptku/$FILE"
+    chmod +x /usr/bin/$FILE
+done
 
 # 7. Restart & Enable Semua Service
 systemctl daemon-reload
@@ -93,5 +109,9 @@ systemctl enable xray
 systemctl restart xray
 systemctl restart nginx
 
-echo "Pemasangan Selesai! Ketik 'menu' untuk memulai."
-
+clear
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "   INSTALLASI SELESAI DENGAN SEMPURNA"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo " Ketik 'menu' untuk membuka dashboard"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
