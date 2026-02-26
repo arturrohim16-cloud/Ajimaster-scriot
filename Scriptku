@@ -9,6 +9,26 @@ source /usr/bin/cek_online 2>/dev/null
 source /usr/bin/exp_cleaner 2>/dev/null
 source /usr/bin/del_user 2>/dev/null
 
+# --- KONFIGURASI BOT TELEGRAM ---
+TOKEN="8226263150:AAFdiVuQeEshxOpSvema_F6fDwbyFcfNWnw"
+CHAT_ID="6577966386"
+
+send_log() {
+    local TIPE=$1
+    local PESAN=$2
+    local TEXT="🚀 *HASIL CREATE $TIPE* 🚀
+━━━━━━━━━━━━━━━━━━━━━━
+$PESAN
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *Berhasil Dibuat*"
+
+    # Menggunakan urlencode agar link panjang & simbol khusus terkirim sempurna
+    curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
+        --data-urlencode "chat_id=$CHAT_ID" \
+        --data-urlencode "text=$TEXT" \
+        --data-urlencode "parse_mode=Markdown" > /dev/null
+}
+
 update_script() {
     clear
     # --- DEFINISI WARNA ---
@@ -53,7 +73,7 @@ backup_data() {
     
     clear
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;32m      BACKUP BERHASIL DISELESAIKAN      \e[0m \e[1;35m┃\e[0m"
+    echo -e " \e[1;35m┃\e[0m \e[1;32m      BACKUP BERHASIL DISELESAIKAN       \e[0m \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m File: /root/user_backup.tar.gz          \e[0m \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;36m Isi : SSH, Vmess, Vless, Domain         \e[0m \e[1;35m┃\e[0m"
@@ -65,158 +85,356 @@ backup_data() {
 add_trojan() {
     clear
     CONF="/usr/local/etc/xray/config.json"
-    DOMAIN=$(cat /etc/xray/domain 2>/dev/null); [[ -z $DOMAIN ]] && DOMAIN="aji.izz-store.my.id"
-    
-    echo -e "\e[1;35m╔════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;35m║\e[0m \e[1;33m      CREATE TROJAN PREMIUM         \e[0m \e[1;35m║\e[0m"
-    echo -e "\e[1;35m╚════════════════════════════════════════╝\e[0m"
-    read -p " 👤 Username   : " user
-    read -p " 🔑 Password   : " pass
-    read -p " 📅 Exp (Days) : " masaaktif
-    
-    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+    domain="aji.izz-store.my.id"
 
-    jq '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": "'$pass'", "email": "'$user'"}]' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\E[44;1;39m       CREATE TROJAN ACCOUNT       \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    read -p "Username : " user
+    read -p "Expired (Days) : " masaaktif
+
+    # Cek apakah jq sudah ada, jika belum install otomatis
+    if ! command -v jq &> /dev/null; then
+        apt install jq -y &> /dev/null
+    fi
+
+    if grep -q "\"email\": \"$user\"" "$CONF"; then
+        echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
+        sleep 2
+        return
+    fi
+
+    password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
+    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
+    hariini=`date +"%Y-%m-%d"`
+
+     # PROSES INJEKSI (Hanya menembak pintu Trojan)
+    jq --arg pw "$password" --arg mail "$user" \
+    '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pw, "email": $mail}]' \
+    "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
+    
+    chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
 
-    t_tls="trojan://$pass@$DOMAIN:443?path=%2Ftrojan&security=tls&type=ws#$user"
+    # GENERATE LINKS
+    link1="trojan://$password@$domain:443?path=%2Ftrojan&security=tls&type=ws&sni=$domain#$user"
+    link2="trojan://$password@$domain:443?mode=multi&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
+
+    mkdir -p /etc/xray
+    echo "### $user $exp" >> /etc/xray/trojan_users.txt
 
     clear
-    echo -e "\e[1;35m╔════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;35m║\e[0m \e[1;32m      TROJAN ACCOUNT DETAILS        \e[0m \e[1;35m║\e[0m"
-    echo -e "\e[1;35m╠════════════════════════════════════════╝\e[0m"
-    echo -e "\e[1;35m║\e[0m \e[1;37mUser     : $user\e[0m"
-    echo -e "\e[1;35m║\e[0m \e[1;37mExpired  : $exp\e[0m"
-    echo -e "\e[1;35m╠════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;35m║\e[0m \e[1;33m🔐 TROJAN WS TLS (443)\e[0m"
-    echo -e "\e[1;35m║\e[0m $t_tls"
-    echo -e "\e[1;35m╚════════════════════════════════════════╝\e[0m"
-    read -p " Tekan Enter untuk kembali..." menu
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\E[44;1;39m      TROJAN ACCOUNT DETAILS       \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "Remarks   : $user"
+    echo -e "Domain    : $domain"
+    echo -e "Password  : $password"
+    echo -e "Path WS   : /trojan"
+    echo -e "ServName  : trojan-grpc"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink Trojan WS TLS :\033[0m"
+    echo -e "$link1"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink Trojan gRPC TLS :\033[0m"
+    echo -e "$link2"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "Created   : $hariini"
+    echo -e "Expired   : $exp"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+# --- FORMAT NOTIFIKASI TROJAN ---
+TROJAN_LOG="╔════════════════════╗
+      ⚔️ TROJAN PREMIUM ⚔️
+╚════════════════════╝
+👤 **User** : \`$user\`
+📅 **Expired** : \`$exp\`
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 **Link WS** :
+\`$link1\`
+
+🚀 **Link gRPC** :
+\`$link2\`
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *Auto-Script By AJI VPN*"
+
+# Kirim ke Telegram
+send_log "TROJAN" "$TROJAN_LOG"
+
+    read -p "Press Enter to return to menu..."
+    dashboard_utama
 }
 
 add_vless() {
     clear
     CONF="/usr/local/etc/xray/config.json"
-    DOMAIN=$(cat /etc/xray/domain 2>/dev/null); [[ -z $DOMAIN ]] && DOMAIN="aji.izz-store.my.id"
-    
-    echo -e "\e[1;36m╔════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;33m      CREATE VLESS PREMIUM          \e[0m \e[1;36m║\e[0m"
-    echo -e "\e[1;36m╚════════════════════════════════════════╝\e[0m"
-    read -p " 👤 Username   : " user
-    grep -qw "$user" "$CONF" && { echo -e "\e[1;31mUser sudah ada!\e[0m"; sleep 2; return; }
-    read -p " 📅 Exp (Days) : " masaaktif
-    
-    uuid=$(uuidgen)
-    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+    domain="aji.izz-store.my.id"
 
-    # Masukkan user ke semua inbound vless (WS & gRPC)
-    jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": $id, "email": $mail}]' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\E[44;1;39m       CREATE VLESS ACCOUNT        \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    read -p "Username : " user
+    read -p "Expired (Days) : " masaaktif
+
+    # Cek apakah jq sudah ada, jika belum install otomatis
+    if ! command -v jq &> /dev/null; then
+        apt install jq -y &> /dev/null
+    fi
+
+    if grep -q "\"email\": \"$user\"" "$CONF"; then
+        echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
+        sleep 2
+        return
+    fi
+
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
+    hariini=`date +"%Y-%m-%d"`
+
+    jq --arg id "$uuid" --arg mail "$user" \
+    '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": $id, "email": $mail}]' \
+    "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
+    
+    chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
 
-    v_tls="vless://$uuid@$DOMAIN:443?path=%2Fvless&security=tls&encryption=none&type=ws&sni=$DOMAIN#$user"
-    v_ntls="vless://$uuid@$DOMAIN:80?path=%2Fvless-ntls&security=none&encryption=none&type=ws&host=$DOMAIN#$user"
-    v_grpc="vless://$uuid@$DOMAIN:443?mode=multi&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$DOMAIN#$user"
+    # GENERATE LINKS VLESS
+    link1="vless://$uuid@$domain:443?path=%2Fvless&security=tls&encryption=none&type=ws&sni=$domain#$user"
+    link2="vless://$uuid@$domain:80?path=%2Fvless&security=none&encryption=none&type=ws#$user"
+    link3="vless://$uuid@$domain:443?mode=multi&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
+
+    echo "### $user $exp" >> /etc/xray/vless_users.txt
 
     clear
-    echo -e "\e[1;36m╔════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;32m      VLESS ACCOUNT DETAILS         \e[0m \e[1;36m║\e[0m"
-    echo -e "\e[1;36m╠════════════════════════════════════════╝\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;37mUser     : $user\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;37mExpired  : $exp\e[0m"
-    echo -e "\e[1;36m╠════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;33m🔐 VLESS WS TLS (443)\e[0m"
-    echo -e "\e[1;36m║\e[0m $v_tls"
-    echo -e "\e[1;36m║\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;33m🔓 VLESS WS NON-TLS (80)\e[0m"
-    echo -e "\e[1;36m║\e[0m $v_ntls"
-    echo -e "\e[1;36m║\e[0m"
-    echo -e "\e[1;36m║\e[0m \e[1;33m🚀 VLESS gRPC (443)\e[0m"
-    echo -e "\e[1;36m║\e[0m $v_grpc"
-    echo -e "\e[1;36m╚════════════════════════════════════════╝\e[0m"
-    read -p " Tekan Enter untuk kembali..." menu
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\E[44;1;39m      VLESS ACCOUNT DETAILS        \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "Remarks   : $user"
+    echo -e "Domain    : $domain"
+    echo -e "UUID      : $uuid"
+    echo -e "Path WS   : /vless"
+    echo -e "ServName  : vless-grpc"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink VLESS WS TLS :\033[0m"
+    echo -e "$link1"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink VLESS WS None TLS :\033[0m"
+    echo -e "$link2"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink VLESS gRPC TLS :\033[0m"
+    echo -e "$link3"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+# --- FORMAT NOTIFIKASI VLESS ---
+VLESS_LOG="╔════════════════════╗
+      ⚡ VLESS PREMIUM ⚡
+╚════════════════════╝
+👤 **User** : \`$user\`
+📅 **Expired** : \`$exp\`
+━━━━━━━━━━━━━━━━━━━━━━
+🔗 **Link TLS** :
+\`$link1\`
+
+🔗 **Link Non-TLS** :
+\`$link2\`
+
+🔗 **Link gRPC** :
+\`$link3\`
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *Auto-Script By AJI VPN*"
+
+# Kirim ke Telegram
+send_log "VLESS" "$VLESS_LOG"
+
+    read -p "Press Enter to return to menu..."
+    dashboard_utama 
 }
 
 add_vmess() {
     clear
     CONF="/usr/local/etc/xray/config.json"
-    DOMAIN=$(cat /etc/xray/domain 2>/dev/null); [[ -z $DOMAIN ]] && DOMAIN="aji.izz-store.my.id"
     
-    echo -e "\e[1;34m╔════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;33m      CREATE VMESS PREMIUM          \e[0m \e[1;34m║\e[0m"
-    echo -e "\e[1;34m╚════════════════════════════════════════╝\e[0m"
-    read -p " 👤 Username   : " user
-    grep -qw "$user" "$CONF" && { echo -e "\e[1;31m User sudah ada!\e[0m"; sleep 2; return; }
-    read -p " 📅 Exp (Days) : " masaaktif
-    
-    uuid=$(uuidgen)
-    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+    # Kunci Domain Langsung (Agar tidak error file not found)
+    domain="aji.izz-store.my.id"
 
-    # Masukkan user ke semua inbound vmess (WS & gRPC)
-    jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.protocol == "vmess")).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' $CONF > $CONF.tmp && mv $CONF.tmp $CONF
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\E[44;1;39m       CREATE VMESS ACCOUNT        \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    read -p "Username : " user
+    read -p "Expired (Days) : " masaaktif
+
+    # Cek apakah jq sudah ada, jika belum install otomatis
+    if ! command -v jq &> /dev/null; then
+        apt install jq -y &> /dev/null
+    fi
+
+    if grep -q "\"email\": \"$user\"" "$CONF"; then
+        echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
+        sleep 2
+        return
+    fi
+
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
+    hariini=`date +"%Y-%m-%d"`
+
+    jq --arg id "$uuid" --arg mail "$user" \
+    '(.inbounds[] | select(.protocol == "vmess")).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' \
+    "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
+    
+    # Fix Permission & Restart
+    chown root:root "$CONF"
+    chmod 644 "$CONF"
     systemctl restart xray
 
-    # Link Generator
-    v_ws=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"tls\":\"tls\",\"sni\":\"$DOMAIN\"}" | base64 -w 0)
-    v_ntls=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$DOMAIN\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"tls\":\"none\"}" | base64 -w 0)
-    v_grpc=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$DOMAIN\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$DOMAIN\",\"tls\":\"tls\",\"sni\":\"$DOMAIN\"}" | base64 -w 0)
+    # GENERATE LINK (Struktur Identik dengan akun 'ako')
+    link1=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
+    link2=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"tls\":\"none\"}" | base64 -w 0)
+    link3=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
+
+    # Catat ke log user (Gunakan path yang pasti ada)
+    mkdir -p /etc/xray
+    echo "### $user $exp" >> /etc/xray/vmess_users.txt
 
     clear
-    echo -e "\e[1;34m╔════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;32m      VMESS ACCOUNT DETAILS         \e[0m \e[1;34m║\e[0m"
-    echo -e "\e[1;34m╠════════════════════════════════════════╝\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;37mUser     : $user\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;37mExpired  : $exp\e[0m"
-    echo -e "\e[1;34m╠════════════════════════════════════════╗\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;33m🔐 VMESS WS TLS (443)\e[0m"
-    echo -e "\e[1;34m║\e[0m vmess://$v_ws"
-    echo -e "\e[1;34m║\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;33m🔓 VMESS WS NON-TLS (80)\e[0m"
-    echo -e "\e[1;34m║\e[0m vmess://$v_ntls"
-    echo -e "\e[1;34m║\e[0m"
-    echo -e "\e[1;34m║\e[0m \e[1;33m🚀 VMESS gRPC (443)\e[0m"
-    echo -e "\e[1;34m║\e[0m vmess://$v_grpc"
-    echo -e "\e[1;34m╚════════════════════════════════════════╝\e[0m"
-    read -p " Tekan Enter untuk kembali..." menu
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\E[44;1;39m      VMESS ACCOUNT DETAILS        \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "Remarks   : $user"
+    echo -e "Domain    : $domain"
+    echo -e "Port TLS  : 443"
+    echo -e "Port NTLS : 80"
+    echo -e "UUID      : $uuid"
+    echo -e "Path      : /vmess"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink WS TLS :\033[0m"
+    echo -e "vmess://$link1"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink WS None TLS :\033[0m"
+    echo -e "vmess://$link2"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[0;32mLink gRPC TLS :\033[0m"
+    echo -e "vmess://$link3"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "Created   : $hariini"
+    echo -e "Expired   : $exp"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+# --- FORMAT NOTIFIKASI VMESS ---
+VMESS_LOG="╔════════════════════╗
+      ✨ VMESS PREMIUM ✨
+╚════════════════════╝
+👤 **User** : \`$user\`
+📅 **Expired** : \`$exp\`
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 **Link TLS** :
+\`$link1\`
+
+🌐 **Link Non-TLS** :
+\`$link2\`
+
+🔗 **Link gRPC** :
+\`$link3\`
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *Auto-Script By AJI VPN*"
+
+# Kirim ke Telegram
+send_log "VMESS" "$VMESS_LOG"
+
+    read -p "Press Enter to return to menu..."
+    dashboard_utama 
 }
 
 add_ssh() {
     clear
-    MYIP=$(wget -qO- ipinfo.io/ip)
-    DOMAIN=$(cat /etc/xray/domain 2>/dev/null); [[ -z $DOMAIN ]] && DOMAIN="aji.izz-store.my.id"
+    domain="aji.izz-store.my.id"
+    # Warna & Gaya Teks
+    RED_BG='\033[41m'
+    WHITE_BOLD='\033[1;37m'
+    YELLOW='\033[1;33m'; CYAN='\033[1;36m'; GREEN='\033[1;32m'
+    PURPLE='\033[1;35m'; BLUE='\033[1;34m'; NC='\033[0m'
 
-    echo -e "\e[1;35m╔═══════════════════════════════════════════════════╗\e[0m"
-    echo -e "   \e[1;33m🛠️  CREATE SSH PREMIUM ACCOUNT  🛠️\e[0m"
-    echo -e "\e[1;35m╚═══════════════════════════════════════════════════╝\e[0m"
-    read -p "  👤 Username   : " user
-    grep -w "^$user" /etc/passwd > /dev/null && { echo -e "\e[1;31m Error: User '$user' sudah ada!\e[0m"; sleep 2; return; }
-    read -p "  🔑 Password   : " pass
-    read -p "  📅 Exp (Days) : " masaaktif
-    read -p "  🚫 Limit IP   : " iplimit
-    read -p "  📉 Limit GB   : " gblimit
-
-    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
-    useradd -e $exp -s /bin/false -M $user
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "   ${RED_BG}${WHITE_BOLD}      CREATE SSH PREMIUM - AJIMASTER      ${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    read -p "   Username       : " user
+    read -p "   Password       : " pass
+    read -p "   Limit IP      : " iplimit
+    read -p "   Expired (Hari) : " masa_aktif
+    
+    # --- PROSES PERBAIKAN DI SINI ---
+    exp=$(date -d "$masa_aktif days" +"%Y-%m-%d")
+    
+    # 1. Hapus user lama jika ada, lalu buat baru dengan shell /bin/false
+    userdel -f $user > /dev/null 2>&1
+    useradd -e $exp -M -s /bin/false $user
+    
+    # 2. Cara ganti password yang paling kompatibel
     echo "$user:$pass" | chpasswd
-    usermod -c "MaxIP:$iplimit | MaxGB:$gblimit" $user
-
+    
+    # 3. Pastikan shell /bin/false terdaftar di sistem agar Dropbear mau terima
+    if ! grep -q "^/bin/false" /etc/shells; then
+        echo "/bin/false" >> /etc/shells
+    fi
+    # --------------------------------
+    
+    echo "$user $iplimit" >> /etc/ssh/.limit_ip
+    
     clear
-    echo -e "\e[1;32m\e[47m"
-    echo -e " ╔══════════════════════════════════════════════╗ "
-    echo -e " ║          SSH PREMIUM - AJIMASTER             ║ "
-    echo -e " ╠══════════════════════════════════════════════╣ "
-    echo -e "   Host/Domain: $DOMAIN"
-    echo -e "   Username   : $user"
-    echo -e "   Password   : $pass"
-    echo -e "   Expired    : $exp"
-    echo -e " ╠══════════════════════════════════════════════╣ "
-    echo -e "   FORMAT HTTP CUSTOM (WS TLS):"
-    echo -e "   $DOMAIN:2053@$user:$pass"
-    echo -e " "
-    echo -e "   FORMAT HTTP CUSTOM (WS NON-TLS):"
-    echo -e "   $DOMAIN:8880@$user:$pass"
-    echo -e " ╚══════════════════════════════════════════════╝ "
-    echo -e "\e[0m"
-    read -p " Tekan Enter untuk kembali..." menu
+    echo -e "${CYAN} ╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN} ║${NC}   ${RED_BG}${WHITE_BOLD}      SSH PREMIUM - AJIMASTER       ${NC}   ${CYAN}║${NC}"
+    echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
+    echo -e "   ${YELLOW}Host/Domain :${NC} ${WHITE_BOLD}$domain${NC}"
+    echo -e "   ${YELLOW}Username    :${NC} ${WHITE_BOLD}$user${NC}"
+    echo -e "   ${YELLOW}Password    :${NC} ${WHITE_BOLD}$pass${NC}"
+    echo -e "   ${YELLOW}Limit IP    :${NC} ${WHITE_BOLD}$iplimit IP${NC}"
+    echo -e "   ${YELLOW}Expired     :${NC} ${WHITE_BOLD}$exp${NC}"
+    echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
+    echo -e "   ${GREEN}SSH WS (N-TLS) :${NC} ${WHITE_BOLD}2082${NC}"
+    echo -e "   ${GREEN}SSH SSL (TLS)  :${NC} ${WHITE_BOLD}444${NC}"
+    echo -e "   ${GREEN}SSH DIRECT     :${NC} ${WHITE_BOLD}143, 109${NC}"
+    echo -e "   ${GREEN}UDPGW PORT     :${NC} ${WHITE_BOLD}7100-7300${NC}"
+    echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
+    echo -e "   ${BLUE}FORMAT KONEKSI (Tinggal Copy):${NC}"
+    echo -e "   ${WHITE_BOLD}SSL/TLS  : $domain:444@$user:$pass${NC}"
+    echo -e "   ${WHITE_BOLD}WS N-TLS : $domain:2082@$user:$pass${NC}"
+    echo -e "   ${WHITE_BOLD}UDP/GAME : $domain:7300@$user:$pass${NC}"
+    echo -e "              ${YELLOW}(Port UDP: 1-65535 aktif)${NC}"
+    echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
+    echo -e "   ${BLUE}PAYLOAD WS (Port 2082):${NC}"
+    echo -e "   ${WHITE_BOLD}GET / HTTP/1.1[crlf]Host: edu.ruangguru.com[crlf]Upgrade: websocket[crlf]Connection: Upgrade[crlf][crlf]${NC}"
+    echo -e ""
+    echo -e "   ${BLUE}SETTING SSL (Port 444):${NC}"
+    echo -e "   ${WHITE_BOLD}SNI/Server Name: edu.ruangguru.com${NC}"
+    echo -e "${CYAN} ╚══════════════════════════════════════════════╝${NC}"
+    echo ""
+
+# --- FORMAT NOTIFIKASI SSH ---
+SSH_LOG="╔════════════════════╗
+      🛡️ SSH PREMIUM 🛡️
+╚════════════════════╝
+👤 **User** : \`$user\`
+🔑 **Password** : \`$pass\`
+📅 **Expired** : \`$exp\`
+🚫 **Limit IP** : \`$iplimit\`
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 **Host** : \`$DOMAIN\`
+🔗 \`$DOMAIN:444@$user:$pass\`
+🔗 \`$DOMAIN:2082@$user:$pass\`
+🔗 \`$DOMAIN:7100@$user:$pass\`
+━━━━━━━━━━━━━━━━━━━━━━
+🚪 **Port SSH** : 2082
+🚪 **Port TLS** : 444
+🚪 **Port UDP** : 7100, 7200
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *Auto-Script By AJI VPN*"
+
+# Kirim ke Telegram
+send_log "SSH" "$SSH_LOG"
+
+    read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
+    dashboard_utama 
 }
 
 trial_ssh() {
@@ -305,7 +523,7 @@ cek_online() {
     if [[ -e /etc/openvpn/server/openvpn-status.log ]]; then
         grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" /etc/openvpn/server/openvpn-status.log | cut -d ',' -f 1,2 | sed 's/,/ -> /'
     fi
-    # Cek Xray Online (biasanya butuh jq)
+    # Cek Xray Online
     echo -e "\n\e[1;33m[ XRAY ONLINE ]\e[0m"
     data=( `cat /etc/xray/config.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq` )
     for user in "${data[@]}"; do
@@ -318,72 +536,107 @@ cek_online() {
 }
 
 hapus_manual() {
-    clear
-    BIRU='\033[1;34m'
-    KUNING='\033[1;33m'
-    CYAN='\033[1;36m'
-    NC='\033[0m'
-    CONF="/usr/local/etc/xray/config.json"
+# =========================================================
+#  FUNGSI DISPLAY & HAPUS USER (SSH & XRAY) BY GEMINI
+# =========================================================
 
-    echo -e "${BIRU}=======================================${NC}"
-    echo -e "       ${KUNING}PENGHAPUSAN AKUN (PER KATEGORI)${NC}  "
-    echo -e "${BIRU}=======================================${NC}"
+# --- 1. WARNA ---
+CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+PURPLE='\033[0;35m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-    # --- 1. DAFTAR SSH ---
-    echo -e "  ${CYAN}[ SSH Users ]${NC}"
-    echo -ne "${KUNING}"
-    awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | nl -s '. '
-    echo -ne "${NC}"
-    echo -e "${BIRU}---------------------------------------${NC}"
+clear
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "          ${PURPLE}🔍 LIST ACTIVE USERS DETAILS${NC}          "
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    # --- 2. DAFTAR VMESS ---
-    echo -e "  ${CYAN}[ VMESS Users ]${NC}"
-    echo -ne "${KUNING}"
-    # Mengambil email dari baris yang ada kata 'alterId' (ciri Vmess)
-    grep "alterId" $CONF | grep -oP '(?<="email": ")[^"]*' | grep -v "admin" | sort | uniq | nl -s '. '
-    echo -ne "${NC}"
-    echo -e "${BIRU}---------------------------------------${NC}"
+# --- 2. TAMPILAN LIST USER ---
 
-    # --- 3. DAFTAR VLESS ---
-    echo -e "  ${CYAN}[ VLESS Users ]${NC}"
-    echo -ne "${KUNING}"
-    # Mengambil email dari baris yang ada ID tapi TIDAK ada alterId (ciri Vless Mas)
-    grep "\"id\":" $CONF | grep -v "alterId" | grep -oP '(?<="email": ")[^"]*' | grep -v "admin" | sort | uniq | nl -s '. '
-    echo -ne "${NC}"
-    echo -e "${BIRU}---------------------------------------${NC}"
+# Bagian SSH & OpenVPN
+echo -e "${YELLOW} [ SSH & OpenVPN Users ] ${NC}"
+awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | nl -s ". " | while read line; do
+    echo -e "${GREEN}  $line${NC}"
+done
+echo -e "${CYAN}-------------------------------------------------${NC}"
 
-    # --- 4. DAFTAR TROJAN ---
-    echo -e "  ${CYAN}[ TROJAN Users ]${NC}"
-    echo -ne "${KUNING}"
-    # Mengambil email dari baris yang ada kata 'password' (ciri Trojan)
-    grep "password" $CONF | grep -oP '(?<="email": ")[^"]*' | grep -v "admin" | sort | uniq | nl -s '. '
-    echo -ne "${NC}"
-    echo -e "${BIRU}=======================================${NC}"
-    echo ""
+# Bagian VMESS
+echo -e "${YELLOW} [ VMESS Users ] ${NC}"
+if [ -s /etc/xray/vmess_users.txt ]; then
+    grep -E "^### " "/etc/xray/vmess_users.txt" | cut -d ' ' -f 2-3 | nl -s ". " | while read line; do
+        echo -e "${GREEN}  $line${NC}"
+    done
+else
+    echo -e "  ${BLUE}No vmess users found.${NC}"
+fi
+echo -e "${CYAN}-------------------------------------------------${NC}"
 
-    echo -ne "${KUNING}Ketik Nama User yang ingin dihapus: ${NC}"
-    read -r user
+# Bagian VLESS
+echo -e "${YELLOW} [ VLESS Users ] ${NC}"
+if [ -s /etc/xray/vless_users.txt ]; then
+    grep -E "^### " "/etc/xray/vless_users.txt" | cut -d ' ' -f 2-3 | nl -s ". " | while read line; do
+        echo -e "${GREEN}  $line${NC}"
+    done
+else
+    echo -e "  ${BLUE}No vless users found.${NC}"
+fi
+echo -e "${CYAN}-------------------------------------------------${NC}"
 
-    if [[ -z $user ]]; then
-        echo -e "${KUNING}Nama tidak boleh kosong!${NC}"
-        sleep 1; return
-    fi
+# Bagian TROJAN
+echo -e "${YELLOW} [ TROJAN Users ] ${NC}"
+if [ -s /etc/xray/trojan_users.txt ]; then
+    grep -E "^### " "/etc/xray/trojan_users.txt" | cut -d ' ' -f 2-3 | nl -s ". " | while read line; do
+        echo -e "${GREEN}  $line${NC}"
+    done
+else
+    echo -e "  ${BLUE}No trojan users found.${NC}"
+fi
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    # PROSES HAPUS SANGAT AKURAT
-    # Menghapus satu blok klien yang mengandung email tersebut
-    sed -i "/\"email\": \"$user\"/d" $CONF
-    # Menghapus jika ada sisa baris kosong
-    sed -i '/^$/d' $CONF
-    
-    # Hapus User SSH jika ada
+# --- 3. PROSES HAPUS ALL-IN-ONE ---
+
+CONF="/usr/local/etc/xray/config.json"
+
+read -p " Ketik Nama User yang ingin dihapus: " user
+
+if [ -z "$user" ]; then
+    echo -e "${RED} Error: Nama tidak boleh kosong!${NC}"
+    sleep 2
+    return
+fi
+
+echo -e "\n${CYAN}Sedang membersihkan user [ $user ]...${NC}"
+
+# Hapus SSH (Sistem)
+if id "$user" &>/dev/null; then
     userdel -f "$user" &>/dev/null
-    
-    systemctl restart xray &>/dev/null
-    systemctl restart ssh &>/dev/null
+    echo -e "${GREEN} [OK]${NC} User SSH [ $user ] dihapus."
+fi
 
-    echo -e "${BIRU}---------------------------------------${NC}"
-    echo -e "  ${KUNING}User [ $user ] Berhasil Dihapus!${NC}"
-    echo -e "${BIRU}---------------------------------------${NC}"
+# Hapus Xray (Config JSON)
+if [ -f "$CONF" ]; then
+    jq --arg mail "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $mail))' "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
+    echo -e "${GREEN} [OK]${NC} User Xray [ $user ] dihapus dari config."
+fi
+
+# Hapus Log TXT
+sed -i "/$user/d" /etc/xray/vmess_users.txt 2>/dev/null
+sed -i "/$user/d" /etc/xray/vless_users.txt 2>/dev/null
+sed -i "/$user/d" /etc/xray/trojan_users.txt 2>/dev/null
+echo -e "${GREEN} [OK]${NC} Log database dibersihkan."
+
+# Restart Service
+chown root:root "$CONF"
+chmod 644 "$CONF"
+systemctl restart xray &>/dev/null
+
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "  ${GREEN}BERHASIL:${NC} Akun [ $user ] telah dihapus total!"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+sleep 3
     echo -ne "${KUNING}Press any key to back to menu${NC}"
     read -n 1 -s -r
     dashboard_utama
@@ -414,7 +667,7 @@ fix_servis() {
     
     # Jalankan WS Python
     screen -dmS ws python3 /usr/local/bin/ws-python 8080
-    
+  
     # Pastikan enable agar saat reboot otomatis nyala
     systemctl enable xray
     systemctl enable nginx
@@ -456,57 +709,47 @@ menu_manager() {
     esac
 }
 
-  dashboard_utama() {
+dashboard_utama() {
     # --- HITUNG TOTAL AKUN (LIVE) ---
-    # Hitung SSH (User Sistem ID 1000+)
     total_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
     
-    # Lokasi Config Xray
     [ -f "/etc/xray/config.json" ] && CONF="/etc/xray/config.json" || CONF="/usr/local/etc/xray/config.json"
     
-    # Hitung Vmess, Vless, Trojan (Berdasarkan ID & Password di Config)
-    total_vmess=$(grep "id" $CONF | grep "alterId" | grep -v "admin@vmess" | wc -l)
-    total_vless=$(grep "id" $CONF | grep -v "alterId" | wc -l)
-    total_trojan=$(grep -c "password" $CONF 2>/dev/null || echo "0")
+    total_vmess=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "0")
+    total_vless=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null || echo "0")
+    total_trojan=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "0")
     
-    # Cuci Variabel (Buang spasi/enter agar kotak tidak pecah)
     total_ssh=$(echo $total_ssh | tr -dc '0-9'); [ -z "$total_ssh" ] && total_ssh="0"
     total_vmess=$(echo $total_vmess | tr -dc '0-9'); [ -z "$total_vmess" ] && total_vmess="0"
     total_vless=$(echo $total_vless | tr -dc '0-9'); [ -z "$total_vless" ] && total_vless="0"
     total_trojan=$(echo $total_trojan | tr -dc '0-9'); [ -z "$total_trojan" ] && total_trojan="0"
 
-    # 1. AMBIL DATA SISTEM
     MYIP=$(wget -qO- ipinfo.io/ip)
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
     [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
     UPTIME=$(uptime -p | cut -d " " -f 2-5)
     
-    # --- DATA VPS (RAM ANGKA) ---
     total_ram=$(free -m | grep Mem | awk '{print $2}')
     ram_usage=$(free -m | grep Mem | awk '{print $3}')
     RAM_VAL="${ram_usage}MB / ${total_ram}MB"
 
-    # 2. CEK STATUS SERVICE
     pgrep -x sshd >/dev/null && st_ssh="\e[1;92mON \e[0m" || st_ssh="\e[1;31mOFF\e[0m"
     if pgrep -f "xray" > /dev/null; then st_xry="\e[1;92mON \e[0m"; else st_xry="\e[1;31mOFF\e[0m"; fi
     pgrep -x nginx >/dev/null && st_ngx="\e[1;92mON \e[0m" || st_ngx="\e[1;31mOFF\e[0m"
     pgrep -f "ws" >/dev/null && st_wse="\e[1;92mON \e[0m" || st_wse="\e[1;31mOFF\e[0m"
 
-    # --- DEFINISI WARNA ---
-    P='\033[1;95m' # Ungu (Garis)
-    B='\033[1;34m' # Biru (Teks)
-    W='\033[1;37m' # Putih (Data)
+    P='\033[1;95m'
+    B='\033[1;34m'
+    W='\033[1;37m'
     NC='\033[0m'
 
     clear
-    # --- HEADER LOGO ---
     echo -e " \e[1;35m      █████╗ ██╗██╗██╗  ██╗\e[0m"
     echo -e " \e[1;35m     ██╔══██╗ ██║██║██║  ██║\e[0m"
     echo -e " \e[1;35m     ███████║ ██║██║██║  ██║\e[0m"
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-    # --- BOX 1: DATA SERVER ---
     echo -e "${P}┌──────────────────────────────────────────────────────────┐${NC}"
     echo -e "${P}│${NC}          ${B}• AJI SYSTEM VPN PANEL MENU •${NC}           ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
@@ -519,12 +762,10 @@ menu_manager() {
     echo -e "${P}│${NC} ${B}SSH:${st_ssh}${B} │ XRAY:${st_xry}${B} │ NGINX:${st_ngx}${B} │ WS:${st_wse}${NC}   ${P}│${NC}"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
 
-    # --- BOX 2: TOTAL AKUN (MENGGUNAKAN VARIABEL YANG SUDAH DICUCI) ---
-    printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}      ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "SSH/VPN" "$total_ssh" "VMESS/WS" "$total_vmess"
+    printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}       ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "SSH/VPN" "$total_ssh" "VMESS/WS" "$total_vmess"
     printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}      ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "VLESS/WS" "$total_vless" "TROJAN/WS" "$total_trojan"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
 
-    # --- BOX 3: DAFTAR MENU ---
     printf "${P}│${NC} ${B} [01] • SSH MENU    ${NC}  ${P}│${NC} ${B} [08] • BACKUP DA   ${NC}  ${P}│${NC}\n"
     printf "${P}│${NC} ${B} [02] • VMESS MENU  ${NC}  ${P}│${NC} ${B} [09] • UPDATE SC   ${NC}  ${P}│${NC}\n"
     printf "${P}│${NC} ${B} [03] • VLESS MENU  ${NC}  ${P}│${NC} ${B} [10] • REBOOT VPS  ${NC}  ${P}│${NC}\n"
@@ -554,10 +795,8 @@ menu_manager() {
     esac
 }
 
-# --- JEMBATAN PERINTAH AGAR BISA DIKETIK 'menu' ---
 menu() {
     dashboard_utama
 }
 
-# --- JALANKAN MENU UTAMA ---
 dashboard_utama
