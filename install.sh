@@ -85,8 +85,7 @@ screen -dmS ws python3 /usr/local/bin/ws-python
 
 # 6. Download File MENU (Script Mewah Kita)
 # GANTI LINK DI BAWAH INI DENGAN LINK RAW MENU GITHUB KAMU
-wget -O /usr/bin/menu "https://raw.githubusercontent.com/username/repo/main/menu"
-chmod +x /usr/bin/menu
+wget --header="Authorization: token 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" -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu" && chmod +x /usr/bin/menu
 
 # 7. Restart & Enable Semua Service
 systemctl daemon-reload
