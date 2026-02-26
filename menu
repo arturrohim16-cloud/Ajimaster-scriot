@@ -442,36 +442,46 @@ trial_ssh() {
     echo -e "\e[1;33m      CREATE TRIAL SSH PREMIUM (1 DAY)\e[0m"
     echo -e "-----------------------------------------------"
     read -p "   Username Trial : " user
-    if grep -w "^$user" /etc/passwd > /dev/null; then
-        echo -e "   Error: Username [$user] sudah ada!"
-        sleep 2; menu_manager
-    fi
-    read -p "   Password       : " pass
-    
     exp_date=$(date -d "1 days" +"%Y-%m-%d")
     IP=$(wget -qO- ipinfo.io/ip)
-    domain=$(cat /etc/xray/domain 2>/dev/null)
-    [[ -z "$domain" ]] && domain=$IP
-
-    # Eksekusi Pembuatan User
+    
+    # Eksekusi Pembuatan User di Sistem VPS
     useradd -e $exp_date -s /bin/false -M $user
-    echo -e "$pass\n$pass" | passwd $user &> /dev/null
+    echo -e "123\n123" | passwd $user &> /dev/null
 
     clear
     echo -e "   \e[1;32mSUCCESS CREATE TRIAL SSH PREMIUM\e[0m"
     echo -e "-----------------------------------------------"
     echo -e "   Username : $user"
-    echo -e "   Password : $pass"
-    echo -e "   Domain   : $domain"
+    echo -e "   Password : 123"
+    echo -e "   Host/IP  : $IP"
+    echo -e "   Port WS  : 444"
+    echo -e "   Port SSH : 2082, 109"
     echo -e "   Expired  : $exp_date (1 Hari)"
     echo -e "-----------------------------------------------"
-    echo -e "   \e[1;33mFORMAT LOGIN :\e[0m"
-    echo -e "   SSH WS    : $domain:80@$user:$pass"
-    echo -e "   SSH SSL   : $domain:443@$user:$pass"
-    echo -e "   SSH OVPN  : $domain:1194@$user:$pass"
-    echo -e "-----------------------------------------------"
+# --- FORMAT NOTIFIKASI SSH ---
+SSH_LOG="╔════════════════════╗
+      🛡️ SSH PREMIUM 🛡️
+╚════════════════════╝
+👤 **User** : \`$user\`
+🔑 **Password** : \`$pass\`
+📅 **Expired** : \`$exp\`
+🚫 **Limit IP** : \`$iplimit\`
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 **Host** : \`$DOMAIN\`
+🔗 \`$DOMAIN:444@$user:$pass\`
+🔗 \`$DOMAIN:2082@$user:$pass\`
+━━━━━━━━━━━━━━━━━━━━━━
+🚪 **Port SSH** : 2082
+🚪 **Port TLS** : 444
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *SIAP DI GUNAKAN BOSS*"
+
+# Kirim ke Telegram
+send_log "SSH" "$SSH_LOG"
+
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
-    menu_manager
+    dashboard_utama
 }
 
 trial_vmess() {
@@ -481,36 +491,92 @@ trial_vmess() {
     read -p "   Username Trial : " user
     exp_date=$(date -d "1 days" +"%Y-%m-%d")
     uuid=$(cat /proc/sys/kernel/random/uuid)
-    domain=$(cat /etc/xray/domain)
+    domain=$(cat /etc/xray/domain 2>/dev/null)
+    [[ -z "$domain" ]] && domain=$(wget -qO- ipinfo.io/ip)
     
-    # Masukkan ke Config Xray
-    sed -i '/#vmess$/i ### '"$user $exp_date"'\n},{"id": "'"$uuid"'"\n#vmess' /etc/xray/config.json
-    systemctl restart xray > /dev/null 2>&1
+    # Injeksi ke Config Xray (VMESS-WS)
+    jq --arg u "$user" --arg id "$uuid" '.inbounds[] | select(.tag=="vmess-ws") | .settings.clients += [{"id": $id, "alterId": 0, "email": $u}]' /usr/local/etc/xray/config.json > /usr/local/etc/xray/config.json.tmp && mv /usr/local/etc/xray/config.json.tmp /usr/local/etc/xray/config.json
+    systemctl restart xray
 
-    # Buat Link Vmess (Pastikan domain terkunci di 'add' dan 'host')
+    # Membuat Link Vmess
     vmess_json='{"v":"2","ps":"'${user}'","add":"'${domain}'","port":"443","id":"'${uuid}'","aid":"0","scy":"auto","net":"ws","type":"none","host":"'${domain}'","path":"/vmess","tls":"tls"}'
     vmess_link="vmess://$(echo -n $vmess_json | base64 -w 0)"
 
     clear
-    echo -e "   \e[1;32mSUCCESS CREATE TRIAL VMESS PREMIUM\e[0m"
+    echo -e "   \e[1;32mSUCCESS CREATE TRIAL VMESS\e[0m"
     echo -e "-----------------------------------------------"
     echo -e "   Remarks  : $user"
     echo -e "   Domain   : $domain"
-    echo -e "   Expired  : $exp_date (1 Hari)"
+    echo -e "   Expired  : $exp_date"
     echo -e "-----------------------------------------------"
-    echo -e "   LINK VMESS (HTTP CUSTOM) :"
+    echo -e "   LINK VMESS :"
     echo -e "   $vmess_link"
     echo -e "-----------------------------------------------"
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
-    menu_manager
+    dashboard_utama
 }
 
 trial_vless() {
-    if [[ -f /usr/bin/trial-vless ]]; then /usr/bin/trial-vless; else echo "Script trial Vless tidak ditemukan!"; sleep 2; fi
+    clear
+    echo -e "\e[1;33m      CREATE TRIAL VLESS PREMIUM (1 DAY)\e[0m"
+    echo -e "-----------------------------------------------"
+    read -p "   Username Trial : " user
+    exp_date=$(date -d "1 days" +"%Y-%m-%d")
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+    domain=$(cat /etc/xray/domain 2>/dev/null)
+    [[ -z "$domain" ]] && domain=$(wget -qO- ipinfo.io/ip)
+    
+    # Injeksi ke Config Xray (VLESS-WS)
+    jq --arg u "$user" --arg id "$uuid" '.inbounds[] | select(.tag=="vless-ws") | .settings.clients += [{"id": $id, "email": $u}]' /usr/local/etc/xray/config.json > /usr/local/etc/xray/config.json.tmp && mv /usr/local/etc/xray/config.json.tmp /usr/local/etc/xray/config.json
+    systemctl restart xray
+
+    # Membuat Link Vless
+    vless_link="vless://${uuid}@${domain}:443?path=%2Fvless&security=tls&encryption=none&type=ws#${user}"
+
+    clear
+    echo -e "   \e[1;32mSUCCESS CREATE TRIAL VLESS\e[0m"
+    echo -e "-----------------------------------------------"
+    echo -e "   Remarks  : $user"
+    echo -e "   Domain   : $domain"
+    echo -e "   Expired  : $exp_date"
+    echo -e "-----------------------------------------------"
+    echo -e "   LINK VLESS :"
+    echo -e "   $vless_link"
+    echo -e "-----------------------------------------------"
+    read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
+    dashboard_utama
 }
 
 trial_trojan() {
-    if [[ -f /usr/bin/trial-trojan ]]; then /usr/bin/trial-trojan; else echo "Script trial Trojan tidak ditemukan!"; sleep 2; fi
+    clear
+    echo -e "\e[1;33m      CREATE TRIAL TROJAN PREMIUM (1 DAY)\e[0m"
+    echo -e "-----------------------------------------------"
+    read -p "   Username Trial : " user
+    exp_date=$(date -d "1 days" +"%Y-%m-%d")
+    password=$(openssl rand -hex 4)
+    domain=$(cat /etc/xray/domain 2>/dev/null)
+    [[ -z "$domain" ]] && domain=$(wget -qO- ipinfo.io/ip)
+    
+    # Injeksi ke Config Xray (TROJAN-WS)
+    jq --arg u "$user" --arg p "$password" '.inbounds[] | select(.tag=="trojan-ws") | .settings.clients += [{"password": $p, "email": $u}]' /usr/local/etc/xray/config.json > /usr/local/etc/xray/config.json.tmp && mv /usr/local/etc/xray/config.json.tmp /usr/local/etc/xray/config.json
+    systemctl restart xray
+
+    # Membuat Link Trojan
+    trojan_link="trojan://${password}@${domain}:443?path=%2Ftrojan&security=tls&type=ws#${user}"
+
+    clear
+    echo -e "   \e[1;32mSUCCESS CREATE TRIAL TROJAN\e[0m"
+    echo -e "-----------------------------------------------"
+    echo -e "   Remarks  : $user"
+    echo -e "   Password : $password"
+    echo -e "   Domain   : $domain"
+    echo -e "   Expired  : $exp_date"
+    echo -e "-----------------------------------------------"
+    echo -e "   LINK TROJAN :"
+    echo -e "   $trojan_link"
+    echo -e "-----------------------------------------------"
+    read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
+    dashboard_utama
 }
 
 # --- FUNGSI CEK ONLINE ---
