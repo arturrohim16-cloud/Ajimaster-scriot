@@ -428,7 +428,7 @@ SSH_LOG="╔════════════════════╗
 🚪 **Port TLS** : 444
 🚪 **Port UDP** : 7100, 7200
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ *SIAP DI GUNAKAN BOSS🤙🏻*"
+✅ *SIAP DI GUNAKAN BOSS*"
 
 # Kirim ke Telegram
 send_log "SSH" "$SSH_LOG"
