@@ -12,21 +12,22 @@ source /usr/bin/del_user 2>/dev/null
 # --- KONFIGURASI BOT TELEGRAM ---
 TOKEN="8226263150:AAFdiVuQeEshxOpSvema_F6fDwbyFcfNWnw"
 CHAT_ID="6577966386"
-
 send_log() {
     local TIPE=$1
     local PESAN=$2
-    local TEXT="🚀 *HASIL CREATE $TIPE* 🚀
+    
+    # Gunakan format HTML agar karakter khusus di link VMESS tidak error
+    local TEXT="🚀 <b>HASIL CREATE $TIPE</b> 🚀
 ━━━━━━━━━━━━━━━━━━━━━━
 $PESAN
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ *Berhasil Dibuat*"
+✅ <b>Berhasil Dibuat</b>"
 
-    # Menggunakan urlencode agar link panjang & simbol khusus terkirim sempurna
+    # Kirim ke Telegram dengan parse_mode HTML
     curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
         --data-urlencode "chat_id=$CHAT_ID" \
         --data-urlencode "text=$TEXT" \
-        --data-urlencode "parse_mode=Markdown" > /dev/null
+        --data-urlencode "parse_mode=HTML" > /dev/null
 }
 
 update_script() {
