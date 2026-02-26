@@ -43,7 +43,7 @@ update_script() {
     echo -e "  ${KUNING}Sedang mengambil update terbaru...${NC}"
     
     # Proses Download Menggunakan Token Mas
-    wget -q --header="Authorization: token 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" -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/Scriptku"
+    wget --header="Authorization: token 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" -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu" && chmod +x /usr/bin/menu
     
     # Memberi Izin Eksekusi
     chmod +x /usr/bin/menu
