@@ -31,30 +31,32 @@ $PESAN
 
 update_script() {
     clear
-    # --- DEFINISI WARNA ---
-    BIRU='\033[1;34m'
-    KUNING='\033[1;33m'
-    NC='\033[0m'
+    echo -e "\e[1;33m      UPDATING SCRIPT FROM GITHUB...\e[0m"
+    echo -e "-----------------------------------------------"
+    
+    # Konfigurasi Token & Link
+    TOKEN="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"
+    REPO_URL="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu"
 
-    echo -e "${BIRU}=======================================${NC}"
-    echo -e "       ${KUNING}UPDATING SCRIPT DARI GITHUB${NC}      "
-    echo -e "${BIRU}=======================================${NC}"
-    echo -e "  ${KUNING}Mohon tunggu sebentar...${NC}"
-    echo -e "  ${KUNING}Sedang mengambil update terbaru...${NC}"
+    echo -e "   [1] Menghapus file menu lama..."
+    rm -f /usr/bin/menu
+
+    echo -e "   [2] Mendownload file menu terbaru..."
+    # Download menggunakan Header Token
+    wget --header="Authorization: token $TOKEN" -v -O /usr/bin/menu "$REPO_URL"
     
-    # Proses Download Menggunakan Token Mas
-    wget --header="Authorization: token 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" -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu" && chmod +x /usr/bin/menu
+    if [ $? -eq 0 ]; then
+        chmod +x /usr/bin/menu
+        echo -e "-----------------------------------------------"
+        echo -e "   \e[1;32mSUCCESS! Script Berhasil Diupdate.\e[0m"
+        echo -e "   Silakan ketik 'menu' kembali."
+        echo -e "-----------------------------------------------"
+    else
+        echo -e "   \e[1;31mGagal mendownload update!\e[0m"
+        echo -e "   Periksa koneksi atau token GitHub kamu."
+    fi
     
-    # Memberi Izin Eksekusi
-    chmod +x /usr/bin/menu
-    
-    echo -e "${BIRU}---------------------------------------${NC}"
-    echo -e "  ${KUNING}Update Berhasil Diinstall!${NC}"
-    echo -e "  ${KUNING}Menjalankan ulang menu...${NC}"
-    echo -e "${BIRU}---------------------------------------${NC}"
-    sleep 2
-    
-    # Menjalankan menu yang sudah diupdate
+    read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
     menu
 }
 
@@ -156,7 +158,7 @@ TROJAN_LOG="╔════════════════════╗
 🚀 **Link gRPC** :
 \`$link2\`
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
+✅ *SIAP DIGUNAKAN BOSS*"🚀
 
 # Kirim ke Telegram
 send_log "TROJAN" "$TROJAN_LOG"
