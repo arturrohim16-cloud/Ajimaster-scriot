@@ -283,7 +283,7 @@ link3="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&type=grpc
 MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User :</b> <code>$user</code>
-📅 <b>Exp  :</b> <code>$exp_date</code>
+📅 <b>exp  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link VLESS WS TLS :</b>
 <code>$link1</code>
@@ -362,10 +362,12 @@ EOF
     systemctl restart nginx
 
     # 3. GENERATE LINK VMESS (Base64 Clean Format)
-    link1=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
-    link2=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)
-    link3=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
-
+    vmess_tls="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+    vmess_ntls="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)"
+    vmess_grpc="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+   
+    mkdir -p /etc/xray   
+    echo "### $user $exp" >> /etc/xray/vmess_users.txt
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\E[44;1;39m      VMESS ACCOUNT DETAILS        \E[0m"
@@ -393,16 +395,16 @@ EOF
 MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User :</b> <code>$user</code>
-📅 <b>Exp  :</b> <code>$exp_date</code>
+📅 <b>exp  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link TLS (443) :</b>
-<code>$link1</code>
+<code>$vmess_tls</code>
 
 🌐 <b>Link Non-TLS (80) :</b>
-<code>$link2</code>
+<code>$vmess_ntls</code>
 
 🔗 <b>Link gRPC (443) :</b>
-<code>$link3</code>
+<code>$vmess_grpc</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
