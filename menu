@@ -302,7 +302,6 @@ link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"po
     # Catat ke log user (Gunakan path yang pasti ada)
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/vmess_users.txt
-
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\E[44;1;39m      VMESS ACCOUNT DETAILS        \E[0m"
@@ -835,30 +834,29 @@ change_port() {
     read port_opt
 
         case $port_opt in
-        00 | 0)
-            echo -e " ${Y}Force Restarting Services...${OFF}"
-            # 1. Matikan dulu yang mungkin macet/bentrok
-            systemctl stop nginx xray openvpn-server@server > /dev/null 2>&1
+              00 | 0)
+            echo -e " ${Y}Memulai Proses Force-Start Semua Port...${OFF}"
             
-            # 2. Perbaiki izin akses file log (Sering jadi penyebab gagal start)
-            chown -R www-data:www-data /var/log/nginx > /dev/null 2>&1
-            chmod +x /usr/local/bin/xray > /dev/null 2>&1
+            # 1. Bersihkan port 80 dari aplikasi macet/bentrok
+            fuser -k 80/tcp > /dev/null 2>&1
+            fuser -k 1194/udp > /dev/null 2>&1
             
-            # 3. Jalankan kembali satu per satu secara paksa
-            systemctl start xray > /dev/null 2>&1
-            systemctl start nginx > /dev/null 2>&1
-            systemctl start openvpn-server@server > /dev/null 2>&1
+            # 2. Restart servis utama secara berurutan
+            systemctl daemon-reload
+            systemctl restart nginx
+            systemctl restart xray
+            systemctl restart openvpn-server@server
             
-            # 4. Cek ulang jika port 80 masih mati, coba start manual nginx
-            if ! netstat -tuln | grep -q ":80 "; then
-                nginx -t && systemctl restart nginx
-            fi
+            # 3. Khusus Websocket (Jika kamu pakai python ws)
+            systemctl restart ws-stunnel > /dev/null 2>&1
+            systemctl restart ws-python > /dev/null 2>&1
             
             sleep 2
-            echo -e " ${G}Perbaikan Selesai! Mengecek ulang status...${OFF}"
+            echo -e " ${G}Perbaikan Selesai! Mengupdate Status...${OFF}"
             sleep 1
-            menu_10 ;;
-            
+            menu_10 
+            ;;
+        
     esac
 }
 
