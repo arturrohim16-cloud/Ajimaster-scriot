@@ -836,38 +836,35 @@ change_port() {
     read port_opt
 
     case $port_opt in
-        00 | 0)
-            echo -e " ${Y}Menjalankan Perbaikan Darurat...${OFF}"
+              00 | 0)
+            echo -e " ${Y}Menjalankan Hard-Fix Port 80 & 1194...${OFF}"
             
-            # 1. Paksa matikan semua proses yang mengunci port
+            # 1. Matikan Firewall VPS (Seringkali UFW memblokir port secara diam-diam)
+            ufw disable > /dev/null 2>&1
+            iptables -F
+            
+            # 2. Paksa buka port 80 dan 1194 di IP Tables
+            iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+            iptables -A INPUT -p udp --dport 1194 -j ACCEPT
+            iptables -A INPUT -p tcp --dport 1194 -j ACCEPT
+            
+            # 3. Bersihkan sisa proses yang macet
             killall -9 nginx xray openvpn 2>/dev/null
-            fuser -k 80/tcp 1194/udp 443/tcp 2>/dev/null
+            fuser -k 80/tcp 1194/udp 2>/dev/null
             
-            # 2. Perbaikan sistem log (Cegah Nginx mogok)
-            mkdir -p /var/log/nginx
-            chown -R www-data:www-data /var/log/nginx
-            
-            # 3. Membersihkan cache konfigurasi
+            # 4. Restart Servis Berurutan
             systemctl daemon-reload
-            
-            # 4. Menghidupkan kembali satu per satu
             systemctl restart xray
             systemctl restart nginx
             systemctl restart openvpn-server@server
             
-            # 5. Restart jalur Websocket/Python
-            systemctl restart ws-stunnel > /dev/null 2>&1
-            systemctl restart ws-python > /dev/null 2>&1
+            # 5. Cek Spesifik Port 80 (Jika masih OFF, jalankan manual)
+            if ! netstat -tuln | grep -q ":80 "; then
+                /usr/sbin/nginx
+            fi
             
             sleep 3
-            echo -e " ${G}Perbaikan Selesai! Mengupdate Status...${OFF}"
-            sleep 1
-            menu_10 # Refresh otomatis ke tampilan scanner
-            ;;
-        x) 
-            ./menu.sh # Ganti dengan nama file script dashboard kamu
-            ;;
-        *) 
+            echo -e " ${G}Hard-Fix Selesai! Mengupdate Status...${OFF}"
             menu_10 
             ;;
     esac
