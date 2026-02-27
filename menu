@@ -865,22 +865,36 @@ dashboard_utama() {
     echo -e "$L_BOT"
     echo ""
     read -p "  ${CYAN}Pilih Nomor: ${OFF}" opt
+       # === LOGIKA PEMILIHAN MENU (SINKRON DENGAN TAMPILAN) ===
     case $opt in
-        1|01) add_ssh ;;
-        2|02) add_vmess ;;
-        3|03) add_vless ;;
-        4|04) add_trojan ;;
-        5|05) menu_manager ;;
-        6|06) reboot ;;
-        7|07) renew_user ;;
-        8|08) run_speedtest ;;
-        9|23) update_script ;;
-        10) restart_services ;;
-        11) cek_online ;;
-        12) fix_servis ;;
-        13) edit_banner ;;
-        0|00) exit ;;
-        *) dashboard_utama ;;
+        1|01) add_ssh ;;              # MENU SSH VIP
+        2|02) add_vmess ;;            # MENU VMESS
+        3|03) add_vless ;;            # MENU VLESS
+        4|04) add_trojan ;;           # MENU TROJAN
+        5|05) add_ssws ;;             # MENU SHADOW
+        6|06) trial_menu ;;           # MENU TRIAL
+        7|07) cek_ram ;;              # CEK RAM/CPU
+        8|08) del_exp ;;              # DELL ALL EXP
+        9|09) auto_reboot ;;          # AUTO REBOOT
+        10) change_port ;;            # MENU PORT
+        11) run_speedtest ;;          # SPEEDTEST
+        12) running_cek ;;            # RUNNING CEK
+        13) clear_log ;;              # CLEAR LOG
+        14) add_slowdns ;;            # CREATE SLOW
+        15) backup_restore ;;         # BCKP/RSTR
+        16) reboot_vps ;;             # REBOOT VPS
+        17) restart_services ;;       # RESTART VPS
+        18) set_domain ;;             # SET DOMAIN
+        19) cert_v2ray ;;             # CERT SSL
+        20) install_udp ;;            # INSTALL UDP
+        21) clear_cache ;;            # CLEAR CACHE
+        22) cek_bandwith ;;           # CEK BANDWITH
+        23) update_script ;;          # UP SCRIPT
+        24) menu_bot ;;               # MENU BOT VIP
+        25) edit_banner ;;            # CHANGE BANNER SSH
+        26) view_log_create ;;        # LOG CREATE USER
+        0|00) exit ;;                 # EXIT MENU
+        *) menu ;;                    # KEMBALI KE MENU JIKA SALAH TEKAN
     esac
 }
 
