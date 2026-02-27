@@ -406,28 +406,31 @@ add_ssh() {
     echo -e "${CYAN} ╚══════════════════════════════════════════════╝${NC}"
     echo ""
 
-# --- FORMAT NOTIFIKASI SSH ---
-SSH_LOG="╔════════════════════╗
-      🛡️ SSH PREMIUM 🛡️
-╚════════════════════╝
-👤 **User** : \`$user\`
-🔑 **Password** : \`$pass\`
-📅 **Expired** : \`$exp\`
-🚫 **Limit IP** : \`$iplimit\`
+# --- GENERATE PESAN SSH ---
+MSG_SSH="✨ <b>SSH PREMIUM SULTAN EDITION</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 **Host** : \`$DOMAIN\`
-🔗 \`$DOMAIN:444@$user:$pass\`
-🔗 \`$DOMAIN:2082@$user:$pass\`
-🔗 \`$DOMAIN:7100@$user:$pass\`
+👤 <b>Username :</b> <code>$user</code>
+🔑 <b>Password :</b> <code>$pass</code>
+📅 <b>Expired  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-🚪 **Port SSH** : 2082
-🚪 **Port TLS** : 444
-🚪 **Port UDP** : 7100, 7200
+🌐 <b>Host/IP  :</b> <code>$domain</code>
+🔓 <b>OpenSSH  :</b> 22
+🐻 <b>Dropbear :</b> 109, 143
+🔐 <b>Stunnel  :</b> 444, 447
+🔌 <b>WS HTTP  :</b> 80, 2082
+🚀 <b>All Port :</b> 1-65535
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ *SIAP DI GUNAKAN BOSS*"
+📝 <b>Payload Websocket :</b>
+<code>GET / HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf][crlf]</code>
+━━━━━━━━━━━━━━━━━━━━━━
+🔗 <b>Format Login (Copy-able) :</b>
+🔹 <b>WS :</b> <code>$domain:2082@$user:$pass</code>
+🔹 <b>SSL :</b> <code>$domain:444@$user:$pass</code>
+🔹 <b>DIR :</b> <code>$domain:1-65535@$user:$pass</code>
+━━━━━━━━━━━━━━━━━━━━━━
+✅ <b>Script By AJI VPN</b>"
 
-# Kirim ke Telegram
-send_log "SSH" "$SSH_LOG"
+send_log "SSH PREMIUM" "$MSG_SSH"
 
     read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
     dashboard_utama 
