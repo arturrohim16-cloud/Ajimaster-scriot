@@ -802,55 +802,59 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-        # === KONFIGURASI WARNA ===
+            # === 1. LOGIKA STATUS OTOMATIS (AMBIL DATA VPS) ===
+    # Mengambil IP dan Domain
+    IP=$(wget -qO- ipinfo.io/ip)
+    domain=$(cat /etc/xray/domain 2>/dev/null)
+    [[ -z "$domain" ]] && domain=$IP
+
+    # Mengambil Info OS, RAM, dan Uptime
+    os_name=$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2)
+    ram_used=$(free -m | grep Mem | awk '{print $3}')
+    ram_total=$(free -m | grep Mem | awk '{print $2}')
+    up_time=$(uptime -p | cut -d' ' -f2-)
+
+    # === 2. WARNA & BINGKAI ===
     OFF='\e[0m'
     PURPLE='\e[1;35m'
     ORANGE='\e[1;33m'
-    CYAN='\e[1;36m'
-    G='\e[1;32m'
+    CYAN='\e[1;36m' # Biru Menyala
+    G='\e[1;32m'    # Hijau Status ON
 
-    # Garis Pembatas Simpel (Biru Terang)
+    # Garis Pembatas (Pastikan jumlah strip sama)
     LINE="${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === TAMPILAN DASHBOARD SISTEM ===
+    # === 3. TAMPILAN DASHBOARD (FULL AUTO) ===
     echo -e "$LINE"
-    echo -e "         ${PURPLE}• AJI SYSTEM VPN PANEL MENU •${OFF}"
+    echo -e " ${PURPLE}   • AJI SYSTEM VPN PANEL MENU •${OFF}"
     echo -e "$LINE"
-    echo -e " ${PURPLE}System OS       : $os${OFF}"
-    echo -e " ${PURPLE}Server RAM      : $ram${OFF}"
-    echo -e " ${PURPLE}System Uptime   : $uptime${OFF}"
-    echo -e " ${PURPLE}Current Domain  : $domain${OFF}"
-    echo -e " ${PURPLE}IP-VPS          : $IP${OFF}"
+    # Status di bawah ini sekarang otomatis terisi
+    printf " ${PURPLE}│ System OS       : %-30s ${PURPLE}│\n${OFF}" "$os_name"
+    printf " ${PURPLE}│ Server RAM      : %-30s ${PURPLE}│\n${OFF}" "$ram_used MB / $ram_total MB"
+    printf " ${PURPLE}│ System Uptime   : %-30s ${PURPLE}│\n${OFF}" "$up_time"
+    printf " ${PURPLE}│ Current Domain  : %-30s ${PURPLE}│\n${OFF}" "$domain"
+    printf " ${PURPLE}│ IP-VPS          : %-30s ${PURPLE}│\n${OFF}" "$IP"
     echo -e "$LINE"
-    echo -e " ${G}SSH:ON ${PURPLE}|${OFF} ${G}XRAY:ON ${PURPLE}|${OFF} ${G}NGINX:ON ${PURPLE}|${OFF} ${G}WS:ON${OFF}"
-    echo -e "$LINE"
-    echo -e " ${PURPLE}SSH/VPN   : $total_ssh          ${PURPLE}VMESS/WS  : $total_vmess${OFF}"
-    echo -e " ${PURPLE}VLESS/WS  : $total_vless          ${PURPLE}TROJAN/WS : $total_trojan${OFF}"
+    echo -e " ${G} SSH:ON ${PURPLE}│${OFF} ${G} XRAY:ON ${PURPLE}│${OFF} ${G} NGINX:ON ${PURPLE}│${OFF} ${G} WS:ON ${OFF}"
     echo -e "$LINE"
 
-    # === DAFTAR MENU (Tiga Kolom Simpel) ===
-    # Baris 1-4 (Ungu)
+    # === 4. DAFTAR MENU (3 KOLOM RAPI) ===
     echo -e " ${PURPLE}[01] SSH VIP    [09] AUTO REBOOT  [17] RESTART VPS${OFF}"
     echo -e " ${PURPLE}[02] VMESS      [10] MENU PORT    [18] SET DOMAIN${OFF}"
     echo -e " ${PURPLE}[03] VLESS      [11] SPEEDTEST    [19] CERT SSL${OFF}"
     echo -e " ${PURPLE}[04] TROJAN     [12] RUNNING CEK  [20] INSTALL UDP${OFF}"
-    
-    # Baris 5-8 (Oranye - Penting)
+    echo -e "$LINE"
     echo -e " ${ORANGE}[05] SHADOW     [13] CLEAR LOG    [21] CLEAR CACHE${OFF}"
     echo -e " ${ORANGE}[06] TRIAL      [14] CREATE SLOW  [22] CEK BANDWITH${OFF}"
     echo -e " ${ORANGE}[07] RAM/CPU    [15] BCKP/RSTR    [23] UP SCRIPT${OFF}"
     echo -e " ${ORANGE}[08] DEL EXP    [16] REBOOT VPS   [24] MENU BOT VIP${OFF}"
-    
-    echo -e ""
-    echo -e " ${PURPLE}[25] CHANGE BANNER SSH <<<${OFF}"
-    echo -e " ${PURPLE}[26] LOG CREATE USER ACCOUNT <<<${OFF}"
     echo -e "$LINE"
     
-    # Informasi Status (Sesuai Foto 2)
-    echo -e " ${PURPLE}Script Version : V2.4 (Last Update)${OFF}"
-    echo -e " ${PURPLE}Script Status  : ${G}(Active)${OFF}"
-    echo -e " ${PURPLE}Username       : ${ORANGE}AJI STORE${OFF}"
-    echo -e " ${PURPLE}Expired script : ${ORANGE}UNLIMITED${OFF}"
+    # Info Versi & User
+    echo -e " ${PURPLE} Script Version : V2.4 (Last Update)${OFF}"
+    echo -e " ${PURPLE} Script Status  : ${G}(Active)${OFF}"
+    echo -e " ${PURPLE} Username       : ${ORANGE}AJI STORE${OFF}"
+    echo -e " ${PURPLE} Expired script : ${ORANGE}UNLIMITED${OFF}"
     echo -e "$LINE"
     echo ""
     read -p "  Pilih Nomor: " opt
