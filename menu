@@ -805,6 +805,26 @@ clear_log() {
     dashboard_utama
 }
 
+change_port() {
+    clear
+    # Mengambil port aktif secara otomatis dari config xray
+    tls=$(cat /etc/xray/config.json | grep -w "port" | sed -n '1p' | awk '{print $2}' | tr -d '",')
+    nontls=$(cat /etc/xray/config.json | grep -w "port" | sed -n '2p' | awk '{print $2}' | tr -d '",')
+    # Mengambil port OVPN (jika ada)
+    ovpn=$(grep "^port" /etc/openvpn/server.conf 2>/dev/null | awk '{print $2}')
+
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e "${C}│${BG_RED}               • CURRENT SERVICE PORT •             ${C}│${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    printf "${C}│ ${P}%-24s ${W}: ${G}%-24s ${C}│\n" "Port XRAY TLS" "${tls:-443}"
+    printf "${C}│ ${P}%-24s ${W}: ${G}%-24s ${C}│\n" "Port XRAY Non-TLS" "${nontls:-80}"
+    printf "${C}│ ${P}%-24s ${W}: ${G}%-24s ${C}│\n" "Port OpenVPN" "${ovpn:-1194}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    
+    echo -e ""
+    read -n 1 -s -r -p " Press any key to back to menu..."
+}
+
 dashboard_utama() {
     # --- HITUNG TOTAL AKUN (LIVE) ---
     total_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
