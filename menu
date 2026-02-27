@@ -833,13 +833,6 @@ dashboard_utama() {
     L_SID="${CYAN}│${OFF}"
     L_SEP="${CYAN}│${OFF}" # Garis Sekat Tengah
 
-    # === TAMPILAN DASHBOARD SISTEM ===
-    echo -e "$L_TOP"
-    echo -e "$L_SID ${PURPLE} SSH/VPN    : $total_ssh           $L_SEP ${PURPLE}VMESS/WS   : $total_vmess      $L_SID"
-    echo -e "$L_SID ${PURPLE} VLESS/WS   : $total_vless           $L_SEP ${PURPLE}TROJAN/WS  : $total_trojan      $L_SID"
-    echo -e "$L_SID ${PURPLE} SHADOW/WS  : $total_shadow                                      $L_SID"
-    echo -e "$L_MID"
-
     # === DAFTAR MENU (Dengan Sekat Tengah) ===
     echo -e "$L_SID ${PURPLE}[01] SSH VIP    $L_SEP ${PURPLE}[09] AUTO REBOOT  $L_SEP ${PURPLE}[17] RESTART  $L_SID"
     echo -e "$L_SID ${PURPLE}[02] VMESS      $L_SEP ${PURPLE}[10] MENU PORT    $L_SEP ${PURPLE}[18] DOMAIN   $L_SID"
@@ -860,11 +853,11 @@ dashboard_utama() {
     # Informasi Versi & Expired (Sesuai Foto 286992.jpg)
     echo -e "$L_SID ${PURPLE} Script Version : V2.4 (Last Update)               $L_SID"
     echo -e "$L_SID ${PURPLE} Script Status  : ${G}(Active)${OFF}                         $L_SID"
-    echo -e "$L_SID ${PURPLE} Username       : ${ORANGE}kucrut-jr${OFF}                       $L_SID"
-    echo -e "$L_SID ${PURPLE} Expired script : ${ORANGE}2025-11-11 / 34 Days${OFF}          $L_SID"
+    echo -e "$L_SID ${PURPLE} Username       : ${ORANGE}AJI STORE${OFF}                       $L_SID"
+    echo -e "$L_SID ${PURPLE} Expired script : ${ORANGE} UNLIMITED${OFF}          $L_SID"
     echo -e "$L_BOT"
     echo ""
-    read -p "  ${CYAN}Pilih Nomor: ${OFF}" opt
+    read -p "  Pilih Nomor: " opt
        # === LOGIKA PEMILIHAN MENU (SINKRON DENGAN TAMPILAN) ===
     case $opt in
         1|01) add_ssh ;;              # MENU SSH VIP
