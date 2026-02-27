@@ -802,32 +802,32 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-          # === 1. LOGIKA STATUS SERVER (PENCARIAN NAMA SERVICE WS) ===
+         # === 1. LOGIKA STATUS SERVER (FIXED UNTUK VPS ANDA) ===
     s_ssh=$(systemctl is-active ssh >/dev/null 2>&1 && echo "🟢" || echo "🔴")
     s_xray=$(systemctl is-active xray >/dev/null 2>&1 && echo "🟢" || echo "🔴")
     s_nginx=$(systemctl is-active nginx >/dev/null 2>&1 && echo "🟢" || echo "🔴")
     
-    # Mencari service WS dengan berbagai kemungkinan nama
-    if systemctl is-active ws-stunnel >/dev/null 2>&1 || systemctl is-active websocket >/dev/null 2>&1 || systemctl is-active python-ws >/dev/null 2>&1; then
+    # FIX WS: Di list service Anda ada 'haproxy', biasanya WS numpang di sana
+    if systemctl is-active haproxy >/dev/null 2>&1 || systemctl is-active dropbear >/dev/null 2>&1; then
         s_ws="🟢"
     else
         s_ws="🔴"
     fi
 
-    # === 2. LOGIKA HITUNG AKUN (REFRESH SETIAP BUKA MENU) ===
-    # Pastikan file ini ada sesuai hasil grep kamu tadi
-    t_ssh=$(grep -c "###" /etc/xray/ssh_users.txt 2>/dev/null || echo "0")
-    t_vms=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
-    t_vls=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
-    t_trj=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
+    # === 2. LOGIKA HITUNG AKUN (FORCE REFRESH) ===
+    # Kita paksa sistem menghitung ulang detik ini juga!
+    t_ssh=$(cat /etc/xray/ssh_users.txt 2>/dev/null | grep -c "###")
+    t_vms=$(cat /etc/xray/config.json 2>/dev/null | grep -c "###")
+    t_vls=$(cat /etc/xray/config.json 2>/dev/null | grep -c "###")
+    t_trj=$(cat /etc/xray/config.json 2>/dev/null | grep -c "###")
 
-    # === 3. WARNA (TIDAK BERUBAH - SESUAI REQUEST) ===
+    # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
     G='\e[1;92m'    # Hijau (Label)
     W='\e[1;97m'    # Putih (Data)
     O='\e[38;5;208m' # ORANYE (Angka Menu)
     Y='\e[1;93m'    # Kuning (Footer)
-    P='\e[1;95m'    # Ungu (Menu)
+    P='\e[1;95m'    # Ungu (Menu Atas)
     BG_RED='\e[1;97;101m' # Judul
     OFF='\e[0m'
 
@@ -839,13 +839,14 @@ dashboard_utama() {
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "System OS" "$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2 | head -n1)"
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Server RAM" "$(free -m | awk '/Mem:/ { print $3 "MB / " $2 "MB" }')"
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "System Uptime" "$(uptime -p | cut -d' ' -f2-)"
-    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Current Domain" "$(cat /etc/xray/domain 2>/dev/null || echo "No Domain Detected")"
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Current Domain" "$(cat /etc/xray/domain 2>/dev/null || echo "No Domain")"
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "IP-VPS" "$(wget -qO- ipinfo.io/ip)"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     echo -e " ${G}SSH:$s_ssh ${C}│${OFF} ${G} XRAY:$s_xray ${C}│${OFF} ${G} NGINX:$s_nginx ${C}│${OFF} ${G} WS:$s_ws ${OFF}"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
     # === 5. TOTAL AKUN (ANTI-NANDUK & AUTO-UPDATE) ===
+    # Format %-8s adalah kunci agar garis kanan tidak melompat
     printf "${C}│ ${G}%-10s ${W}: %-8s ${C}│ ${G}%-11s ${W}: %-7s ${C}│\n" "SSH/VPN" "$t_ssh" "VMESS/WS" "$t_vms"
     printf "${C}│ ${G}%-10s ${W}: %-8s ${C}│ ${G}%-11s ${W}: %-7s ${C}│\n" "VLESS/WS" "$t_vls" "TROJAN/WS" "$t_trj"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
