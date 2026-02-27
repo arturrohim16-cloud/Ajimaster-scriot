@@ -146,24 +146,21 @@ add_trojan() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- FORMAT NOTIFIKASI TROJAN ---
-TROJAN_LOG="╔════════════════════╗
-      ⚔️ TROJAN PREMIUM ⚔️
-╚════════════════════╝
-👤 **User** : \`$user\`
-📅 **Expired** : \`$exp\`
+# --- 2. SUSUN PESAN (Gunakan Variabel yang Jelas) ---
+MSG="👤 User : $user
+📅 Expired : $exp_date
 ━━━━━━━━━━━━━━━━━━━━━━
-🚀 **Link WS** :
-\`$link1\`
+🌐 Link TLS :
+$link_tls"
 
-🚀 **Link gRPC** :
-\`$link2\`
-━━━━━━━━━━━━━━━━━━━━━━
-✅ *SIAP DIGUNAKAN BOSS*"🚀
+# --- 3. PANGGIL FUNGSI LOG ---
+# Pastikan fungsi send_log sudah ditulis DI ATAS (sebelum) bagian ini
+send_log "trojan" "$MSG"
 
-# Kirim ke Telegram
-send_log "TROJAN" "$TROJAN_LOG"
-
+# --- 4. TAMPILKAN DI LAYAR ---
+clear
+echo -e "BERHASIL MEMBUAT AKUN!"
+echo -e "$MSG"
     read -p "Press Enter to return to menu..."
     dashboard_utama
 }
@@ -323,26 +320,21 @@ add_vmess() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- FORMAT NOTIFIKASI VMESS ---
-VMESS_LOG="╔════════════════════╗
-      ✨ VMESS PREMIUM ✨
-╚════════════════════╝
-👤 **User** : \`$user\`
-📅 **Expired** : \`$exp\`
+# --- 2. SUSUN PESAN (Gunakan Variabel yang Jelas) ---
+MSG="👤 User : $user
+📅 Expired : $exp_date
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 **Link TLS** :
-\`$link1\`
+🌐 Link TLS :
+$link1"
 
-🌐 **Link Non-TLS** :
-\`$link2\`
+# --- 3. PANGGIL FUNGSI LOG ---
+# Pastikan fungsi send_log sudah ditulis DI ATAS (sebelum) bagian ini
+send_log "VMESS" "$MSG"
 
-🔗 **Link gRPC** :
-\`$link3\`
-━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
-
-# Kirim ke Telegram
-send_log "VMESS" "$VMESS_LOG"
+# --- 4. TAMPILKAN DI LAYAR ---
+clear
+echo -e "BERHASIL MEMBUAT AKUN!"
+echo -e "$MSG"
 
     read -p "Press Enter to return to menu..."
     dashboard_utama 
