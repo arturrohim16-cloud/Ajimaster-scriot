@@ -834,22 +834,31 @@ change_port() {
     echo -ne " ${G}Pilih Opsi : ${OFF}"
     read port_opt
 
-    case $port_opt in
+        case $port_opt in
         00 | 0)
-            echo -e " ${Y}Sedang memperbaiki port, mohon tunggu...${OFF}"
-            # Perintah simpel untuk menghidupkan semua servis utama
-            systemctl restart xray > /dev/null 2>&1
-            systemctl restart nginx > /dev/null 2>&1
-            systemctl restart ws-stunnel > /dev/null 2>&1
-            systemctl restart openvpn-server@server > /dev/null 2>&1
-            systemctl restart dropbear > /dev/null 2>&1
+            echo -e " ${Y}Force Restarting Services...${OFF}"
+            # 1. Matikan dulu yang mungkin macet/bentrok
+            systemctl stop nginx xray openvpn-server@server > /dev/null 2>&1
+            
+            # 2. Perbaiki izin akses file log (Sering jadi penyebab gagal start)
+            chown -R www-data:www-data /var/log/nginx > /dev/null 2>&1
+            chmod +x /usr/local/bin/xray > /dev/null 2>&1
+            
+            # 3. Jalankan kembali satu per satu secara paksa
+            systemctl start xray > /dev/null 2>&1
+            systemctl start nginx > /dev/null 2>&1
+            systemctl start openvpn-server@server > /dev/null 2>&1
+            
+            # 4. Cek ulang jika port 80 masih mati, coba start manual nginx
+            if ! netstat -tuln | grep -q ":80 "; then
+                nginx -t && systemctl restart nginx
+            fi
+            
             sleep 2
-            echo -e " ${G}Proses perbaikan selesai!${OFF}"
+            echo -e " ${G}Perbaikan Selesai! Mengecek ulang status...${OFF}"
             sleep 1
-            menu_10 # Refresh tampilan untuk cek status terbaru
-            ;;
-        x) return ;;
-        *) menu_10 ;;
+            menu_10 ;;
+            
     esac
 }
 
