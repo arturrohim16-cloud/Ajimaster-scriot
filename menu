@@ -204,13 +204,13 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 📅 <b>Exp  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link TROJAN WS :</b>
-<code>$tr1</code>
+<code>$link1</code>
 
 🔗 <b>Link TROJAN HTTP :</b>
-<code>$tr2</code>
+<code>$link2</code>
 
 🔗 <b>Link TROJAN gRPC :</b>
-<code>$tr3</code>
+<code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
@@ -286,13 +286,13 @@ MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 📅 <b>Exp  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link VLESS WS TLS :</b>
-<code>$vless1</code>
+<code>$link1</code>
 
 🌐 <b>Link VLESS WS HTTP :</b>
-<code>$vless2</code>
+<code>$link2</code>
 
 🔗 <b>Link VLESS gRPC :</b>
-<code>$vless3</code>
+<code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
@@ -868,20 +868,6 @@ clear_log() {
 }
 
 dashboard_utama() {
-    # --- HITUNG TOTAL AKUN (LIVE) ---
-    total_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
-    
-    [ -f "/etc/xray/config.json" ] && CONF="/etc/xray/config.json" || CONF="/usr/local/etc/xray/config.json"
-    
-    total_vmess=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "0")
-    total_vless=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null || echo "0")
-    total_trojan=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "0")
-    
-    total_ssh=$(echo $total_ssh | tr -dc '0-9'); [ -z "$total_ssh" ] && total_ssh="0"
-    total_vmess=$(echo $total_vmess | tr -dc '0-9'); [ -z "$total_vmess" ] && total_vmess="0"
-    total_vless=$(echo $total_vless | tr -dc '0-9'); [ -z "$total_vless" ] && total_vless="0"
-    total_trojan=$(echo $total_trojan | tr -dc '0-9'); [ -z "$total_trojan" ] && total_trojan="0"
-
     MYIP=$(wget -qO- ipinfo.io/ip)
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
     [[ -z "$DOMAIN" ]] && DOMAIN="aji.izz-store.my.id"
