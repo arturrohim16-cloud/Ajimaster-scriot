@@ -814,12 +814,12 @@ dashboard_utama() {
         s_ws="🔴"
     fi
 
-    # === 2. LOGIKA HITUNG AKUN (FORCE REFRESH) ===
-    # Kita paksa sistem menghitung ulang detik ini juga!
-    t_ssh=$(cat /etc/xray/ssh_users.txt 2>/dev/null | grep -c "###")
-    t_vms=$(cat /etc/xray/config.json 2>/dev/null | grep -c "###")
-    t_vls=$(cat /etc/xray/config.json 2>/dev/null | grep -c "###")
-    t_trj=$(cat /etc/xray/config.json 2>/dev/null | grep -c "###")
+    # === 2. LOGIKA HITUNG AKUN (MENGGUNAKAN WC -L SESUAI REQUEST) ===
+    # Menghitung jumlah baris total di setiap file konfigurasi
+  t_ssh=$(cat /etc/xray/ssh_users.txt 2>/dev/null | wc -l)
+    t_vms=$(cat /etc/xray/config.json 2>/dev/null | wc -l)
+    t_vls=$(cat /etc/xray/config.json 2>/dev/null | wc -l)
+    t_trj=$(cat /etc/xray/config.json 2>/dev/null | wc -l)
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
