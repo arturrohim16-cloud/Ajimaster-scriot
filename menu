@@ -836,36 +836,31 @@ change_port() {
     read port_opt
 
     case $port_opt in
-              00 | 0)
-            echo -e " ${Y}Menjalankan Hard-Fix Port 80 & 1194...${OFF}"
+            00 | 0)
+            echo -e " ${Y}Menjalankan Super-Fix Port 80 & 1194...${OFF}"
             
-            # 1. Matikan Firewall VPS (Seringkali UFW memblokir port secara diam-diam)
-            ufw disable > /dev/null 2>&1
-            iptables -F
+            # 1. Bersihkan semua yang pakai port 80, 81, dan 443 secara paksa
+            fuser -k 80/tcp 81/tcp 443/tcp 1194/udp 2>/dev/null
             
-            # 2. Paksa buka port 80 dan 1194 di IP Tables
-            iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-            iptables -A INPUT -p udp --dport 1194 -j ACCEPT
-            iptables -A INPUT -p tcp --dport 1194 -j ACCEPT
+            # 2. Perbaiki Konfigurasi Nginx agar tidak bentrok
+            systemctl stop nginx 2>/dev/null
             
-            # 3. Bersihkan sisa proses yang macet
-            killall -9 nginx xray openvpn 2>/dev/null
-            fuser -k 80/tcp 1194/udp 2>/dev/null
-            
-            # 4. Restart Servis Berurutan
-            systemctl daemon-reload
+            # 3. Restart Xray dulu sebagai core
             systemctl restart xray
-            systemctl restart nginx
-            systemctl restart openvpn-server@server
             
-            # 5. Cek Spesifik Port 80 (Jika masih OFF, jalankan manual)
-            if ! netstat -tuln | grep -q ":80 "; then
-                /usr/sbin/nginx
+            # 4. Restart Nginx dengan cara aman
+            systemctl restart nginx
+            
+            # 5. Deteksi Nama Service OpenVPN secara otomatis
+            vpn_service=$(systemctl list-units --type=service | grep -i openvpn | awk '{print $1}' | head -n1)
+            if [ ! -z "$vpn_service" ]; then
+                systemctl restart $vpn_service
             fi
             
-            sleep 3
-            echo -e " ${G}Hard-Fix Selesai! Mengupdate Status...${OFF}"
-            menu_10 
+            sleep 2
+            echo -e " ${G}Super-Fix Selesai!${OFF}"
+            # Pastikan memanggil fungsi menu_10 dengan benar
+            menu_10
             ;;
     esac
 }
