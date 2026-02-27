@@ -807,20 +807,41 @@ clear_log() {
 
 change_port() {
     clear
-    # Mengambil port aktif secara otomatis dari config xray
-    tls=$(cat /etc/xray/config.json | grep -w "port" | sed -n '1p' | awk '{print $2}' | tr -d '",')
-    nontls=$(cat /etc/xray/config.json | grep -w "port" | sed -n '2p' | awk '{print $2}' | tr -d '",')
-    # Mengambil port OVPN (jika ada)
-    ovpn=$(grep "^port" /etc/openvpn/server.conf 2>/dev/null | awk '{print $2}')
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e "${C}│${BG_RED}             • REAL-TIME PORT MONITOR •             ${C}│${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    printf "${W}  %-20s  %-10s  %-15s ${OFF}\n" "SERVICE NAME" "PORT" "STATUS"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+
+    # Daftar Port Utama yang ingin dipantau (Bisa kamu tambah sendiri)
+    # Format: "Nama_Service:Nomor_Port"
+    services=(
+        "XRAY-TLS:443"
+        "XRAY-HTTP:80"
+        "WS-SSH/PYTHON:444"
+        "WS-SSH/DROPBEAR:2082"
+        "DROPBEAR:143"
+        "SSH-CORE:22"
+        "OVPN:1194"
+        "PROXY-SQUID:8080"
+    )
+
+    for item in "${services[@]}"; do
+        name=$(echo $item | cut -d: -f1)
+        port=$(echo $item | cut -d: -f2)
+
+        # Mesin Pengecek (Real-time)
+        if netstat -tuln | grep -q ":$port "; then
+            status="🟢 ${G}ON${OFF}"
+        else
+            status="🔴 ${R}OFF${OFF}"
+        fi
+
+        # Tampilkan dengan presisi agar tidak nanduk
+        printf " ${P}%-20s ${W}: ${O}%-9s %-15b\n" "$name" "$port" "$status"
+    done
 
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    echo -e "${C}│${BG_RED}               • CURRENT SERVICE PORT •             ${C}│${OFF}"
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    printf "${C}│ ${P}%-24s ${W}: ${G}%-24s ${C}│\n" "Port XRAY TLS" "${tls:-443}"
-    printf "${C}│ ${P}%-24s ${W}: ${G}%-24s ${C}│\n" "Port XRAY Non-TLS" "${nontls:-80}"
-    printf "${C}│ ${P}%-24s ${W}: ${G}%-24s ${C}│\n" "Port OpenVPN" "${ovpn:-1194}"
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    
     echo -e ""
     read -n 1 -s -r -p " Press any key to back to menu..."
 }
