@@ -813,37 +813,44 @@ change_port() {
     printf "${W}  %-20s  %-10s  %-15s ${OFF}\n" "SERVICE NAME" "PORT" "STATUS"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # Daftar Port Utama yang ingin dipantau (Bisa kamu tambah sendiri)
-    # Format: "Nama_Service:Nomor_Port"
-    services=(
-        "XRAY-TLS:443"
-        "XRAY-HTTP:80"
-        "WS-SSH/PYTHON:444"
-        "WS-SSH/DROPBEAR:2082"
-        "DROPBEAR:143"
-        "SSH-CORE:22"
-        "OVPN:1194"
-        "PROXY-SQUID:8080"
-    )
+    # Daftar Port Utama untuk dipantau
+    services=("XRAY-TLS:443" "XRAY-HTTP:80" "WS-PYTHON:444" "WS-DROPBEAR:2082" "DROPBEAR:143" "SSH:22" "OVPN:1194")
 
     for item in "${services[@]}"; do
         name=$(echo $item | cut -d: -f1)
         port=$(echo $item | cut -d: -f2)
-
-        # Mesin Pengecek (Real-time)
         if netstat -tuln | grep -q ":$port "; then
             status="🟢 ${G}ON${OFF}"
         else
             status="🔴 ${R}OFF${OFF}"
         fi
-
-        # Tampilkan dengan presisi agar tidak nanduk
         printf " ${P}%-20s ${W}: ${O}%-9s %-15b\n" "$name" "$port" "$status"
     done
 
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    echo -e ""
-    read -n 1 -s -r -p " Press any key to back to menu..."
+    echo -e " ${O}[00]${G} PERBAIKI SEMUA PORT (FIX ALL) ${OFF}"
+    echo -e " ${O}[x] ${P} KEMBALI KE MENU UTAMA ${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -ne " ${G}Pilih Opsi : ${OFF}"
+    read port_opt
+
+    case $port_opt in
+        00 | 0)
+            echo -e " ${Y}Sedang memperbaiki port, mohon tunggu...${OFF}"
+            # Perintah simpel untuk menghidupkan semua servis utama
+            systemctl restart xray > /dev/null 2>&1
+            systemctl restart nginx > /dev/null 2>&1
+            systemctl restart ws-stunnel > /dev/null 2>&1
+            systemctl restart openvpn-server@server > /dev/null 2>&1
+            systemctl restart dropbear > /dev/null 2>&1
+            sleep 2
+            echo -e " ${G}Proses perbaikan selesai!${OFF}"
+            sleep 1
+            menu_10 # Refresh tampilan untuk cek status terbaru
+            ;;
+        x) return ;;
+        *) menu_10 ;;
+    esac
 }
 
 dashboard_utama() {
