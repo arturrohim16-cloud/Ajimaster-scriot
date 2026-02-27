@@ -302,9 +302,27 @@ send_log "VLESS PREMIUM" "$MSG_VLESS"
 add_vmess() {
     clear
     CONF="/usr/local/etc/xray/config.json"
-    
-    # Kunci Domain Langsung (Agar tidak error file not found)
     domain="aji.izz-store.my.id"
+
+    # 1. Pastikan Port 80 Nginx Mengarah ke Xray (Auto-Fix Jalur)
+    # Ini supaya Port 80 bisa konek ke port internal Xray (10001)
+    if [ ! -f "/etc/nginx/conf.d/vmess.conf" ]; then
+        cat <<EOF > /etc/nginx/conf.d/vmess.conf
+server {
+    listen 80;
+    server_name $domain;
+    location /vmess {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:10001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$http_host;
+    }
+}
+EOF
+        systemctl restart nginx
+    fi
 
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\E[44;1;39m       CREATE VMESS ACCOUNT        \E[0m"
@@ -312,7 +330,6 @@ add_vmess() {
     read -p "Username : " user
     read -p "Expired (Days) : " masaaktif
 
-    # Cek apakah jq sudah ada, jika belum install otomatis
     if ! command -v jq &> /dev/null; then
         apt install jq -y &> /dev/null
     fi
@@ -327,23 +344,26 @@ add_vmess() {
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
+    # 2. Menulis tanda ### Langsung di Config Xray (Agar Dashboard TIDAK 0)
+    # Kita sisipkan tanda pagar tepat di atas id user baru
     jq --arg id "$uuid" --arg mail "$user" \
     '(.inbounds[] | select(.protocol == "vmess")).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' \
     "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
     
+    # Teknik Sed untuk menambahkan komentar ### di baris yang tepat
+    sed -i "/$uuid/i \### $user $exp" "$CONF"
+
     # Fix Permission & Restart
     chown root:root "$CONF"
     chmod 644 "$CONF"
     systemctl restart xray
+    systemctl restart nginx
 
-# --- GENERATE LINK VMESS ---
-link1="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
-link2="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"tls\":\"none\"}" | base64 -w 0)"
-link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+    # 3. GENERATE LINK VMESS (Base64 Clean Format)
+    link1=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
+    link2=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)
+    link3=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
 
-    # Catat ke log user (Gunakan path yang pasti ada)
-    mkdir -p /etc/xray
-    echo "### $user $exp" >> /etc/xray/vmess_users.txt
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\E[44;1;39m      VMESS ACCOUNT DETAILS        \E[0m"
@@ -357,14 +377,13 @@ link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"po
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\033[0;32mLink WS TLS :\033[0m"
     echo -e "vmess://$link1"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e ""
     echo -e "\033[0;32mLink WS None TLS :\033[0m"
     echo -e "vmess://$link2"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e ""
     echo -e "\033[0;32mLink gRPC TLS :\033[0m"
     echo -e "vmess://$link3"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "Created   : $hariini"
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
