@@ -119,10 +119,10 @@ add_trojan() {
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
 
-    # GENERATE LINKS
-    link1="trojan://$password@$domain:443?path=%2Ftrojan&security=tls&type=ws&sni=$domain#$user"
-    link2="trojan://$password@$domain:443?mode=multi&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
-
+# --- GENERATE LINK TROJAN ---
+tr1="trojan://${pass_tr}@${domain}:443?path=%2Ftrojan&security=tls&type=ws#${user}"
+tr2="trojan://${pass_tr}@${domain}:443?mode=multi&security=tls&type=grpc&serviceName=trojan-grpc#${user}"
+   
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
 
@@ -146,21 +146,22 @@ add_trojan() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- 2. SUSUN PESAN (Gunakan Variabel yang Jelas) ---
-MSG="👤 User : $user
-📅 Expired : $exp_date
+# --- GENERATE PESAN TROJAN ---
+MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 Link TLS :
-$link_tls"
+👤 <b>User :</b> <code>$user</code>
+🔑 <b>Pass :</b> <code>$pass_tr</code>
+📅 <b>Exp  :</b> <code>$exp_date</code>
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 <b>Link TROJAN WS :</b>
+<code>$tr1</code>
 
-# --- 3. PANGGIL FUNGSI LOG ---
-# Pastikan fungsi send_log sudah ditulis DI ATAS (sebelum) bagian ini
-send_log "trojan" "$MSG"
+🔗 <b>Link TROJAN gRPC :</b>
+<code>$tr2</code>
+━━━━━━━━━━━━━━━━━━━━━━
+✅ <b>Script By AJI VPN</b>"
 
-# --- 4. TAMPILKAN DI LAYAR ---
-clear
-echo -e "BERHASIL MEMBUAT AKUN!"
-echo -e "$MSG"
+send_log "TROJAN PREMIUM" "$MSG_TROJAN"
     read -p "Press Enter to return to menu..."
     dashboard_utama
 }
@@ -198,11 +199,12 @@ add_vless() {
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
 
-    # GENERATE LINKS VLESS
-    link1="vless://$uuid@$domain:443?path=%2Fvless&security=tls&encryption=none&type=ws&sni=$domain#$user"
-    link2="vless://$uuid@$domain:80?path=%2Fvless&security=none&encryption=none&type=ws#$user"
-    link3="vless://$uuid@$domain:443?mode=multi&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
+# --- GENERATE LINK VLESS ---
+vless1="vless://${uuid}@${domain}:443?path=%2Fvless&security=tls&encryption=none&type=ws#${user}"
+vless2="vless://${uuid}@${domain}:80?path=%2Fvless&security=none&encryption=none&type=ws#${user}"
+vless3="vless://${uuid}@${domain}:443?mode=multi&security=tls&encryption=none&type=grpc&serviceName=vless-grpc#${user}"
 
+    mkdir -p /etc/xray   
     echo "### $user $exp" >> /etc/xray/vless_users.txt
 
     clear
@@ -225,27 +227,24 @@ add_vless() {
     echo -e "$link3"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- FORMAT NOTIFIKASI VLESS ---
-VLESS_LOG="╔════════════════════╗
-      ⚡ VLESS PREMIUM ⚡
-╚════════════════════╝
-👤 **User** : \`$user\`
-📅 **Expired** : \`$exp\`
+# --- GENERATE PESAN VLESS ---
+MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
-🔗 **Link TLS** :
-\`$link1\`
-
-🔗 **Link Non-TLS** :
-\`$link2\`
-
-🔗 **Link gRPC** :
-\`$link3\`
+👤 <b>User :</b> <code>$user</code>
+📅 <b>Exp  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
+🌐 <b>Link VLESS WS TLS :</b>
+<code>$vless1</code>
 
-# Kirim ke Telegram
-send_log "VLESS" "$VLESS_LOG"
+🌐 <b>Link VLESS WS HTTP :</b>
+<code>$vless2</code>
 
+🔗 <b>Link VLESS gRPC :</b>
+<code>$vless3</code>
+━━━━━━━━━━━━━━━━━━━━━━
+✅ <b>Script By AJI VPN</b>"
+
+send_log "VLESS PREMIUM" "$MSG_VLESS"
     read -p "Press Enter to return to menu..."
     dashboard_utama 
 }
@@ -287,10 +286,10 @@ add_vmess() {
     chmod 644 "$CONF"
     systemctl restart xray
 
-    # GENERATE LINK
-    link_tls="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
-    link2="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"tls\":\"none\"}" | base64 -w 0)"
-    link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+# --- GENERATE LINK VMESS ---
+link1="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+link2="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"tls\":\"none\"}" | base64 -w 0)"
+link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
 
     # Catat ke log user (Gunakan path yang pasti ada)
     mkdir -p /etc/xray
@@ -320,22 +319,24 @@ add_vmess() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- 2. SUSUN PESAN (Gunakan Variabel yang Jelas) ---
-MSG="👤 User : $user
-📅 Expired : $exp_date
+# --- GENERATE PESAN VMESS ---
+MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 Link TLS :
-$link_tls"
+👤 <b>User :</b> <code>$user</code>
+📅 <b>Exp  :</b> <code>$exp_date</code>
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 <b>Link TLS (443) :</b>
+<code>$link1</code>
 
-# --- 3. PANGGIL FUNGSI LOG ---
-# Pastikan fungsi send_log sudah ditulis DI ATAS (sebelum) bagian ini
-send_log "VMESS" "$MSG"
+🌐 <b>Link Non-TLS (80) :</b>
+<code>$link2</code>
 
-# --- 4. TAMPILKAN DI LAYAR ---
-clear
-echo -e "BERHASIL MEMBUAT AKUN!"
-echo -e "$MSG"
+🔗 <b>Link gRPC (443) :</b>
+<code>$link3</code>
+━━━━━━━━━━━━━━━━━━━━━━
+✅ <b>Script By AJI VPN</b>"
 
+send_log "VMESS PREMIUM" "$MSG_VMESS"
     read -p "Press Enter to return to menu..."
     dashboard_utama 
 }
@@ -454,27 +455,6 @@ trial_ssh() {
     echo -e "   Port SSH : 2082, 109"
     echo -e "   Expired  : $exp_date (1 Hari)"
     echo -e "-----------------------------------------------"
-# --- FORMAT NOTIFIKASI SSH ---
-SSH_LOG="╔════════════════════╗
-      🛡️ SSH PREMIUM 🛡️
-╚════════════════════╝
-👤 **User** : \`$user\`
-🔑 **Password** : \`$pass\`
-📅 **Expired** : \`$exp\`
-🚫 **Limit IP** : \`$iplimit\`
-━━━━━━━━━━━━━━━━━━━━━━
-🌐 **Host** : \`$DOMAIN\`
-🔗 \`$DOMAIN:444@$user:$pass\`
-🔗 \`$DOMAIN:2082@$user:$pass\`
-━━━━━━━━━━━━━━━━━━━━━━
-🚪 **Port SSH** : 2082
-🚪 **Port TLS** : 444
-━━━━━━━━━━━━━━━━━━━━━━
-✅ *SIAP DI GUNAKAN BOSS*"
-
-# Kirim ke Telegram
-send_log "SSH" "$SSH_LOG"
-
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
     dashboard_utama
 }
