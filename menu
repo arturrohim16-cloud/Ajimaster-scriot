@@ -812,7 +812,6 @@ change_port() {
     printf "${W}  %-20s  %-10s  %-15s ${OFF}\n" "SERVICE NAME" "PORT" "STATUS"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # Daftar Port untuk dipantau
     services=("XRAY-TLS:443" "XRAY-HTTP:80" "WS-PYTHON:444" "WS-DROPBEAR:2082" "DROPBEAR:143" "SSH-CORE:22" "OPENVPN:1194")
 
     for item in "${services[@]}"; do
@@ -835,23 +834,17 @@ change_port() {
 
     case $port_opt in
         00 | 0)
-            echo -e " ${Y}Cleaning Port 81 & Restarting Services...${OFF}"
-            # Menendang proses pengganggu di port 81 yang tadi kita temukan
-            fuser -k 81/tcp > /dev/null 2>&1
-            fuser -k 80/tcp > /dev/null 2>&1
-            
-            # Restart Servis
-            systemctl restart xray
-            systemctl restart nginx
-            
-            # Deteksi otomatis servis OpenVPN agar tidak error 'Unit Not Found'
+            echo -e " ${Y}Cleaning & Restarting Services...${OFF}"
+            # Logika perbaikan yang tadi terbukti ampuh
+            apt-get purge apache2 -y > /dev/null 2>&1
+            fuser -k 80/tcp 81/tcp 443/tcp 1194/udp 2>/dev/null
+            systemctl restart xray nginx > /dev/null 2>&1
             vpn_name=$(systemctl list-units --type=service | grep -i openvpn | awk '{print $1}' | head -n1)
-            [[ ! -z "$vpn_name" ]] && systemctl restart $vpn_name
-            
+            [[ ! -z "$vpn_name" ]] && systemctl restart $vpn_name > /dev/null 2>&1
             sleep 2
             echo -e " ${G}Perbaikan Selesai!${OFF}"
             sleep 1
-            menu_10 # Memanggil kembali fungsi ini agar status terupdate
+            menu_10 
             ;;
         x) return ;;
         *) menu_10 ;;
