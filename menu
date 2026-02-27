@@ -70,7 +70,7 @@ update_script() {
 }
 
 # Fungsi Backup Data Akun
-backup_data() {
+backup_restore() {
     clear
     echo -e "\e[1;33m Sedang memproses backup, mohon tunggu... \e[0m"
     mkdir -p /root/backup_vpn
@@ -731,7 +731,7 @@ fix_servis() {
     dashboard_utama
 }
 
-menu_manager() {
+trial_menu() {
     clear
     echo -e " \e[1;35m╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[41;1;37m        🚀 USER & TRIAL MANAGER        \e[0m \e[1;35m┃\e[0m"
@@ -741,9 +741,6 @@ menu_manager() {
     echo -e " \e[1;35m┃\e[0m \e[1;33m[03]\e[0m \e[1;32mCreate Trial Vless    \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[04]\e[0m \e[1;32mCreate Trial Trojan   \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┠──────────────────────────────────────────┨\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[05]\e[0m \e[1;36mCek Online            \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[06]\e[0m \e[1;31mHapus User Expired    \e[1;35m┃\e[0m"
-    echo -e " \e[1;35m┃\e[0m \e[1;33m[07]\e[0m \e[1;31mHapus  Manual         \e[1;35m┃\e[0m"
     echo -e " \e[1;35m┃\e[0m \e[1;33m[00]\e[0m \e[1;31mKembali Ke Menu Utama \e[1;35m┃\e[0m"
     echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
     echo ""
@@ -753,9 +750,6 @@ menu_manager() {
         2|02) trial_vmess ;;
         3|03) trial_vless ;;
         4|04) trial_trojan ;;
-        5|05) cek_online ;;
-        6|06) exp_cleaner ;;
-        7|07) hapus_manual ;;
         0|00) dashboard_utama ;;
         *) menu_manager ;;
     esac
