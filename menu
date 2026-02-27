@@ -802,60 +802,56 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-    echo -e "${P}┌──────────────────────────────────────────────────────────┐${NC}"
-    echo -e "${P}│${NC}          ${B}• AJI SYSTEM VPN PANEL MENU •${NC}           ${P}│${NC}"
-    echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "System OS" "Debian GNU/Linux 10"
-    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "Server RAM" "$RAM_VAL"
-    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "System Uptime" "$UPTIME"
-    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "Current Domain" "$DOMAIN"
-    printf "${P}│${NC} ${B}%-15s${NC} : ${W}%-35s${NC} ${P}│${NC}\n" "IP-VPS" "$MYIP"
-    echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-    echo -e "${P}│${NC} ${B}SSH:${st_ssh}${B} │ XRAY:${st_xry}${B} │ NGINX:${st_ngx}${B} │ WS:${st_wse}${NC}   ${P}│${NC}"
-    echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-
-    printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}       ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "SSH/VPN" "$total_ssh" "VMESS/WS" "$total_vmess"
-    printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}      ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "VLESS/WS" "$total_vless" "TROJAN/WS" "$total_trojan"
-    echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
-
-    # === KONFIGURASI WARNA ===
+        # === KONFIGURASI WARNA ===
     OFF='\e[0m'
     PURPLE='\e[1;35m'
     ORANGE='\e[1;33m'
-    CYAN='\e[1;36m'   # Biru Terang Menyala
-    G='\e[1;32m'      # Hijau (Active)
+    CYAN='\e[1;36m'
+    G='\e[1;32m'
 
-    # Garis Bingkai & Sekat
-    L_TOP="${CYAN}┌────────────────────────────────────────────────────────┐${OFF}"
-    L_MID="${CYAN}├──────────────────────────┬─────────────────────────────┤${OFF}"
-    L_MID2="${CYAN}├────────────────────────────────────────────────────────┤${OFF}"
-    L_BOT="${CYAN}└────────────────────────────────────────────────────────┘${OFF}"
-    L_SID="${CYAN}│${OFF}"
-    L_SEP="${CYAN}│${OFF}" # Garis Sekat Tengah
+    # Garis Pembatas Simpel (Biru Terang)
+    LINE="${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === DAFTAR MENU (Dengan Sekat Tengah) ===
-    echo -e "$L_SID ${PURPLE}[01] SSH VIP    $L_SEP ${PURPLE}[09] AUTO REBOOT  $L_SEP ${PURPLE}[17] RESTART  $L_SID"
-    echo -e "$L_SID ${PURPLE}[02] VMESS      $L_SEP ${PURPLE}[10] MENU PORT    $L_SEP ${PURPLE}[18] DOMAIN   $L_SID"
-    echo -e "$L_SID ${PURPLE}[03] VLESS      $L_SEP ${PURPLE}[11] SPEEDTEST    $L_SEP ${PURPLE}[19] CERT SSL $L_SID"
-    echo -e "$L_SID ${PURPLE}[04] TROJAN     $L_SEP ${PURPLE}[12] RUNNING CEK  $L_SEP ${PURPLE}[20] INST UDP $L_SID"
+    # === TAMPILAN DASHBOARD SISTEM ===
+    echo -e "$LINE"
+    echo -e "         ${PURPLE}• AJI SYSTEM VPN PANEL MENU •${OFF}"
+    echo -e "$LINE"
+    echo -e " ${PURPLE}System OS       : $os${OFF}"
+    echo -e " ${PURPLE}Server RAM      : $ram${OFF}"
+    echo -e " ${PURPLE}System Uptime   : $uptime${OFF}"
+    echo -e " ${PURPLE}Current Domain  : $domain${OFF}"
+    echo -e " ${PURPLE}IP-VPS          : $IP${OFF}"
+    echo -e "$LINE"
+    echo -e " ${G}SSH:ON ${PURPLE}|${OFF} ${G}XRAY:ON ${PURPLE}|${OFF} ${G}NGINX:ON ${PURPLE}|${OFF} ${G}WS:ON${OFF}"
+    echo -e "$LINE"
+    echo -e " ${PURPLE}SSH/VPN   : $total_ssh          ${PURPLE}VMESS/WS  : $total_vmess${OFF}"
+    echo -e " ${PURPLE}VLESS/WS  : $total_vless          ${PURPLE}TROJAN/WS : $total_trojan${OFF}"
+    echo -e "$LINE"
+
+    # === DAFTAR MENU (Tiga Kolom Simpel) ===
+    # Baris 1-4 (Ungu)
+    echo -e " ${PURPLE}[01] SSH VIP    [09] AUTO REBOOT  [17] RESTART VPS${OFF}"
+    echo -e " ${PURPLE}[02] VMESS      [10] MENU PORT    [18] SET DOMAIN${OFF}"
+    echo -e " ${PURPLE}[03] VLESS      [11] SPEEDTEST    [19] CERT SSL${OFF}"
+    echo -e " ${PURPLE}[04] TROJAN     [12] RUNNING CEK  [20] INSTALL UDP${OFF}"
     
-    # Bagian Menu Penting (Oranye)
-    echo -e "$L_SID ${ORANGE}[05] SHADOW     $L_SEP ${ORANGE}[13] CLEAR LOG    $L_SEP ${ORANGE}[21] CACHE    $L_SID"
-    echo -e "$L_SID ${ORANGE}[06] TRIAL      $L_SEP ${ORANGE}[14] CREATE SLOW  $L_SEP ${ORANGE}[22] BNDWITH  $L_SID"
-    echo -e "$L_SID ${ORANGE}[07] RAM/CPU    $L_SEP ${ORANGE}[15] BCKP/RSTR    $L_SEP ${ORANGE}[23] UP SCRIPT$L_SID"
-    echo -e "$L_SID ${ORANGE}[08] DEL EXP    $L_SEP ${ORANGE}[16] REBOOT VPS   $L_SEP ${ORANGE}[24] MENU BOT $L_SID"
+    # Baris 5-8 (Oranye - Penting)
+    echo -e " ${ORANGE}[05] SHADOW     [13] CLEAR LOG    [21] CLEAR CACHE${OFF}"
+    echo -e " ${ORANGE}[06] TRIAL      [14] CREATE SLOW  [22] CEK BANDWITH${OFF}"
+    echo -e " ${ORANGE}[07] RAM/CPU    [15] BCKP/RSTR    [23] UP SCRIPT${OFF}"
+    echo -e " ${ORANGE}[08] DEL EXP    [16] REBOOT VPS   [24] MENU BOT VIP${OFF}"
     
-    echo -e "$L_MID2"
-    echo -e "$L_SID ${PURPLE}[25] CHANGE BANNER SSH <<<                           $L_SID"
-    echo -e "$L_SID ${PURPLE}[26] LOG CREATE USER ACCOUNT <<<                    $L_SID"
-    echo -e "$L_MID2"
+    echo -e ""
+    echo -e " ${PURPLE}[25] CHANGE BANNER SSH <<<${OFF}"
+    echo -e " ${PURPLE}[26] LOG CREATE USER ACCOUNT <<<${OFF}"
+    echo -e "$LINE"
     
-    # Informasi Versi & Expired (Sesuai Foto 286992.jpg)
-    echo -e "$L_SID ${PURPLE} Script Version : V2.4 (Last Update)               $L_SID"
-    echo -e "$L_SID ${PURPLE} Script Status  : ${G}(Active)${OFF}                         $L_SID"
-    echo -e "$L_SID ${PURPLE} Username       : ${ORANGE}AJI STORE${OFF}                       $L_SID"
-    echo -e "$L_SID ${PURPLE} Expired script : ${ORANGE} UNLIMITED${OFF}          $L_SID"
-    echo -e "$L_BOT"
+    # Informasi Status (Sesuai Foto 2)
+    echo -e " ${PURPLE}Script Version : V2.4 (Last Update)${OFF}"
+    echo -e " ${PURPLE}Script Status  : ${G}(Active)${OFF}"
+    echo -e " ${PURPLE}Username       : ${ORANGE}AJI STORE${OFF}"
+    echo -e " ${PURPLE}Expired script : ${ORANGE}UNLIMITED${OFF}"
+    echo -e "$LINE"
     echo ""
     read -p "  Pilih Nomor: " opt
        # === LOGIKA PEMILIHAN MENU (SINKRON DENGAN TAMPILAN) ===
