@@ -755,6 +755,56 @@ trial_menu() {
     esac
 }
 
+run_speedtest() {
+    clear
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e "${C}│${BG_RED}             • RUNNING SPEEDTEST SERVER •           ${C}│${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    # Cek apakah speedtest sudah terinstal
+    if ! command -v speedtest &> /dev/null; then
+        echo -e "${Y} Installing Speedtest...${OFF}"
+        apt install speedtest-cli -y
+    fi
+    speedtest-cli
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    read -n 1 -s -r -p " Press any key to back to menu..."
+    dashboard_utama
+}
+
+running_cek() {
+    clear
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e "${C}│${BG_RED}            • CHECKING SERVICE STATUS •             ${C}│${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    # Menggunakan status yang sudah kita buat tadi
+    echo -e " ${G}SSH/VPN      : $s_ssh${OFF}"
+    echo -e " ${G}XRAY CORE    : $s_xray${OFF}"
+    echo -e " ${G}NGINX        : $s_nginx${OFF}"
+    echo -e " ${G}WEBSOCKET/WS : $s_ws${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    # Menampilkan uptime singkat
+    uptime -p
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    read -n 1 -s -r -p " Press any key to back to menu..."
+    dashboard_utama
+}
+
+clear_log() {
+    clear
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e "${C}│${BG_RED}               • CLEARING SYSTEM LOG •              ${C}│${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -ne " Cleaning logs, please wait..."
+    # Menghapus semua file log di direktori umum
+    find /var/log -type f -name "*.log" -exec truncate -s 0 {} \;
+    find /var/log -type f -name "*.gz" -delete
+    rm -rf /var/log/journal/*
+    echo -e "${G} DONE!${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    read -n 1 -s -r -p " Press any key to back to menu..."
+    dashboard_utama
+}
+
 dashboard_utama() {
     # --- HITUNG TOTAL AKUN (LIVE) ---
     total_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
