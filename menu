@@ -814,12 +814,13 @@ dashboard_utama() {
         s_ws="🔴"
     fi
 
-    # === 2. LOGIKA HITUNG AKUN (MENGGUNAKAN WC -L SESUAI REQUEST) ===
-    # Menghitung jumlah baris total di setiap file konfigurasi
-  t_ssh=$(cat /etc/xray/ssh_users.txt 2>/dev/null | wc -l)
-    t_vms=$(cat /etc/xray/config.json 2>/dev/null | wc -l)
-    t_vls=$(cat /etc/xray/config.json 2>/dev/null | wc -l)
-    t_trj=$(cat /etc/xray/config.json 2>/dev/null | wc -l)
+        # === 2. LOGIKA HITUNG AKUN (SUPER ACCURATE) ===
+    # Menghitung user SSH asli dari system (UID > 1000) agar pasti update
+    t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
+    # Untuk XRAY, kita hitung baris di file TXT tapi paksa refresh
+    t_vms=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
+    t_vls=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
+    t_trj=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
