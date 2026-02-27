@@ -802,7 +802,7 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-         # === 1. LOGIKA DATA VPS (WAJIB ADA AGAR TIDAK KOSONG) ===
+         # === 1. LOGIKA DATA VPS & AKUN (FIX: AUTO-DETECT) ===
     IP=$(wget -qO- ipinfo.io/ip)
     domain=$(cat /etc/xray/domain 2>/dev/null || echo "$IP")
     os_name=$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2 | head -n1)
@@ -810,41 +810,42 @@ dashboard_utama() {
     ram_total=$(free -m | grep Mem | awk '{print $2}')
     up_time=$(uptime -p | cut -d' ' -f2-)
 
-    # Hitung Akun (Ganti Path jika perlu)
-    t_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || echo "0")
-    t_vms=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-    t_vls=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-    t_trj=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    # Logika hitung akun: Mencari tanda '###' atau 'user' di config
+    t_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || grep -c "###" "/etc/xray/ssh" 2>/dev/null || echo "0")
+    t_vms=$(grep -c -E "### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    t_vls=$(grep -c -E "### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    t_trj=$(grep -c -E "### " "/etc/xray/config.json" 2>/dev/null || echo "0")
 
-    # === 2. KONFIGURASI WARNA (SESUAI FOTO) ===
-    C='\e[1;96m'    # Garis Biru Langit
+    # === 2. KONFIGURASI WARNA SULTAN ===
+    C='\e[1;96m'    # Biru Langit (Garis)
     G='\e[1;92m'    # Hijau Cerah (Teks Label)
-    W='\e[1;97m'    # Putih (Isi Data)
+    W='\e[1;97m'    # Putih Terang (Isi Data)
+    Y='\e[1;93m'    # Kuning (Angka & Garis Menu)
     P='\e[1;95m'    # Ungu (Menu Atas)
-    Y='\e[1;93m'    # Kuning (Garis Tengah/Footer)
-    BG_RED='\e[1;97;101m' # Judul Background Merah
+    BG_RED='\e[1;97;101m' # Background Merah Judul
     OFF='\e[0m'
 
     # === 3. TAMPILAN DASHBOARD (PRESISI TOTAL) ===
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     echo -e "${C}│${BG_RED}           • AJI SYSTEM VPN PANEL MENU •            ${C}│${OFF}"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    printf "${C}│ ${G}%-15s ${W}: %-33s ${C}│\n" "System OS" "$os_name"
-    printf "${C}│ ${G}%-15s ${W}: %-33s ${C}│\n" "Server RAM" "$ram_used MB / $ram_total MB"
-    printf "${C}│ ${G}%-15s ${W}: %-33s ${C}│\n" "System Uptime" "$up_time"
-    printf "${C}│ ${G}%-15s ${W}: %-33s ${C}│\n" "Current Domain" "$domain"
-    printf "${C}│ ${G}%-15s ${W}: %-33s ${C}│\n" "IP-VPS" "$IP"
+    # Mengunci lebar teks label 16 dan data 32 agar garis kanan LURUS
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "System OS" "$os_name"
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Server RAM" "$ram_used MB / $ram_total MB"
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "System Uptime" "$up_time"
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Current Domain" "$domain"
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "IP-VPS" "$IP"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     echo -e " ${G}SSH:ON ${C}│${OFF} ${G} XRAY:ON ${C}│${OFF} ${G} NGINX:ON ${C}│${OFF} ${G} WS:ON ${OFF}"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === 4. TOTAL AKUN (ANTI BRANTAKAN - FIXED) ===
-    # Kita pakai printf yang lebih lebar agar angka 0 tidak melompat
-    printf "${C}│ ${G}%-9s ${W}: %-10s ${C}│ ${G}%-10s ${W}: %-9s ${C}│\n" "SSH/VPN" "$t_ssh" "VMESS/WS" "$t_vms"
-    printf "${C}│ ${G}%-9s ${W}: %-10s ${C}│ ${G}%-10s ${W}: %-9s ${C}│\n" "VLESS/WS" "$t_vls" "TROJAN/WS" "$t_trj"
+    # === 4. TOTAL AKUN (FIXED: ANTI-LONCAT) ===
+    # Menggunakan %-8s untuk memaksa angka tetap di posisinya
+    printf "${C}│ ${G}%-10s ${W}: %-8s ${C}│ ${G}%-10s ${W}: %-8s ${C}│\n" "SSH/VPN" "$t_ssh" "VMESS/WS" "$t_vms"
+    printf "${C}│ ${G}%-10s ${W}: %-8s ${C}│ ${G}%-10s ${W}: %-8s ${C}│\n" "VLESS/WS" "$t_vls" "TROJAN/WS" "$t_trj"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === 5. DAFTAR MENU (WARNA SESUAI FOTO) ===
+    # === 5. DAFTAR MENU (3 KOLOM RAPI) ===
     printf "${P}│ [01] SSH VIP   │ [09] AUTO REBOOT │ [17] RESTART    │\n"
     printf "${P}│ [02] VMESS     │ [10] MENU PORT   │ [18] DOMAIN     │\n"
     printf "${P}│ [03] VLESS     │ [11] SPEEDTEST   │ [19] CERT SSL   │\n"
@@ -856,11 +857,11 @@ dashboard_utama() {
     printf "${G}│ [08] DEL EXP   │ [16] REBOOT VPS  │ [24] MENU BOT   │\n"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     
-    # === 6. FOOTER (FIXED ALIGNMENT) ===
-    printf "${C}│ ${G}%-15s ${W}: %-33s ${C}│\n" "Script Version" "V2.4 (Last Update)"
-    printf "${C}│ ${G}%-15s ${G}: %-33s ${C}│\n" "Script Status" "(Active)"
-    printf "${C}│ ${G}%-15s ${Y}: %-33s ${C}│\n" "Username" "AJI STORE"
-    printf "${C}│ ${G}%-15s ${Y}: %-33s ${C}│\n" "Expired script" "UNLIMITED"
+    # === 6. FOOTER INFO (TEXT BERWARNA) ===
+    printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Script Version" "V2.4 (Last Update)"
+    printf "${C}│ ${G}%-16s ${G}: %-32s ${C}│\n" "Script Status" "(Active)"
+    printf "${C}│ ${G}%-16s ${Y}: %-32s ${C}│\n" "Username" "AJI STORE"
+    printf "${C}│ ${G}%-16s ${Y}: %-32s ${C}│\n" "Expired script" "UNLIMITED"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     echo ""
     read -p "  Pilih Nomor: " opt
