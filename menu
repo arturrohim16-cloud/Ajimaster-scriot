@@ -818,16 +818,53 @@ dashboard_utama() {
     printf "${P}│${NC}  ${B}%-11s${NC}: ${W}%-5s${NC}      ${P}│${NC}      ${B}%-11s${NC}: ${W}%-5s${NC}  ${P}│${NC}\n" "VLESS/WS" "$total_vless" "TROJAN/WS" "$total_trojan"
     echo -e "${P}├──────────────────────────────────────────────────────────┤${NC}"
 
-    printf "${P}│${NC} ${B} [01] • SSH MENU    ${NC}  ${P}│${NC} ${B} [08] • BACKUP DA   ${NC}  ${P}│${NC}\n"
-    printf "${P}│${NC} ${B} [02] • VMESS MENU  ${NC}  ${P}│${NC} ${B} [09] • UPDATE SC   ${NC}  ${P}│${NC}\n"
-    printf "${P}│${NC} ${B} [03] • VLESS MENU  ${NC}  ${P}│${NC} ${B} [10] • REBOOT VPS  ${NC}  ${P}│${NC}\n"
-    printf "${P}│${NC} ${B} [04] • TROJAN MENU ${NC}  ${P}│${NC} ${B} [11] • EDIT SCRIPT ${NC}  ${P}│${NC}\n"
-    printf "${P}│${NC} ${B} [05] • DEL USER    ${NC}  ${P}│${NC} ${B} [12] • FIX SERVICE ${NC}  ${P}│${NC}\n"
-    printf "${P}│${NC} ${B} [06] • REBOOT      ${NC}  ${P}│${NC} ${B} [13] • BANNER      ${NC}  ${P}│${NC}\n"
-    printf "${P}│${NC} ${B} [07] • EXTEND      ${NC}  ${P}│${NC} ${B} [00] • EXIT MENU   ${NC}  ${P}│${NC}\n"
-    echo -e "${P}└──────────────────────────────────────────────────────────┘${NC}"
+    # === KONFIGURASI WARNA ===
+    OFF='\e[0m'
+    PURPLE='\e[1;35m'
+    ORANGE='\e[1;33m'
+    CYAN='\e[1;36m'   # Biru Terang Menyala
+    G='\e[1;32m'      # Hijau (Active)
+
+    # Garis Bingkai & Sekat
+    L_TOP="${CYAN}┌────────────────────────────────────────────────────────┐${OFF}"
+    L_MID="${CYAN}├──────────────────────────┬─────────────────────────────┤${OFF}"
+    L_MID2="${CYAN}├────────────────────────────────────────────────────────┤${OFF}"
+    L_BOT="${CYAN}└────────────────────────────────────────────────────────┘${OFF}"
+    L_SID="${CYAN}│${OFF}"
+    L_SEP="${CYAN}│${OFF}" # Garis Sekat Tengah
+
+    # === TAMPILAN DASHBOARD SISTEM ===
+    echo -e "$L_TOP"
+    echo -e "$L_SID ${PURPLE} SSH/VPN    : $total_ssh           $L_SEP ${PURPLE}VMESS/WS   : $total_vmess      $L_SID"
+    echo -e "$L_SID ${PURPLE} VLESS/WS   : $total_vless           $L_SEP ${PURPLE}TROJAN/WS  : $total_trojan      $L_SID"
+    echo -e "$L_SID ${PURPLE} SHADOW/WS  : $total_shadow                                      $L_SID"
+    echo -e "$L_MID"
+
+    # === DAFTAR MENU (Dengan Sekat Tengah) ===
+    echo -e "$L_SID ${PURPLE}[01] SSH VIP    $L_SEP ${PURPLE}[09] AUTO REBOOT  $L_SEP ${PURPLE}[17] RESTART  $L_SID"
+    echo -e "$L_SID ${PURPLE}[02] VMESS      $L_SEP ${PURPLE}[10] MENU PORT    $L_SEP ${PURPLE}[18] DOMAIN   $L_SID"
+    echo -e "$L_SID ${PURPLE}[03] VLESS      $L_SEP ${PURPLE}[11] SPEEDTEST    $L_SEP ${PURPLE}[19] CERT SSL $L_SID"
+    echo -e "$L_SID ${PURPLE}[04] TROJAN     $L_SEP ${PURPLE}[12] RUNNING CEK  $L_SEP ${PURPLE}[20] INST UDP $L_SID"
+    
+    # Bagian Menu Penting (Oranye)
+    echo -e "$L_SID ${ORANGE}[05] SHADOW     $L_SEP ${ORANGE}[13] CLEAR LOG    $L_SEP ${ORANGE}[21] CACHE    $L_SID"
+    echo -e "$L_SID ${ORANGE}[06] TRIAL      $L_SEP ${ORANGE}[14] CREATE SLOW  $L_SEP ${ORANGE}[22] BNDWITH  $L_SID"
+    echo -e "$L_SID ${ORANGE}[07] RAM/CPU    $L_SEP ${ORANGE}[15] BCKP/RSTR    $L_SEP ${ORANGE}[23] UP SCRIPT$L_SID"
+    echo -e "$L_SID ${ORANGE}[08] DEL EXP    $L_SEP ${ORANGE}[16] REBOOT VPS   $L_SEP ${ORANGE}[24] MENU BOT $L_SID"
+    
+    echo -e "$L_MID2"
+    echo -e "$L_SID ${PURPLE}[25] CHANGE BANNER SSH <<<                           $L_SID"
+    echo -e "$L_SID ${PURPLE}[26] LOG CREATE USER ACCOUNT <<<                    $L_SID"
+    echo -e "$L_MID2"
+    
+    # Informasi Versi & Expired (Sesuai Foto 286992.jpg)
+    echo -e "$L_SID ${PURPLE} Script Version : V2.4 (Last Update)               $L_SID"
+    echo -e "$L_SID ${PURPLE} Script Status  : ${G}(Active)${OFF}                         $L_SID"
+    echo -e "$L_SID ${PURPLE} Username       : ${ORANGE}kucrut-jr${OFF}                       $L_SID"
+    echo -e "$L_SID ${PURPLE} Expired script : ${ORANGE}2025-11-11 / 34 Days${OFF}          $L_SID"
+    echo -e "$L_BOT"
     echo ""
-    read -p "  Pilih Nomor: " opt
+    read -p "  ${CYAN}Pilih Nomor: ${OFF}" opt
     case $opt in
         1|01) add_ssh ;;
         2|02) add_vmess ;;
@@ -837,7 +874,7 @@ dashboard_utama() {
         6|06) reboot ;;
         7|07) renew_user ;;
         8|08) run_speedtest ;;
-        9|09) update_script ;;
+        9|23) update_script ;;
         10) restart_services ;;
         11) cek_online ;;
         12) fix_servis ;;
