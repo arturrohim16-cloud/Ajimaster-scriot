@@ -9,6 +9,48 @@ source /usr/bin/cek_online 2>/dev/null
 source /usr/bin/exp_cleaner 2>/dev/null
 source /usr/bin/del_user 2>/dev/null
 
+# === TARUH DI ATAS SCRIPT ===
+change_port() {
+    clear
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e "${C}│${BG_RED}             • REAL-TIME PORT MONITOR •             ${C}│${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    printf "${W}  %-20s  %-10s  %-15s ${OFF}\n" "SERVICE NAME" "PORT" "STATUS"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+
+    services=("XRAY-TLS:443" "XRAY-HTTP:80" "WS-PYTHON:444" "WS-DROPBEAR:2082" "DROPBEAR:143" "SSH-CORE:22" "OPENVPN:1194")
+
+    for item in "${services[@]}"; do
+        name=$(echo $item | cut -d: -f1)
+        port=$(echo $item | cut -d: -f2)
+        if netstat -tuln | grep -q ":$port "; then
+            status="🟢 ${G}ON${OFF}"
+        else
+            status="🔴 ${R}OFF${OFF}"
+        fi
+        printf " ${P}%-20s ${W}: ${O}%-9s %-15b\n" "$name" "$port" "$status"
+    done
+
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -e " ${O}[00]${G} PERBAIKI SEMUA PORT (SUPER FIX) ${OFF}"
+    echo -e " ${O}[x] ${P} KEMBALI KE MENU UTAMA ${OFF}"
+    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    echo -ne " ${G}Pilih Opsi : ${OFF}"
+    read port_opt
+
+    case $port_opt in
+        00 | 0)
+            echo -e " ${Y}Menjalankan Perbaikan...${OFF}"
+            fuser -k 80/tcp 81/tcp 1194/udp 2>/dev/null #
+            systemctl restart xray nginx openvpn-server@server 2>/dev/null
+            sleep 2
+            menu_10 
+            ;;
+        x) return ;;
+        *) menu_10 ;;
+    esac
+}
+
 # --- KONFIGURASI BOT TELEGRAM ---
 TOKEN="8226263150:AAFdiVuQeEshxOpSvema_F6fDwbyFcfNWnw"
 CHAT_ID="6577966386"
@@ -802,54 +844,6 @@ clear_log() {
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     read -n 1 -s -r -p " Press any key to back to menu..."
     dashboard_utama
-}
-
-change_port() {
-    clear
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    echo -e "${C}│${BG_RED}             • REAL-TIME PORT MONITOR •             ${C}│${OFF}"
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    printf "${W}  %-20s  %-10s  %-15s ${OFF}\n" "SERVICE NAME" "PORT" "STATUS"
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-
-    # Daftar Port Pantauan
-    services=("XRAY-TLS:443" "XRAY-HTTP:80" "WS-PYTHON:444" "WS-DROPBEAR:2082" "DROPBEAR:143" "SSH-CORE:22" "OPENVPN:1194")
-
-    for item in "${services[@]}"; do
-        name=$(echo $item | cut -d: -f1)
-        port=$(echo $item | cut -d: -f2)
-        if netstat -tuln | grep -q ":$port "; then
-            status="🟢 ${G}ON${OFF}"
-        else
-            status="🔴 ${R}OFF${OFF}"
-        fi
-        printf " ${P}%-20s ${W}: ${O}%-9s %-15b\n" "$name" "$port" "$status"
-    done
-
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    echo -e " ${O}[00]${G} PERBAIKI SEMUA PORT (FORCE FIX) ${OFF}"
-    echo -e " ${O}[x] ${P} KEMBALI KE MENU UTAMA ${OFF}"
-    echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    echo -ne " ${G}Pilih Opsi : ${OFF}"
-    read port_opt
-
-    case $port_opt in
-        00 | 0)
-            echo -e " ${Y}Force Restarting & Clearing Port 81...${OFF}"
-            # Menghancurkan proses pengganggu di port 80 & 81
-            fuser -k 80/tcp 81/tcp 443/tcp 1194/udp > /dev/null 2>&1
-            systemctl restart xray nginx > /dev/null 2>&1
-            # Auto-detect OpenVPN
-            vpn_name=$(systemctl list-units --type=service | grep -i openvpn | awk '{print $1}' | head -n1)
-            [[ ! -z "$vpn_name" ]] && systemctl restart $vpn_name > /dev/null 2>&1
-            sleep 2
-            echo -e " ${G}Perbaikan Selesai!${OFF}"
-            sleep 1
-            menu_10 
-            ;;
-        x) return ;;
-        *) menu_10 ;;
-    esac
 }
 
 dashboard_utama() {
