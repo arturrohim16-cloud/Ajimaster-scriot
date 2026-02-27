@@ -802,33 +802,41 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-            # === 1. LOGIKA STATUS OTOMATIS (AMBIL DATA VPS) ===
-    # Mengambil IP dan Domain
+    # === 1. LOGIKA DATA OTOMATIS (FIX BUG DOMAIN & TOTAL) ===
     IP=$(wget -qO- ipinfo.io/ip)
+    # Pastikan file domain ada, jika tidak pakai IP
     domain=$(cat /etc/xray/domain 2>/dev/null)
-    [[ -z "$domain" ]] && domain=$IP
+    if [[ -z "$domain" ]]; then
+        domain="$IP"
+    fi
 
-    # Mengambil Info OS, RAM, dan Uptime
+    # Mengambil Data Sistem
     os_name=$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2)
     ram_used=$(free -m | grep Mem | awk '{print $3}')
     ram_total=$(free -m | grep Mem | awk '{print $2}')
     up_time=$(uptime -p | cut -d' ' -f2-)
 
-    # === 2. WARNA & BINGKAI ===
+    # Menghitung Total Akun Secara Otomatis
+    total_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || echo "0")
+    total_vmess=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_vless=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_trojan=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+
+    # === 2. KONFIGURASI WARNA & GARIS ===
     OFF='\e[0m'
     PURPLE='\e[1;35m'
     ORANGE='\e[1;33m'
-    CYAN='\e[1;36m' # Biru Menyala
-    G='\e[1;32m'    # Hijau Status ON
+    CYAN='\e[1;36m' 
+    G='\e[1;32m'
 
-    # Garis Pembatas (Pastikan jumlah strip sama)
+    # Garis Bingkai Sultan
     LINE="${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    L_SID="${CYAN}│${OFF}"
 
-    # === 3. TAMPILAN DASHBOARD (FULL AUTO) ===
+    # === 3. TAMPILAN DASHBOARD SISTEM (PRESISI) ===
     echo -e "$LINE"
     echo -e " ${PURPLE}   • AJI SYSTEM VPN PANEL MENU •${OFF}"
     echo -e "$LINE"
-    # Status di bawah ini sekarang otomatis terisi
     printf " ${PURPLE}│ System OS       : %-30s ${PURPLE}│\n${OFF}" "$os_name"
     printf " ${PURPLE}│ Server RAM      : %-30s ${PURPLE}│\n${OFF}" "$ram_used MB / $ram_total MB"
     printf " ${PURPLE}│ System Uptime   : %-30s ${PURPLE}│\n${OFF}" "$up_time"
@@ -838,23 +846,29 @@ dashboard_utama() {
     echo -e " ${G} SSH:ON ${PURPLE}│${OFF} ${G} XRAY:ON ${PURPLE}│${OFF} ${G} NGINX:ON ${PURPLE}│${OFF} ${G} WS:ON ${OFF}"
     echo -e "$LINE"
 
-    # === 4. DAFTAR MENU (3 KOLOM RAPI) ===
-    echo -e " ${PURPLE}[01] SSH VIP    [09] AUTO REBOOT  [17] RESTART VPS${OFF}"
-    echo -e " ${PURPLE}[02] VMESS      [10] MENU PORT    [18] SET DOMAIN${OFF}"
-    echo -e " ${PURPLE}[03] VLESS      [11] SPEEDTEST    [19] CERT SSL${OFF}"
-    echo -e " ${PURPLE}[04] TROJAN     [12] RUNNING CEK  [20] INSTALL UDP${OFF}"
+    # === 4. TAMPILAN TOTAL AKUN (PRESISI) ===
+    # Bagian ini sekarang memiliki penyekat rapi
+    printf " ${PURPLE}│ SSH/VPN  : %-11s ${PURPLE}│ VMESS/WS : %-11s ${PURPLE}│\n${OFF}" "$total_ssh" "$total_vmess"
+    printf " ${PURPLE}│ VLESS/WS : %-11s ${PURPLE}│ TROJAN/WS: %-11s ${PURPLE}│\n${OFF}" "$total_vless" "$total_trojan"
     echo -e "$LINE"
-    echo -e " ${ORANGE}[05] SHADOW     [13] CLEAR LOG    [21] CLEAR CACHE${OFF}"
-    echo -e " ${ORANGE}[06] TRIAL      [14] CREATE SLOW  [22] CEK BANDWITH${OFF}"
-    echo -e " ${ORANGE}[07] RAM/CPU    [15] BCKP/RSTR    [23] UP SCRIPT${OFF}"
-    echo -e " ${ORANGE}[08] DEL EXP    [16] REBOOT VPS   [24] MENU BOT VIP${OFF}"
+
+    # === 5. DAFTAR MENU (TIGA KOLOM PRESISI) ===
+    printf " ${PURPLE}│ [01] SSH VIP   │ [09] AUTO REBOOT │ [17] RESTART    │\n${OFF}"
+    printf " ${PURPLE}│ [02] VMESS     │ [10] MENU PORT   │ [18] DOMAIN     │\n${OFF}"
+    printf " ${PURPLE}│ [03] VLESS     │ [11] SPEEDTEST   │ [19] CERT SSL   │\n${OFF}"
+    printf " ${PURPLE}│ [04] TROJAN    │ [12] RUNNING CEK │ [20] INST UDP   │\n${OFF}"
+    echo -e "$LINE"
+    printf " ${ORANGE}│ [05] SHADOW    │ [13] CLEAR LOG   │ [21] CACHE      │\n${OFF}"
+    printf " ${ORANGE}│ [06] TRIAL     │ [14] CREATE SLOW │ [22] BNDWITH    │\n${OFF}"
+    printf " ${ORANGE}│ [07] RAM/CPU   │ [15] BCKP/RSTR   │ [23] UP SCRIPT  │\n${OFF}"
+    printf " ${ORANGE}│ [08] DEL EXP   │ [16] REBOOT VPS  │ [24] MENU BOT   │\n${OFF}"
     echo -e "$LINE"
     
-    # Info Versi & User
-    echo -e " ${PURPLE} Script Version : V2.4 (Last Update)${OFF}"
-    echo -e " ${PURPLE} Script Status  : ${G}(Active)${OFF}"
-    echo -e " ${PURPLE} Username       : ${ORANGE}AJI STORE${OFF}"
-    echo -e " ${PURPLE} Expired script : ${ORANGE}UNLIMITED${OFF}"
+    # === 6. FOOTER INFO (PRESISI) ===
+    printf " ${PURPLE}│ Script Version : %-30s ${PURPLE}│\n${OFF}" "V2.4 (Last Update)"
+    printf " ${PURPLE}│ Script Status  : %-30s ${PURPLE}│\n${OFF}" "Active"
+    printf " ${PURPLE}│ Username       : %-30s ${PURPLE}│\n${OFF}" "AJI STORE"
+    printf " ${PURPLE}│ Expired script : %-30s ${PURPLE}│\n${OFF}" "UNLIMITED"
     echo -e "$LINE"
     echo ""
     read -p "  Pilih Nomor: " opt
