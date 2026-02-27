@@ -802,32 +802,34 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-    # === KONFIGURASI WARNA TERANG & TEBAL ===
-    # Kuning Terang (Bold Yellow)
-    Y='\e[1;93m'
-    # Hijau Neon (Bold Green)
-    G='\e[1;92m'
-    # Biru Langit (Bold Cyan)
-    C='\e[1;96m'
-    # Reset
+     # === 1. LOGIKA DATA (MENGGUNAKAN TEKS BERSIH) ===
+    IP=$(wget -qO- ipinfo.io/ip)
+    domain=$(head -n 1 /etc/xray/domain 2>/dev/null | tr -d '\r' | xargs)
+    [[ -z "$domain" || ! "$domain" == *"."* ]] && domain="No Domain Detected"
+
+    os_name=$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2 | head -n1)
+    ram_used=$(free -m | grep Mem | awk '{print $3}')
+    ram_total=$(free -m | grep Mem | awk '{print $2}')
+    up_time=$(uptime -p | cut -d' ' -f2-)
+
+    # Menghitung total akun dengan output angka bersih
+    t_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || echo "0")
+    t_vms=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    t_vls=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    t_trj=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+
+    # === 2. KONFIGURASI WARNA TERANG & TEBAL ===
+    Y='\e[1;93m'  # Kuning Terang (Bold)
+    G='\e[1;92m'  # Hijau Neon (Bold)
+    C='\e[1;96m'  # Biru Langit (Bold)
     OFF='\e[0m'
 
-    # === LOGIKA DATA (TETAP PRESISI) ===
-    IP=$(wget -qO- ipinfo.io/ip)
+    # Garis Pembatas Biru Cyan
+    LINE="${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # FIX DOMAIN: Mengambil hanya baris pertama dan hapus spasi/karakter aneh
-    domain=$(head -n 1 /etc/xray/domain 2>/dev/null | tr -d '\r' | xargs)
-    if [[ -z "$domain" || ! "$domain" == *"."* ]]; then
-        domain="No Domain Detected"
-    fi
-
-    # Hitung Total Akun
-    total_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || echo "0")
-    total_vmess=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_vless=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-    total_trojan=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-
-    # === TAMPILAN DASHBOARD SISTEM (WARNA BARU) ===
+    # === 3. TAMPILAN DASHBOARD VPS (PRESISI) ===
+    echo -e "$LINE"
+    echo -e " ${Y}         • AJI SYSTEM VPN PANEL MENU •${OFF}"
     echo -e "$LINE"
     printf " ${Y}│ System OS       : %-30s ${Y}│\n${OFF}" "$os_name"
     printf " ${Y}│ Server RAM      : %-30s ${Y}│\n${OFF}" "$ram_used MB / $ram_total MB"
@@ -835,33 +837,36 @@ dashboard_utama() {
     printf " ${Y}│ Current Domain  : %-30s ${Y}│\n${OFF}" "$domain"
     printf " ${Y}│ IP-VPS          : %-30s ${Y}│\n${OFF}" "$IP"
     echo -e "$LINE"
-
-    # === BARIS STATUS SERVICE ===
+    
+    # Baris Status Service
     echo -e " ${G} SSH:ON ${Y}│${OFF} ${G} XRAY:ON ${Y}│${OFF} ${G} NGINX:ON ${Y}│${OFF} ${G} WS:ON ${OFF}"
     echo -e "$LINE"
 
-    # === TAMPILAN TOTAL AKUN (WARNA BARU) ===
-    printf " ${C}│ SSH/VPN  : %-11s ${C}│ VMESS/WS : %-11s ${C}│\n${OFF}" "$total_ssh" "$total_vmess"
-    printf " ${C}│ VLESS/WS : %-11s ${C}│ TROJAN/WS: %-11s ${C}│\n${OFF}" "$total_vless" "$total_trojan"
+    # === 4. TAMPILAN TOTAL AKUN (PRESISI TANPA SYMBOL) ===
+    # Menggunakan teks statis agar garis penutup kanan lurus sempurna
+    printf " ${C}│ SSH/VPN  : %-11s ${C}│ VMESS/WS : %-11s ${C}│\n${OFF}" "$t_ssh" "$t_vms"
+    printf " ${C}│ VLESS/WS : %-11s ${C}│ TROJAN/WS: %-11s ${C}│\n${OFF}" "$t_vls" "$t_trj"
     echo -e "$LINE"
 
     # === 5. DAFTAR MENU (TIGA KOLOM PRESISI) ===
-    printf " ${PURPLE}│ [01] SSH VIP   │ [09] AUTO REBOOT │ [17] RESTART    │\n${OFF}"
-    printf " ${PURPLE}│ [02] VMESS     │ [10] MENU PORT   │ [18] DOMAIN     │\n${OFF}"
-    printf " ${PURPLE}│ [03] VLESS     │ [11] SPEEDTEST   │ [19] CERT SSL   │\n${OFF}"
-    printf " ${PURPLE}│ [04] TROJAN    │ [12] RUNNING CEK │ [20] INST UDP   │\n${OFF}"
+    # Baris Menu Ungu (Hanya Angka & Teks)
+    printf " ${Y}│ [01] SSH VIP   │ [09] AUTO REBOOT │ [17] RESTART    │\n${OFF}"
+    printf " ${Y}│ [02] VMESS     │ [10] MENU PORT   │ [18] DOMAIN     │\n${OFF}"
+    printf " ${Y}│ [03] VLESS     │ [11] SPEEDTEST   │ [19] CERT SSL   │\n${OFF}"
+    printf " ${Y}│ [04] TROJAN    │ [12] RUNNING CEK │ [20] INST UDP   │\n${OFF}"
     echo -e "$LINE"
-    printf " ${ORANGE}│ [05] SHADOW    │ [13] CLEAR LOG   │ [21] CACHE      │\n${OFF}"
-    printf " ${ORANGE}│ [06] TRIAL     │ [14] CREATE SLOW │ [22] BNDWITH    │\n${OFF}"
-    printf " ${ORANGE}│ [07] RAM/CPU   │ [15] BCKP/RSTR   │ [23] UP SCRIPT  │\n${OFF}"
-    printf " ${ORANGE}│ [08] DEL EXP   │ [16] REBOOT VPS  │ [24] MENU BOT   │\n${OFF}"
+    # Baris Menu Oranye (Hanya Angka & Teks)
+    printf " ${G}│ [05] SHADOW    │ [13] CLEAR LOG   │ [21] CACHE      │\n${OFF}"
+    printf " ${G}│ [06] TRIAL     │ [14] CREATE SLOW │ [22] BNDWITH    │\n${OFF}"
+    printf " ${G}│ [07] RAM/CPU   │ [15] BCKP/RSTR   │ [23] UP SCRIPT  │\n${OFF}"
+    printf " ${G}│ [08] DEL EXP   │ [16] REBOOT VPS  │ [24] MENU BOT   │\n${OFF}"
     echo -e "$LINE"
     
     # === 6. FOOTER INFO (PRESISI) ===
-    printf " ${PURPLE}│ Script Version : %-30s ${PURPLE}│\n${OFF}" "V2.4 (Last Update)"
-    printf " ${PURPLE}│ Script Status  : %-30s ${PURPLE}│\n${OFF}" "Active"
-    printf " ${PURPLE}│ Username       : %-30s ${PURPLE}│\n${OFF}" "AJI STORE"
-    printf " ${PURPLE}│ Expired script : %-30s ${PURPLE}│\n${OFF}" "UNLIMITED"
+    printf " ${C}│ Script Version : %-30s ${C}│\n${OFF}" "V2.4 (Last Update)"
+    printf " ${C}│ Script Status  : %-30s ${C}│\n${OFF}" "Active"
+    printf " ${C}│ Username       : %-30s ${C}│\n${OFF}" "AJI STORE"
+    printf " ${C}│ Expired script : %-30s ${C}│\n${OFF}" "UNLIMITED"
     echo -e "$LINE"
     echo ""
     read -p "  Pilih Nomor: " opt
