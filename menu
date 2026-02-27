@@ -161,10 +161,9 @@ add_trojan() {
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-     # PROSES INJEKSI (Hanya menembak pintu Trojan)
-jq --arg id "$uuid" --arg mail "$user" \
-'(.inbounds[] | select(.port == 10003)).settings.clients += [{"password": $id, "email": $mail}]' \
-/usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+     jq --arg id "$uuid" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $id}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+     systemctl restart xray
+
 
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
@@ -252,9 +251,9 @@ add_vless() {
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-jq --arg id "$uuid" --arg mail "$user" \
-'(.inbounds[] | select(.port == 10002)).settings.clients += [{"id": $id, "email": $mail}]' \
-/usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+# Tambahkan ke Port 443 dan 10002 sekaligus
+jq --arg id "$uuid" '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": $id, "decryption": "none"}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+systemctl restart xray
 
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
@@ -365,11 +364,10 @@ EOF
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-    # 2. Menulis tanda ### Langsung di Config Xray (Agar Dashboard TIDAK 0)
-    # Kita sisipkan tanda pagar tepat di atas id user baru
-jq --arg id "$uuid" --arg mail "$user" \
-'(.inbounds[] | select(.port == 10001)).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' \
-/usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+    # Contoh logika dalam script
+uuid=$(cat /proc/sys/kernel/random/uuid)
+jq --arg id "$uuid" '(.inbounds[] | select(.port == 10001)).settings.clients += [{"id": $id, "alterId": 0}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+systemctl restart xray
 
     # Teknik Sed untuk menambahkan komentar ### di baris yang tepat
     sed -i "/$uuid/i \### $user $exp" "$CONF"
