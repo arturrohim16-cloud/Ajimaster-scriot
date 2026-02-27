@@ -802,75 +802,63 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-        # === 1. LOGIKA DATA (AMBIL OTOMATIS) ===
-    IP=$(wget -qO- ipinfo.io/ip)
-    # Mengambil domain dari file, jika tidak ada pakai IP
-    domain=$(head -n 1 /etc/xray/domain 2>/dev/null | tr -d '\r' | xargs)
-    [[ -z "$domain" ]] && domain="No Domain Detected"
+          # === 1. LOGIKA TOTAL AKUN (FIX: TIDAK NOL LAGI) ===
+    # Mengambil data asli dari config sistem
+    total_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || echo "0")
+    total_vmess=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_vless=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
+    total_trojan=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
 
-    os_name=$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2 | head -n1)
-    ram_used=$(free -m | grep Mem | awk '{print $3}')
-    ram_total=$(free -m | grep Mem | awk '{print $2}')
-    up_time=$(uptime -p | cut -d' ' -f2-)
-
-    # Total Akun Angka Murni
-    t_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || echo "0")
-    t_vms=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-    t_vls=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-    t_trj=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null || echo "0")
-
-    # === 2. KONFIGURASI WARNA CERAH & TEBAL ===
-    C='\e[1;96m'   # Biru Langit (Bold)
-    Y='\e[1;93m'   # Kuning (Bold)
-    G='\e[1;92m'   # Hijau Neon (Bold)
-    P='\e[1;95m'   # Ungu Terang (Bold)
-    BG_RED='\e[1;97;101m' # Teks Putih, BG Merah Cerah
+    # === 2. KONFIGURASI WARNA CERAH TEBAL ===
+    C='\e[1;96m'    # Biru Langit (Garis Bingkai)
+    G='\e[1;92m'    # Hijau Neon (Teks Label)
+    W='\e[1;97m'    # Putih Terang (Isi Data)
+    Y='\e[1;93m'    # Kuning (Angka & Menu)
+    P='\e[1;95m'    # Ungu Terang
+    BG_RED='\e[1;97;101m' # BG Merah Cerah
     OFF='\e[0m'
 
-    # Baris Bingkai Berwarna-warni
-    L_C="${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    L_Y="${Y}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    L_G="${G}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
+    # Garis Bingkai Biru Cerah
+    LINE="${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === 3. TAMPILAN DASHBOARD (PRESISI 100%) ===
-    echo -e "$L_C"
+    # === 3. DASHBOARD SISTEM (TEKS HIJAU CERAH) ===
+    echo -e "$LINE"
     echo -e "${C}│${BG_RED}           • AJI SYSTEM VPN PANEL MENU •            ${C}│${OFF}"
-    echo -e "$L_C"
-    printf " ${Y}│ System OS       : %-30s ${Y}│\n${OFF}" "$os_name"
-    printf " ${Y}│ Server RAM      : %-30s ${Y}│\n${OFF}" "$ram_used MB / $ram_total MB"
-    printf " ${Y}│ System Uptime   : %-30s ${Y}│\n${OFF}" "$up_time"
-    printf " ${Y}│ Current Domain  : %-30s ${Y}│\n${OFF}" "$domain"
-    printf " ${Y}│ IP-VPS          : %-30s ${Y}│\n${OFF}" "$IP"
-    echo -e "$L_Y"
-    
-    # Status Service
+    echo -e "$LINE"
+    # Format %-16s mengunci label teks agar presisi
+    printf " ${C}│ ${G}%-16s ${W}: %-30s ${C}│\n${OFF}" "System OS" "$os_name"
+    printf " ${C}│ ${G}%-16s ${W}: %-30s ${C}│\n${OFF}" "Server RAM" "$ram_used MB / $ram_total MB"
+    printf " ${C}│ ${G}%-16s ${W}: %-30s ${C}│\n${OFF}" "System Uptime" "$up_time"
+    printf " ${C}│ ${G}%-16s ${W}: %-30s ${C}│\n${OFF}" "Current Domain" "$domain"
+    printf " ${C}│ ${G}%-16s ${W}: %-30s ${C}│\n${OFF}" "IP-VPS" "$IP"
+    echo -e "$LINE"
     echo -e " ${G} SSH:ON ${C}│${OFF} ${G} XRAY:ON ${C}│${OFF} ${G} NGINX:ON ${C}│${OFF} ${G} WS:ON ${OFF}"
-    echo -e "$L_G"
+    echo -e "$LINE"
 
-    # === 4. TAMPILAN TOTAL AKUN (KUNCI LEBAR KOLOM) ===
-    # printf %-11s memastikan garis penyekat lurus sempurna
-    printf " ${C}│ SSH/VPN  : %-11s ${C}│ VMESS/WS : %-11s ${C}│\n${OFF}" "$t_ssh" "$t_vms"
-    printf " ${C}│ VLESS/WS : %-11s ${C}│ TROJAN/WS: %-11s ${C}│\n${OFF}" "$t_vls" "$t_trj"
-    echo -e "$L_C"
+    # === 4. TOTAL AKUN (TABEL STATIS - ANTI BERANTAKAN) ===
+    # Menggunakan printf format kolom tetap untuk menjamin garis kanan LURUS
+    printf " ${C}│ ${G}%-9s ${W}: %-10s ${C}│ ${G}%-9s ${W}: %-10s ${C}│\n${OFF}" "SSH/VPN" "$total_ssh" "VMESS/WS" "$total_vmess"
+    printf " ${C}│ ${G}%-9s ${W}: %-10s ${C}│ ${G}%-9s ${W}: %-10s ${C}│\n${OFF}" "VLESS/WS" "$total_vless" "TROJAN/WS" "$total_trojan"
+    echo -e "$LINE"
 
-    # === 5. DAFTAR MENU (TIGA KOLOM RAPI) ===
+    # === 5. DAFTAR MENU (WARNA BERBEDA TIAP BARIS) ===
     printf " ${P}│ [01] SSH VIP   │ [09] AUTO REBOOT │ [17] RESTART    │\n${OFF}"
     printf " ${P}│ [02] VMESS     │ [10] MENU PORT   │ [18] DOMAIN     │\n${OFF}"
     printf " ${P}│ [03] VLESS     │ [11] SPEEDTEST   │ [19] CERT SSL   │\n${OFF}"
     printf " ${P}│ [04] TROJAN    │ [12] RUNNING CEK │ [20] INST UDP   │\n${OFF}"
-    echo -e "$L_Y"
+    echo -e "${Y}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     printf " ${G}│ [05] SHADOW    │ [13] CLEAR LOG   │ [21] CACHE      │\n${OFF}"
     printf " ${G}│ [06] TRIAL     │ [14] CREATE SLOW │ [22] BNDWITH    │\n${OFF}"
     printf " ${G}│ [07] RAM/CPU   │ [15] BCKP/RSTR   │ [23] UP SCRIPT  │\n${OFF}"
     printf " ${G}│ [08] DEL EXP   │ [16] REBOOT VPS  │ [24] MENU BOT   │\n${OFF}"
-    echo -e "$L_G"
+    echo -e "${G}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     
-    # === 6. FOOTER INFO ===
-    printf " ${C}│ Script Version : %-30s ${C}│\n${OFF}" "V2.4 (Last Update)"
-    printf " ${C}│ Script Status  : %-30s ${C}│\n${OFF}" "Active"
-    printf " ${C}│ Username       : %-30s ${C}│\n${OFF}" "AJI STORE"
-    printf " ${C}│ Expired script : %-30s ${C}│\n${OFF}" "UNLIMITED"
-    echo -e "$L_C"
+    # === 6. FOOTER (WARNA TEKS BERBEDA) ===
+    printf " ${C}│ ${G}%-16s ${W}: %-30s ${C}│\n${OFF}" "Script Version" "V2.4 (Last Update)"
+    printf " ${C}│ ${G}%-16s ${G}%-30s ${C}│\n${OFF}" "Script Status" "(Active)"
+    printf " ${C}│ ${G}%-16s ${Y}%-30s ${C}│\n${OFF}" "Username" "AJI STORE"
+    printf " ${C}│ ${G}%-16s ${Y}%-30s ${C}│\n${OFF}" "Expired script" "UNLIMITED"
+    echo -e "$LINE"
     echo ""
     read -p "  Pilih Nomor: " opt
        # === LOGIKA PEMILIHAN MENU (SINKRON DENGAN TAMPILAN) ===
