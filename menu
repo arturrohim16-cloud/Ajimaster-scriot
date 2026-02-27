@@ -46,7 +46,7 @@ change_port() {
             sleep 2
             menu_10 
             ;;
-        x) return ;;
+        x) dashboard_utama ;;
         *) menu_10 ;;
     esac
 }
@@ -170,9 +170,9 @@ add_trojan() {
     systemctl restart xray
 
 # --- GENERATE LINK TROJAN ---
-tr1="trojan://${pass_tr}@${domain}:443?path=%2Ftrojan&security=tls&type=ws#${user}"
-tr2="trojan://${pass_tr}@${domain}:443?mode=multi&security=tls&type=grpc&serviceName=trojan-grpc#${user}"
-   
+link1="trojan://$uuid@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
+link2="trojan://$uuid@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
+link3="trojan://$uuid@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"   
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
 
@@ -206,8 +206,11 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 🌐 <b>Link TROJAN WS :</b>
 <code>$tr1</code>
 
-🔗 <b>Link TROJAN gRPC :</b>
+🔗 <b>Link TROJAN HTTP :</b>
 <code>$tr2</code>
+
+🔗 <b>Link TROJAN gRPC :</b>
+<code>$tr3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
@@ -250,10 +253,9 @@ add_vless() {
     systemctl restart xray
 
 # --- GENERATE LINK VLESS ---
-vless1="vless://${uuid}@${domain}:443?path=%2Fvless&security=tls&encryption=none&type=ws#${user}"
-vless2="vless://${uuid}@${domain}:80?path=%2Fvless&security=none&encryption=none&type=ws#${user}"
-vless3="vless://${uuid}@${domain}:443?mode=multi&security=tls&encryption=none&type=grpc&serviceName=vless-grpc#${user}"
-
+link1="vless://$uuid@$domain:443?path=/vless&security=tls&encryption=none&type=ws&sni=$domain#$user"
+link2="vless://$uuid@$domain:80?path=/vless&security=none&encryption=none&type=ws&host=$domain#$user"
+link3="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
     mkdir -p /etc/xray   
     echo "### $user $exp" >> /etc/xray/vless_users.txt
 
