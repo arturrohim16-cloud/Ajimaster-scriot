@@ -17,17 +17,25 @@ send_log() {
     local TIPE=$1
     local PESAN=$2
     
-    # Hapus parse_mode dulu untuk tes, agar teks murni terkirim
-    local TEXT="🚀 HASIL CREATE $TIPE 🚀
-━━━━━━━━━━━━━━━━━━━━━━
-$PESAN
-━━━━━━━━━━━━━━━━━━━━━━
-✅ Berhasil Dibuat"
+    # Header Pesan
+    local HEADER="🚀 <b>HASIL CREATE $TIPE</b> 🚀
+━━━━━━━━━━━━━━━━━━━━━━"
+    
+    # Footer Pesan
+    local FOOTER="━━━━━━━━━━━━━━━━━━━━━━
+✅ <b>Berhasil Dibuat</b>"
 
-    # Kirim dan SIMPAN respon errornya ke file /root/log_bot.txt
+    # Gabungkan semua
+    local FULL_TEXT="$HEADER
+$PESAN
+$FOOTER"
+
+    # KIRIM DENGAN PERBAIKAN: 
+    # Kita gunakan --data-urlencode untuk SEMUA parameter agar karakter unik tidak merusak JSON API Telegram
     curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
         --data-urlencode "chat_id=$CHAT_ID" \
-        --data-urlencode "text=$TEXT" > /root/log_bot.txt
+        --data-urlencode "text=$FULL_TEXT" \
+        --data-urlencode "parse_mode=HTML" > /root/log_bot.txt
 }
 
 update_script() {
