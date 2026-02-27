@@ -812,12 +812,14 @@ change_port() {
     printf "${W}  %-20s  %-10s  %-15s ${OFF}\n" "SERVICE NAME" "PORT" "STATUS"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # Daftar Port Utama untuk dipantau
-    services=("XRAY-TLS:443" "XRAY-HTTP:80" "WS-PYTHON:444" "WS-DROPBEAR:2082" "DROPBEAR:143" "SSH:22" "OVPN:1194")
+    # Daftar Port Utama untuk dipantau secara otomatis
+    services=("XRAY-TLS:443" "XRAY-HTTP:80" "WS-PYTHON:444" "WS-DROPBEAR:2082" "DROPBEAR:143" "SSH-CORE:22" "OPENVPN:1194")
 
     for item in "${services[@]}"; do
         name=$(echo $item | cut -d: -f1)
         port=$(echo $item | cut -d: -f2)
+        
+        # Mesin scanner real-time
         if netstat -tuln | grep -q ":$port "; then
             status="🟢 ${G}ON${OFF}"
         else
@@ -827,36 +829,47 @@ change_port() {
     done
 
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    echo -e " ${O}[00]${G} PERBAIKI SEMUA PORT (FIX ALL) ${OFF}"
+    echo -e " ${O}[00]${G} PERBAIKI SEMUA PORT (FORCE START) ${OFF}"
     echo -e " ${O}[x] ${P} KEMBALI KE MENU UTAMA ${OFF}"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     echo -ne " ${G}Pilih Opsi : ${OFF}"
     read port_opt
 
-        case $port_opt in
-              00 | 0)
-            echo -e " ${Y}Memulai Proses Force-Start Semua Port...${OFF}"
+    case $port_opt in
+        00 | 0)
+            echo -e " ${Y}Menjalankan Perbaikan Darurat...${OFF}"
             
-            # 1. Bersihkan port 80 dari aplikasi macet/bentrok
-            fuser -k 80/tcp > /dev/null 2>&1
-            fuser -k 1194/udp > /dev/null 2>&1
+            # 1. Paksa matikan semua proses yang mengunci port
+            killall -9 nginx xray openvpn 2>/dev/null
+            fuser -k 80/tcp 1194/udp 443/tcp 2>/dev/null
             
-            # 2. Restart servis utama secara berurutan
+            # 2. Perbaikan sistem log (Cegah Nginx mogok)
+            mkdir -p /var/log/nginx
+            chown -R www-data:www-data /var/log/nginx
+            
+            # 3. Membersihkan cache konfigurasi
             systemctl daemon-reload
-            systemctl restart nginx
+            
+            # 4. Menghidupkan kembali satu per satu
             systemctl restart xray
+            systemctl restart nginx
             systemctl restart openvpn-server@server
             
-            # 3. Khusus Websocket (Jika kamu pakai python ws)
+            # 5. Restart jalur Websocket/Python
             systemctl restart ws-stunnel > /dev/null 2>&1
             systemctl restart ws-python > /dev/null 2>&1
             
-            sleep 2
+            sleep 3
             echo -e " ${G}Perbaikan Selesai! Mengupdate Status...${OFF}"
             sleep 1
+            menu_10 # Refresh otomatis ke tampilan scanner
+            ;;
+        x) 
+            ./menu.sh # Ganti dengan nama file script dashboard kamu
+            ;;
+        *) 
             menu_10 
             ;;
-        
     esac
 }
 
