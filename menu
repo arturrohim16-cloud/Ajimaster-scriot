@@ -587,7 +587,7 @@ cek_online() {
     menu_manager
 }
 
-hapus_manual() {
+del_exp() {
 # =========================================================
 #  FUNGSI DISPLAY & HAPUS USER (SSH & XRAY) BY GEMINI
 # =========================================================
