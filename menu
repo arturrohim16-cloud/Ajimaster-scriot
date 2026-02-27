@@ -802,7 +802,7 @@ dashboard_utama() {
     echo -e " \e[1;35m     ██║  ██║██  ██║██║╚████╔╝ \e[0m"
     echo -e " \e[1;35m     ╚═╝  ╚═╝╚█████╔╝╚═╝ ╚═══╝ \e[0m"
 
-         # === 1. LOGIKA FIX DATA VPS & AKUN (ANTI-NOL) ===
+         # === 1. LOGIKA FIX DATA VPS & HITUNG AKUN (SESUAI HASIL GREP KAMU) ===
     IP=$(wget -qO- ipinfo.io/ip)
     domain=$(cat /etc/xray/domain 2>/dev/null || echo "$IP")
     os_name=$(cat /etc/os-release | grep -i PRETTY_NAME | cut -d'"' -f2 | head -n1)
@@ -810,17 +810,17 @@ dashboard_utama() {
     ram_total=$(free -m | grep Mem | awk '{print $2}')
     up_time=$(uptime -p | cut -d' ' -f2-)
 
-    # MENCARI AKUN DI BERBAGAI LOKASI (Agar tidak 0)
-    t_ssh=$(grep -c -E "^### " "/etc/ssh/sshd_config" 2>/dev/null || grep -c "###" "/etc/xray/ssh" 2>/dev/null || echo "0")
-    t_vms=$(grep -c -E "### " "/etc/xray/config.json" 2>/dev/null || grep -c "###" "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-    t_vls=$(grep -c -E "### " "/etc/xray/config.json" 2>/dev/null || grep -c "###" "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
-    t_trj=$(grep -c -E "### " "/etc/xray/config.json" 2>/dev/null || grep -c "###" "/usr/local/etc/xray/config.json" 2>/dev/null || echo "0")
+    # FIX: Membaca file /etc/xray/ssh_users.txt sesuai hasil pengecekanmu
+    t_ssh=$(grep -c "###" /etc/xray/ssh_users.txt 2>/dev/null || echo "0")
+    t_vms=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
+    t_vls=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
+    t_trj=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
 
-    # === 2. WARNA SULTAN (SESUAI REQUEST) ===
-    C='\e[1;96m'    # Biru Langit (Garis)
-    G='\e[1;92m'    # Hijau Neon (Teks Label)
+    # === 2. KONFIGURASI WARNA (HIJAU CERAH & GARIS BIRU) ===
+    C='\e[1;96m'    # Biru (Garis)
+    G='\e[1;92m'    # Hijau Cerah (Label Teks)
     W='\e[1;97m'    # Putih (Isi Data)
-    Y='\e[1;93m'    # Kuning (Garis Menu/Footer)
+    Y='\e[1;93m'    # Kuning (Garis Tengah/Footer)
     P='\e[1;95m'    # Ungu (Menu)
     BG_RED='\e[1;97;101m' # BG Merah Judul
     OFF='\e[0m'
@@ -829,7 +829,6 @@ dashboard_utama() {
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     echo -e "${C}│${BG_RED}           • AJI SYSTEM VPN PANEL MENU •            ${C}│${OFF}"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    # %-16s mengunci lebar label teks agar garis kanan SEJAJAR
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "System OS" "$os_name"
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Server RAM" "$ram_used MB / $ram_total MB"
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "System Uptime" "$up_time"
@@ -839,13 +838,13 @@ dashboard_utama() {
     echo -e " ${G}SSH:ON ${C}│${OFF} ${G} XRAY:ON ${C}│${OFF} ${G} NGINX:ON ${C}│${OFF} ${G} WS:ON ${OFF}"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === 4. TOTAL AKUN (PASTI LURUS & TIDAK BERANTAKAN) ===
-    # Format %-10s mengunci lebar kolom akun
+    # === 4. TOTAL AKUN (FIXED: ANTI-BRANTAKAN & UPDATE OTOMATIS) ===
+    # Kunci lebar kolom agar garis kanan PASTI LURUS
     printf "${C}│ ${G}%-10s ${W}: %-8s ${C}│ ${G}%-10s ${W}: %-8s ${C}│\n" "SSH/VPN" "$t_ssh" "VMESS/WS" "$t_vms"
     printf "${C}│ ${G}%-10s ${W}: %-8s ${C}│ ${G}%-10s ${W}: %-8s ${C}│\n" "VLESS/WS" "$t_vls" "TROJAN/WS" "$t_trj"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
 
-    # === 5. DAFTAR MENU (3 KOLOM RAPI) ===
+    # === 5. DAFTAR MENU (WARNA SESUAI FOTO) ===
     printf "${P}│ [01] SSH VIP   │ [09] AUTO REBOOT │ [17] RESTART    │\n"
     printf "${P}│ [02] VMESS     │ [10] MENU PORT   │ [18] DOMAIN     │\n"
     printf "${P}│ [03] VLESS     │ [11] SPEEDTEST   │ [19] CERT SSL   │\n"
@@ -857,7 +856,7 @@ dashboard_utama() {
     printf "${G}│ [08] DEL EXP   │ [16] REBOOT VPS  │ [24] MENU BOT   │\n"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     
-    # === 6. FOOTER INFO ===
+    # === 6. FOOTER (WARNA TEXT BERBEDA) ===
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Script Version" "V2.4"
     printf "${C}│ ${G}%-16s ${G}: %-32s ${C}│\n" "Script Status" "(Active)"
     printf "${C}│ ${G}%-16s ${Y}: %-32s ${C}│\n" "Username" "AJI STORE"
