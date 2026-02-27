@@ -168,11 +168,18 @@ add_trojan() {
     
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
+    systemctl restart nginx
 
-# --- GENERATE LINK TROJAN ---
-link1="trojan://$uuid@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
-link2="trojan://$uuid@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
-link3="trojan://$uuid@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"   
+# 3. GENERATE LINK TROJAN (URI FORMAT)
+    # Link 1: WS TLS (443)
+    link1="trojan://$uuid@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
+
+    # Link 2: WS Non-TLS (80) - PASTI KONEK GACOR
+    link2="trojan://$uuid@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
+
+    # Link 3: gRPC TLS (443)
+    link3="trojan://$uuid@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
+
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
 
@@ -251,13 +258,25 @@ add_vless() {
     
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
+    systemctl restart nginx
 
-# --- GENERATE LINK VLESS ---
-link1="vless://$uuid@$domain:443?path=/vless&security=tls&encryption=none&type=ws&sni=$domain#$user"
-link2="vless://$uuid@$domain:80?path=/vless&security=none&encryption=none&type=ws&host=$domain#$user"
-link3="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
-    mkdir -p /etc/xray   
+    # --- GENERATE LINK VLESS ---
+    # Link 1: WS TLS 443
+    link1="vless://$uuid@$domain:443?path=/vless&security=tls&encryption=none&type=ws&sni=$domain#$user"
+    
+    # Link 2: WS Non-TLS 80 (PASTI KONEK)
+    link2="vless://$uuid@$domain:80?path=/vless&security=none&encryption=none&type=ws&host=$domain#$user"
+    
+    # Link 3: gRPC TLS 443
+    link3="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
+
+    # Membuat folder log jika belum ada
+    mkdir -p /etc/xray
+    
+    # Menulis tanda ### agar angka di dashboard tidak 0
     echo "### $user $exp" >> /etc/xray/vless_users.txt
+    # Dan tulis juga ke config utama agar sinkron
+    sed -i "/$uuid/i \### $user $exp" "/usr/local/etc/xray/config.json"
 
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -361,11 +380,15 @@ EOF
     systemctl restart xray
     systemctl restart nginx
 
-    # 3. GENERATE LINK VMESS (Base64 Clean Format)
-    vmess_tls="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
-    vmess_ntls="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)"
-    vmess_grpc="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
-   
+    # 3. GENERATE LINK VMESS (FORMAT VARIABEL LENGKAP)
+    # Link 1: WS TLS (443)
+    link1="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+
+    # Link 2: WS Non-TLS (80) - PASTI KONEK GACOR
+    link2="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)"
+
+    # Link 3: gRPC TLS (443)
+    link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
     mkdir -p /etc/xray   
     echo "### $user $exp" >> /etc/xray/vmess_users.txt
     clear
@@ -398,13 +421,13 @@ MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 📅 <b>exp  :</b> <code>$exp_date</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link TLS (443) :</b>
-<code>$vmess_tls</code>
+<code>$link1</code>
 
 🌐 <b>Link Non-TLS (80) :</b>
-<code>$vmess_ntls</code>
+<code>$link2</code>
 
 🔗 <b>Link gRPC (443) :</b>
-<code>$vmess_grpc</code>
+<code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
