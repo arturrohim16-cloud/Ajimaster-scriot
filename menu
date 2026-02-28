@@ -51,53 +51,38 @@ change_port() {
     esac
 }
 
-# --- START ADD BOT ---
 cat <<EOF > /usr/bin/add_bot
 #!/bin/bash
 clear
 CONF_BOT="/etc/xray/bot.conf"
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "\E[44;1;39m          SETTING BOT NOTIFIKASI              \E[0m"
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-if [ -f "\$CONF_BOT" ]; then
-    source \$CONF_BOT
-    echo -e " Token Saat Ini   : \033[0;33m\$BOT_TOKEN\033[0m"
-    echo -e " Chat ID Saat Ini : \033[0;33m\$CHAT_ID\033[0m"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-fi
-
+# Ambil input user
 read -p " Masukkan Token Bot : " NEW_TOKEN
 read -p " Masukkan Chat ID   : " NEW_ID
 
-# Simpan ke config pusat
+# 1. Simpan ke Database Pusat
 echo "BOT_TOKEN=\"\$NEW_TOKEN\"" > \$CONF_BOT
 echo "CHAT_ID=\"\$NEW_ID\"" >> \$CONF_BOT
 
-echo -e "\n\033[0;36m[...]\033[0m Menyingkronkan ke semua menu script..."
-LIST_FILES=("add-vmess" "add-vless" "add-tr" "trial-vmess" "trial-vless" "menu")
-
+# 2. Suntikkan ke semua script (Inject Langsung)
+LIST_FILES=("add-vmess" "add-vless" "add-tr")
 for FILE in "\${LIST_FILES[@]}"; do
     if [ -f "/usr/bin/\$FILE" ]; then
-        # Hapus baris lama jika sudah ada (mencegah penumpukan)
+        # Bersihkan baris lama agar tidak double
         sed -i "/BOT_TOKEN=/d" /usr/bin/\$FILE
         sed -i "/CHAT_ID=/d" /usr/bin/\$FILE
-        
-        # Masukkan Token & ID baru di baris ke-2 (tepat setelah shebang #!/bin/bash)
+        # Masukkan variabel baru di baris paling atas (setelah #!/bin/bash)
         sed -i "2i BOT_TOKEN=\"\$NEW_TOKEN\"" /usr/bin/\$FILE
         sed -i "3i CHAT_ID=\"\$NEW_ID\"" /usr/bin/\$FILE
     fi
 done
 
-MSG="<b>✅ BOT TELEGRAM AKTIF</b>%0A━━━━━━━━━━━━━━━━━━━━━━━━%0A<b>Admin :</b> AJI STORE%0A<b>Status:</b> Online Gacor"
-curl -s -X POST "https://api.telegram.org/bot\$NEW_TOKEN/sendMessage" -d chat_id=\$NEW_ID -d text="\$MSG" -d parse_mode="HTML" > /dev/null
-
-echo -e "\033[0;32m[ OK ]\033[0m Setup Selesai! Bot Berhasil Disinkronkan."
+echo -e "Sinkronisasi Selesai! Mengirim Test..."
+curl -s -X POST "https://api.telegram.org/bot\$NEW_TOKEN/sendMessage" -d chat_id=\$NEW_ID -d text="✅ BOT DISINKRONKAN!"
 sleep 2
 menu
 EOF
 chmod +x /usr/bin/add_bot
-# --- END ADD BOT ---
 
 update_script() {
     clear
@@ -242,10 +227,10 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 # Kita panggil source agar Token & ID selalu yang paling update dari menu [24]
 if [ -f "/etc/xray/bot.conf" ]; then
     source /etc/xray/bot.conf
-    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-        -d chat_id="${CHAT_ID}" \
-        -d text="${MSG_TROJAN}" \
-        -d parse_mode="HTML" > /dev/null
+    curl -s -X POST "https://api.telegram.org/bot\${BOT_TOKEN}/sendMessage" \
+    -d chat_id="\${CHAT_ID}" \
+    -d text="\${MSG_TROJAN}" \
+    -d parse_mode="HTML" > /dev/null
 fi
 
 # --- PENUTUP SCRIPT ---
