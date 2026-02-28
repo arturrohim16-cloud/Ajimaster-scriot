@@ -51,34 +51,60 @@ change_port() {
     esac
 }
 
-# --- KONFIGURASI BOT TELEGRAM ---
-TOKEN="8226263150:AAFdiVuQeEshxOpSvema_F6fDwbyFcfNWnw"
-CHAT_ID="6577966386"
+cat <<EOF > /usr/bin/add_bot
+#!/bin/bash
+clear
+# Path file config bot agar tersimpan permanen
+CONF_BOT="/etc/xray/bot.conf"
 
-send_log() {
-    local TIPE=$1
-    local PESAN=$2
-    
-    # Header Pesan
-    local HEADER="🚀 <b>HASIL CREATE $TIPE</b> 🚀
-━━━━━━━━━━━━━━━━━━━━━━"
-    
-    # Footer Pesan
-    local FOOTER="━━━━━━━━━━━━━━━━━━━━━━
-✅ <b>Berhasil Dibuat</b>"
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "\E[44;1;39m          SETTING BOT NOTIFIKASI              \E[0m"
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-    # Gabungkan semua
-    local FULL_TEXT="$HEADER
-$PESAN
-$FOOTER"
+# Load data lama jika ada
+if [ -f "\$CONF_BOT" ]; then
+    source \$CONF_BOT
+    echo -e " Token Saat Ini  : \033[0;33m\$BOT_TOKEN\033[0m"
+    echo -e " Chat ID Saat Ini : \033[0;33m\$CHAT_ID\033[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+fi
 
-    # KIRIM DENGAN PERBAIKAN: 
-    # Kita gunakan --data-urlencode untuk SEMUA parameter agar karakter unik tidak merusak JSON API Telegram
-    curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
-        --data-urlencode "chat_id=$CHAT_ID" \
-        --data-urlencode "text=$FULL_TEXT" \
-        --data-urlencode "parse_mode=HTML" > /root/log_bot.txt
-}
+echo -e " \033[0;32m[ INFO ]\033[0m Dapatkan Token di @BotFather"
+echo -e " \033[0;32m[ INFO ]\033[0m Dapatkan Chat ID di @MissRose_bot (ketik /id)"
+echo ""
+read -p " Masukkan Token Bot : " NEW_TOKEN
+read -p " Masukkan Chat ID   : " NEW_ID
+
+# Simpan ke file config pusat
+echo "BOT_TOKEN=\"\$NEW_TOKEN\"" > \$CONF_BOT
+echo "CHAT_ID=\"\$NEW_ID\"" >> \$CONF_BOT
+
+# Update otomatis ke semua script pembuatan akun
+echo -e "\n\033[0;36m[...]\033[0m Menyingkronkan ke semua menu script..."
+LIST_FILES=("add-vmess" "add-vless" "add-tr" "trial-vmess" "trial-vless" "trial-ssh" "menu")
+
+for FILE in "\${LIST_FILES[@]}"; do
+    if [ -f "/usr/bin/\$FILE" ]; then
+        sed -i "s/BOT_TOKEN=\".*\"/BOT_TOKEN=\"\$NEW_TOKEN\"/g" /usr/bin/\$FILE
+        sed -i "s/CHAT_ID=\".*\"/CHAT_ID=\"\$NEW_ID\"/g" /usr/bin/\$FILE
+    fi
+done
+
+# Kirim pesan pengetesan ke Telegram
+echo -e "\033[0;36m[...]\033[0m Mengirim pesan tes ke Telegram..."
+MSG="<b>✅ BOT TELEGRAM AKTIF</b>%0A━━━━━━━━━━━━━━━━━━━━━━━━%0A<b>Admin :</b> AJI STORE%0A<b>Status:</b> Online Gacor%0A━━━━━━━━━━━━━━━━━━━━━━━━%0A<i>Bot siap mengirim notifikasi create akun!</i>"
+
+curl -s -X POST "https://api.telegram.org/bot\$NEW_TOKEN/sendMessage" \
+    -d chat_id=\$NEW_ID \
+    -d text="\$MSG" \
+    -d parse_mode="HTML" > /dev/null
+
+echo -e "\033[0;32m[ OK ]\033[0m Setup Selesai! Silakan cek Telegram kamu, King! 👑"
+sleep 2
+menu
+EOF
+
+chmod +x /usr/bin/add_bot
 
 update_script() {
     clear
@@ -1013,7 +1039,7 @@ dashboard_utama() {
         21) clear_cache ;;            # CLEAR CACHE
         22) cek_bandwith ;;           # CEK BANDWITH
         23) update_script ;;          # UP SCRIPT
-        24) menu_bot ;;               # MENU BOT VIP
+        24) add_bot ;;                # MENU BOT VIP
         25) edit_banner ;;            # CHANGE BANNER SSH
         26) view_log_create ;;        # LOG CREATE USER
         0|00) exit ;;                 # EXIT MENU
