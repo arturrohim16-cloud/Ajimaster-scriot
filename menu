@@ -233,7 +233,7 @@ add_vless() {
         return
     fi
 
-    uuid=$(cat /proc/sys/kernel/random/uuid)
+    uuid="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
