@@ -51,61 +51,24 @@ change_port() {
     esac
 }
 
-add_bot() {
-    clear
-    CONF_BOT="/etc/xray/bot.conf"
-    
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\E[44;1;39m          SETTING BOT NOTIFIKASI MANUAL       \E[0m"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+# --- KONFIGURASI BOT TELEGRAM ---
+TOKEN="8226263150:AAFdiVuQeEshxOpSvema_F6fDwbyFcfNWnw"
+CHAT_ID="6577966386"
 
-    # Tampilkan data lama jika ada
-    if [ -f "$CONF_BOT" ]; then
-        source $CONF_BOT
-        echo -e " Token Saat Ini   : \033[0;33m$BOT_TOKEN\033[0m"
-        echo -e " Chat ID Saat Ini : \033[0;33m$CHAT_ID\033[0m"
-        echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    fi
-
-    # Input manual dari user
-    read -p " Masukkan Token Bot Telegram : " NEW_TOKEN
-    read -p " Masukkan Chat ID Telegram  : " NEW_ID
-
-    # Validasi input tidak boleh kosong
-    if [[ -z "$NEW_TOKEN" || -z "$NEW_ID" ]]; then
-        echo -e "\033[0;31m[ Error ]\033[0m Token atau ID tidak boleh kosong!"
-        sleep 2
-        menu
-        return
-    fi
-
-    # Simpan ke file config pusat agar bisa dipanggil 'source'
-    mkdir -p /etc/xray
-    echo "BOT_TOKEN=\"$NEW_TOKEN\"" > $CONF_BOT
-    echo "CHAT_ID=\"$NEW_ID\"" >> $CONF_BOT
-
-    echo -e "\n\033[0;36m[...]\033[0m Mengetes Koneksi Bot..."
-    
-    # Kirim pesan tes menggunakan format yang kamu inginkan
-    TEXT="✅ *BOT NOTIFIKASI AKTIF*
+send_log() {
+    local TIPE=$1
+    local PESAN=$2
+    local TEXT="🚀 *HASIL CREATE $TIPE* 🚀
 ━━━━━━━━━━━━━━━━━━━━━━
-Bot berhasil dihubungkan ke VPS Aji Store!
+$PESAN
 ━━━━━━━━━━━━━━━━━━━━━━
-*Status:* Online Gacor"
+✅ *Berhasil Dibuat*"
 
-    TEST_SEND=$(curl -s -X POST "https://api.telegram.org/bot$NEW_TOKEN/sendMessage" \
-        --data-urlencode "chat_id=$NEW_ID" \
+    # Menggunakan urlencode agar link panjang & simbol khusus terkirim sempurna
+    curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
+        --data-urlencode "chat_id=$CHAT_ID" \
         --data-urlencode "text=$TEXT" \
-        --data-urlencode "parse_mode=Markdown")
-
-    if echo "$TEST_SEND" | grep -q "\"ok\":true"; then
-        echo -e "\033[0;32m[ OK ]\033[0m Bot Berhasil Terhubung!"
-    else
-        echo -e "\033[0;31m[ FAIL ]\033[0m Gagal! Cek Token/ID lagi."
-    fi
-
-    sleep 2
-    menu
+        --data-urlencode "parse_mode=Markdown" > /dev/null
 }
 
 update_script() {
@@ -971,7 +934,7 @@ dashboard_utama() {
         21) exp_cleaner ;;            # CLEAR CACHE
         22) cek_bandwith ;;           # CEK BANDWITH
         23) update_script ;;          # UP SCRIPT
-        24) add_bot ;;                # MENU BOT VIP
+        24) send_log ;;                # MENU BOT VIP
         25) edit_banner ;;            # CHANGE BANNER SSH
         26) view_log_create ;;        # LOG CREATE USER
         0|00) exit ;;                 # EXIT MENU
