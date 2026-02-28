@@ -150,15 +150,16 @@ add_trojan() {
         return
     fi
 
-    password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
+    # Ganti baris password lama dengan UUID milik Anda
+    password="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-     # PROSES INJEKSI (Hanya menembak pintu Trojan)
+    # PROSES INJEKSI (Menggunakan UUID Anda sebagai password Trojan)
     jq --arg pw "$password" --arg mail "$user" \
     '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pw, "email": $mail}]' \
     "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
-    
+
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
 
