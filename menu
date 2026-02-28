@@ -248,7 +248,6 @@ if [ -f "/etc/xray/bot.conf" ]; then
         -d text="${MSG_TROJAN}" \
         -d parse_mode="HTML" > /dev/null
 fi
-
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e " Detail Akun Terkirim ke Bot Telegram!"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -350,7 +349,6 @@ if [ -f "/etc/xray/bot.conf" ]; then
         -d text="${MSG_VLESS}" \
         -d parse_mode="HTML" > /dev/null
 fi
-
     read -p "Press Enter to return to menu..."
     dashboard_utama 
 
@@ -988,13 +986,13 @@ dashboard_utama() {
     t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
     
     # Menghitung user VMESS dari catatan database vmess
-    t_vms=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "0")
+    t_vms=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "00")
     
     # Menghitung user VLESS dari catatan database vless
-    t_vls=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null || echo "0")
+    t_vls=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null || echo "00")
     
     # Menghitung user TROJAN dari catatan database trojan
-    t_trj=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "0")
+    t_trj=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "00")
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
