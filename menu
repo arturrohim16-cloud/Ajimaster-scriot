@@ -51,7 +51,9 @@ change_port() {
     esac
 }
 
+# --- START ADD BOT ---
 cat <<EOF > /usr/bin/add_bot
+#!/bin/bash
 clear
 CONF_BOT="/etc/xray/bot.conf"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -72,18 +74,17 @@ echo "BOT_TOKEN=\"\$NEW_TOKEN\"" > \$CONF_BOT
 echo "CHAT_ID=\"\$NEW_ID\"" >> \$CONF_BOT
 
 echo -e "\n\033[0;36m[...]\033[0m Menyingkronkan ke semua menu script..."
-# Tambahkan add-vless dan add-tr ke daftar
 LIST_FILES=("add-vmess" "add-vless" "add-tr" "trial-vmess" "trial-vless" "menu")
 
 for FILE in "\${LIST_FILES[@]}"; do
     if [ -f "/usr/bin/\$FILE" ]; then
-        # Menghapus baris lama dan menyisipkan variabel baru di baris ke-2
-        sed -i '2i BOT_TOKEN=""' /usr/bin/\$FILE 2>/dev/null
-        sed -i '3i CHAT_ID=""' /usr/bin/\$FILE 2>/dev/null
+        # Cek apakah variabel sudah ada, jika belum baru tambahkan
+        grep -q "BOT_TOKEN=" "/usr/bin/\$FILE" || sed -i '2i BOT_TOKEN=""' /usr/bin/\$FILE
+        grep -q "CHAT_ID=" "/usr/bin/\$FILE" || sed -i '3i CHAT_ID=""' /usr/bin/\$FILE
         
-        # Mengisi variabel tersebut dengan Token & ID baru
-        sed -i "s/BOT_TOKEN=\".*\"/BOT_TOKEN=\"\$NEW_TOKEN\"/g" /usr/bin/\$FILE
-        sed -i "s/CHAT_ID=\".*\"/CHAT_ID=\"\$NEW_ID\"/g" /usr/bin/\$FILE
+        # Injeksi Token & ID baru
+        sed -i "s|BOT_TOKEN=.*|BOT_TOKEN=\"\$NEW_TOKEN\"|g" /usr/bin/\$FILE
+        sed -i "s|CHAT_ID=.*|CHAT_ID=\"\$NEW_ID\"|g" /usr/bin/\$FILE
     fi
 done
 
@@ -95,7 +96,7 @@ sleep 2
 menu
 EOF
 chmod +x /usr/bin/add_bot
-
+# --- END ADD BOT ---
 
 update_script() {
     clear
