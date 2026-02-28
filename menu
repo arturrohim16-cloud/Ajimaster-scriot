@@ -51,8 +51,7 @@ change_port() {
     esac
 }
 
-cat <<EOF > /usr/bin/add_bot
-#!/bin/bash
+cat <<EOF > /usr/bin/add_bot() {
 clear
 CONF_BOT="/etc/xray/bot.conf"
 
@@ -97,6 +96,8 @@ sleep 2
 menu
 EOF
 chmod +x /usr/bin/add_bot
+
+}
 
 update_script() {
     clear
@@ -152,6 +153,7 @@ backup_restore() {
     echo -e " \e[1;35m╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\e[0m"
     read -p " Tekan Enter untuk kembali..."
     dashboard_utama
+
 }
 
 add_trojan() {
@@ -247,6 +249,7 @@ fi
 
     read -p "Press Enter to return to menu..."
     dashboard_utama 
+
 }
 
 add_vless() {
@@ -343,6 +346,7 @@ fi
 
     read -p "Press Enter to return to menu..."
     dashboard_utama 
+
 }
 
 add_vmess() {
@@ -462,6 +466,7 @@ fi
 
     read -p "Press Enter to return to menu..."
     dashboard_utama 
+
 }
 
 
@@ -565,6 +570,7 @@ fi
 
     read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
     dashboard_utama 
+
 }
 
 trial_ssh() {
