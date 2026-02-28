@@ -240,7 +240,7 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
-  # --- LOGIKA KIRIM BOT TROJAN ---
+ # --- LOGIKA KIRIM BOT TROJAN ---
 if [ -f "/etc/xray/bot.conf" ]; then
     source /etc/xray/bot.conf
     curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
@@ -986,13 +986,13 @@ dashboard_utama() {
     t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
     
     # Menghitung user VMESS dari catatan database vmess
-    t_vms=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "00")
+    t_vms=$(grep -F "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "00")
     
     # Menghitung user VLESS dari catatan database vless
-    t_vls=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null || echo "00")
+    t_vls=$(grep -F "###" /etc/xray/vless_users.txt 2>/dev/null || echo "00")
     
     # Menghitung user TROJAN dari catatan database trojan
-    t_trj=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "00")
+    t_trj=$(grep -F "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "00")
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
