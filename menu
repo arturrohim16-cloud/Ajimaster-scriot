@@ -359,18 +359,18 @@ EOF
         return
     fi
 
-    uuid=$(cat /proc/sys/kernel/random/uuid)
+    # --- UUID DIKUNCI SESUAI PERMINTAAN ---
+    uuid="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     
     # 2. PROSES DAFTAR UUID KE XRAY (PORT 10001 & PORT 443)
-    # Kita masukkan ke port 10001 (untuk Non-TLS 80)
+    # Daftarkan ke Port 10001 (Port 80 Non-TLS)
     jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.port == 10001)).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
     
-    # Kita masukkan juga ke port 443 (untuk TLS) jika ada protocol vmess di sana
-    # Jika 443 kamu pakai VLESS, abaikan baris bawah ini. Tapi kalau mau Vmess TLS jalan, ini wajib:
+    # Daftarkan ke Port 443 (TLS)
     jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.port == 443)).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
 
-    # Tambahkan komentar penanda expired
+    # Tambahkan komentar penanda expired agar dashboard sinkron
     sed -i "/\"email\": \"$user\"/i \### $user $exp" "$CONF"
 
     # Fix Permission & Restart
@@ -379,7 +379,7 @@ EOF
     systemctl restart xray
     systemctl restart nginx
 
-    # 3. GENERATE LINK VMESS
+    # 3. GENERATE LINK VMESS (Menggunakan UUID Sakti)
     link1="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
     link2="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)"
     link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
@@ -410,7 +410,7 @@ EOF
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-    # Send Log Telegram (Jika ada fungsi send_log)
+    # Send Log Telegram
     MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User :</b> <code>$user</code>
