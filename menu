@@ -51,10 +51,9 @@ change_port() {
     esac
 }
 
-add_bot() {
+cat <<EOF > /usr/bin/add_bot
 clear
 CONF_BOT="/etc/xray/bot.conf"
-
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e "\E[44;1;39m          SETTING BOT NOTIFIKASI              \E[0m"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -97,7 +96,6 @@ menu
 EOF
 chmod +x /usr/bin/add_bot
 
-}
 
 update_script() {
     clear
