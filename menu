@@ -228,11 +228,11 @@ add_trojan() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- GENERATE PESAN TOJAN ---
+# --- GENERATE PESAN TROJAN ---
 MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
-🆔 <b>UUID    :</b> <code>$uuid</code>
+🔑 <b>Pass    :</b> <code>$password</code>
 📅 <b>Expired :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link WS TLS :</b>
@@ -241,7 +241,7 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 🔗 <b>Link WS Non-TLS :</b>
 <code>$link2</code>
 
-🔗 <b>Link WS gRPC TLS :</b>
+🔗 <b>Link gRPC TLS :</b>
 <code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
