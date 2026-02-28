@@ -972,13 +972,18 @@ dashboard_utama() {
         s_ws="🔴"
     fi
 
-        # === 2. LOGIKA HITUNG AKUN (SUPER ACCURATE) ===
-    # Menghitung user SSH asli dari system (UID > 1000) agar pasti update
+     # === 2. LOGIKA HITUNG AKUN (FIXED & ACCURATE) ===
+    # Menghitung user SSH asli dari system
     t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
-    # Untuk XRAY, kita hitung baris di file TXT tapi paksa refresh
-    t_vms=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
-    t_vls=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
-    t_trj=$(grep -c "###" /etc/xray/config.json 2>/dev/null || echo "0")
+    
+    # Menghitung user VMESS dari catatan database vmess
+    t_vms=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null || echo "0")
+    
+    # Menghitung user VLESS dari catatan database vless
+    t_vls=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null || echo "0")
+    
+    # Menghitung user TROJAN dari catatan database trojan
+    t_trj=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null || echo "0")
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
