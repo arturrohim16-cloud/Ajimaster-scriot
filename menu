@@ -201,29 +201,33 @@ add_trojan() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-    # --- GENERATE PESAN DULU ---
+        # --- GENERATE PESAN DULU ---
     MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
 🔑 <b>Pass    :</b> <code>$password</code>
 📅 <b>Expired :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>Link TLS :</b>
+🌐 <b>Link WS TLS :</b>
 <code>$link1</code>
 
-🔗 <b>Link Non-TLS :</b>
+🔗 <b>Link WS Non-TLS :</b>
 <code>$link2</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
-    # --- LOGIKA KIRIM BOT TROJAN (FIXED SINKRON) ---
+    # --- LOGIKA KIRIM BOT TROJAN (Paling Sinkron) ---
     if [ -f "/etc/xray/bot.conf" ]; then
+        # Memaksa script membaca token & ID dari file config pusat
         source /etc/xray/bot.conf
-        # FIX: Menghapus backslash (\) agar variabel terbaca sistem
+        export BOT_TOKEN
+        export CHAT_ID
+        
+        # Kirim menggunakan variabel yang sudah di-export
         curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-        -d chat_id="${CHAT_ID}" \
-        -d text="${MSG_TROJAN}" \
-        -d parse_mode="HTML" > /dev/null
+            -d chat_id="${CHAT_ID}" \
+            -d text="${MSG_TROJAN}" \
+            -d parse_mode="HTML" > /dev/null
     fi
 
     echo -e " Detail Akun Terkirim ke Bot Telegram!"
