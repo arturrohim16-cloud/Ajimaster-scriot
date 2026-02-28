@@ -222,26 +222,24 @@ add_trojan() {
     echo -e "Created   : $hariini"
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-
-# --- GENERATE PESAN TROJAN ---
+# --- GENERATE PESAN DULU ---
+# Memastikan pesan mengambil data terbaru
 MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
 🔑 <b>Pass    :</b> <code>$password</code>
 📅 <b>Expired :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>Link WS TLS :</b>
+🌐 <b>Link TLS :</b>
 <code>$link1</code>
 
-🔗 <b>Link WS Non-TLS :</b>
+🔗 <b>Link Non-TLS :</b>
 <code>$link2</code>
-
-🔗 <b>Link gRPC TLS :</b>
-<code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
- # --- LOGIKA KIRIM BOT TROJAN ---
+# --- LOGIKA KIRIM BOT TROJAN (SINKRON) ---
+# Kita panggil source agar Token & ID selalu yang paling update dari menu [24]
 if [ -f "/etc/xray/bot.conf" ]; then
     source /etc/xray/bot.conf
     curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
@@ -249,11 +247,13 @@ if [ -f "/etc/xray/bot.conf" ]; then
         -d text="${MSG_TROJAN}" \
         -d parse_mode="HTML" > /dev/null
 fi
+
+# --- PENUTUP SCRIPT ---
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e " Detail Akun Terkirim ke Bot Telegram!"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     read -p " Press Enter to return to menu..."
-    dashboard_utama
+    menu
 }
 
 add_vless() {
