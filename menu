@@ -127,6 +127,7 @@ update_script() {
     
     read -n 1 -s -r -p "   Tekan sembarang tombol untuk kembali"
     menu
+
 }
 
 # Fungsi Backup Data Akun
@@ -437,9 +438,6 @@ EOF
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
    # --- GENERATE PESAN VMESS ---
-if [ -f "/etc/xray/bot.conf" ]; then
-    source /etc/xray/bot.conf
-    
     # Format Pesan Mewah
     MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
