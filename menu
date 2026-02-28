@@ -152,7 +152,6 @@ add_trojan() {
     read -p "Username : " user
     read -p "Expired (Days) : " masaaktif
 
-    # Cek apakah jq sudah ada, jika belum install otomatis
     if ! command -v jq &> /dev/null; then
         apt install jq -y &> /dev/null
     fi
@@ -163,27 +162,21 @@ add_trojan() {
         return
     fi
 
+    # FIX: Menggunakan password untuk pendaftaran di config
     password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-     jq --arg id "$uuid" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $id}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
-     systemctl restart xray
-
-
-    chown root:root "$CONF" && chmod 644 "$CONF"
+    # FIX: Argumen dirubah dari $uuid menjadi $password
+    jq --arg id "$password" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $id, "email": "'$user'"}]' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+    
     systemctl restart xray
     systemctl restart nginx
 
-# 3. GENERATE LINK TROJAN (URI FORMAT)
-    # Link 1: WS TLS (443)
-    link1="trojan://$uuid@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
-
-    # Link 2: WS Non-TLS (80) - PASTI KONEK GACOR
-    link2="trojan://$uuid@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
-
-    # Link 3: gRPC TLS (443)
-    link3="trojan://$uuid@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
+    # FIX: Link sekarang menggunakan $password, bukan $uuid yang kosong
+    link1="trojan://$password@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
+    link2="trojan://$password@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
+    link3="trojan://$password@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
 
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
@@ -202,14 +195,14 @@ add_trojan() {
     echo -e "$link1"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\033[0;32mLink Trojan gRPC TLS :\033[0m"
-    echo -e "$link2"
+    echo -e "$link3"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "Created   : $hariini"
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-# --- GENERATE PESAN DULU ---
-# Memastikan pesan mengambil data terbaru
-MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
+
+    # --- GENERATE PESAN DULU ---
+    MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
 🔑 <b>Pass    :</b> <code>$password</code>
@@ -223,22 +216,20 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
-# --- LOGIKA KIRIM BOT TROJAN (SINKRON) ---
-# Kita panggil source agar Token & ID selalu yang paling update dari menu [24]
-if [ -f "/etc/xray/bot.conf" ]; then
-    source /etc/xray/bot.conf
-    curl -s -X POST "https://api.telegram.org/bot\${BOT_TOKEN}/sendMessage" \
-    -d chat_id="\${CHAT_ID}" \
-    -d text="\${MSG_TROJAN}" \
-    -d parse_mode="HTML" > /dev/null
-fi
+    # --- LOGIKA KIRIM BOT TROJAN (FIXED SINKRON) ---
+    if [ -f "/etc/xray/bot.conf" ]; then
+        source /etc/xray/bot.conf
+        # FIX: Menghapus backslash (\) agar variabel terbaca sistem
+        curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+        -d chat_id="${CHAT_ID}" \
+        -d text="${MSG_TROJAN}" \
+        -d parse_mode="HTML" > /dev/null
+    fi
 
-# --- PENUTUP SCRIPT ---
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e " Detail Akun Terkirim ke Bot Telegram!"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     read -p " Press Enter to return to menu..."
-    menu
+    dashboard_utama
 }
 
 add_vless() {
