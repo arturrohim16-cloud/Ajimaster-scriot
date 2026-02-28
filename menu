@@ -236,11 +236,12 @@ add_vless() {
     read -p "Username : " user
     read -p "Expired (Days) : " masaaktif
 
-    # Cek apakah jq sudah ada, jika belum install otomatis
+    # Cek apakah jq sudah ada
     if ! command -v jq &> /dev/null; then
         apt install jq -y &> /dev/null
     fi
 
+    # Cek user dobel
     if grep -q "\"email\": \"$user\"" "$CONF"; then
         echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
         sleep 2
@@ -249,33 +250,27 @@ add_vless() {
 
     uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
 
-# Tambahkan ke Port 443 dan 10002 sekaligus
-jq --arg id "$uuid" '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": $id, "decryption": "none"}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
-systemctl restart xray
+    # --- PROSES DAFTAR UUID KE SEMUA INBOUND VLESS (443 & 10002) ---
+    # Perintah ini akan otomatis mengisi semua port yang pakai protokol vless
+    jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": $id, "decryption": "none", "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
 
+    # Tambahkan komentar expired di atas baris email user agar sinkron dengan dashboard
+    sed -i "/\"email\": \"$user\"/i \### $user $exp" "$CONF"
+
+    # Fix Permission & Restart
     chown root:root "$CONF" && chmod 644 "$CONF"
     systemctl restart xray
     systemctl restart nginx
 
     # --- GENERATE LINK VLESS ---
-    # Link 1: WS TLS 443
     link1="vless://$uuid@$domain:443?path=/vless&security=tls&encryption=none&type=ws&sni=$domain#$user"
-    
-    # Link 2: WS Non-TLS 80 (PASTI KONEK)
     link2="vless://$uuid@$domain:80?path=/vless&security=none&encryption=none&type=ws&host=$domain#$user"
-    
-    # Link 3: gRPC TLS 443
     link3="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
 
-    # Membuat folder log jika belum ada
+    # Database Lokal
     mkdir -p /etc/xray
-    
-    # Menulis tanda ### agar angka di dashboard tidak 0
     echo "### $user $exp" >> /etc/xray/vless_users.txt
-    # Dan tulis juga ke config utama agar sinkron
-    sed -i "/$uuid/i \### $user $exp" "/usr/local/etc/xray/config.json"
 
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -286,22 +281,23 @@ systemctl restart xray
     echo -e "UUID      : $uuid"
     echo -e "Path WS   : /vless"
     echo -e "ServName  : vless-grpc"
+    echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\033[0;32mLink VLESS WS TLS :\033[0m"
+    echo -e "\033[0;32mLink VLESS WS TLS (443) :\033[0m"
     echo -e "$link1"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\033[0;32mLink VLESS WS None TLS :\033[0m"
+    echo -e ""
+    echo -e "\033[0;32mLink VLESS WS None TLS (80) :\033[0m"
     echo -e "$link2"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\033[0;32mLink VLESS gRPC TLS :\033[0m"
+    echo -e ""
+    echo -e "\033[0;32mLink VLESS gRPC TLS (443) :\033[0m"
     echo -e "$link3"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- GENERATE PESAN VLESS ---
-MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
+    # --- GENERATE PESAN LOG ---
+    MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User :</b> <code>$user</code>
-📅 <b>exp  :</b> <code>$exp_date</code>
+📅 <b>exp  :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link VLESS WS TLS :</b>
 <code>$link1</code>
@@ -314,7 +310,10 @@ MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
-send_log "VLESS PREMIUM" "$MSG_VLESS"
+    if command -v send_log &> /dev/null; then
+        send_log "VLESS PREMIUM" "$MSG_VLESS"
+    fi
+
     read -p "Press Enter to return to menu..."
     dashboard_utama 
 }
@@ -324,8 +323,7 @@ add_vmess() {
     CONF="/usr/local/etc/xray/config.json"
     domain="aji.izz-store.my.id"
 
-    # 1. Pastikan Port 80 Nginx Mengarah ke Xray (Auto-Fix Jalur)
-    # Ini supaya Port 80 bisa konek ke port internal Xray (10001)
+    # 1. Auto-Fix Jalur Nginx Port 80
     if [ ! -f "/etc/nginx/conf.d/vmess.conf" ]; then
         cat <<EOF > /etc/nginx/conf.d/vmess.conf
 server {
@@ -354,6 +352,7 @@ EOF
         apt install jq -y &> /dev/null
     fi
 
+    # Cek user dobel
     if grep -q "\"email\": \"$user\"" "$CONF"; then
         echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
         sleep 2
@@ -362,15 +361,17 @@ EOF
 
     uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
+    
+    # 2. PROSES DAFTAR UUID KE XRAY (PORT 10001 & PORT 443)
+    # Kita masukkan ke port 10001 (untuk Non-TLS 80)
+    jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.port == 10001)).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
+    
+    # Kita masukkan juga ke port 443 (untuk TLS) jika ada protocol vmess di sana
+    # Jika 443 kamu pakai VLESS, abaikan baris bawah ini. Tapi kalau mau Vmess TLS jalan, ini wajib:
+    jq --arg id "$uuid" --arg mail "$user" '(.inbounds[] | select(.port == 443)).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
 
-    # Contoh logika dalam script
-uuid=$(cat /proc/sys/kernel/random/uuid)
-jq --arg id "$uuid" '(.inbounds[] | select(.port == 10001)).settings.clients += [{"id": $id, "alterId": 0}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
-systemctl restart xray
-
-    # Teknik Sed untuk menambahkan komentar ### di baris yang tepat
-    sed -i "/$uuid/i \### $user $exp" "$CONF"
+    # Tambahkan komentar penanda expired
+    sed -i "/\"email\": \"$user\"/i \### $user $exp" "$CONF"
 
     # Fix Permission & Restart
     chown root:root "$CONF"
@@ -378,17 +379,14 @@ systemctl restart xray
     systemctl restart xray
     systemctl restart nginx
 
-    # 3. GENERATE LINK VMESS (FORMAT VARIABEL LENGKAP)
-    # Link 1: WS TLS (443)
+    # 3. GENERATE LINK VMESS
     link1="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
-
-    # Link 2: WS Non-TLS (80) - PASTI KONEK GACOR
     link2="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)"
-
-    # Link 3: gRPC TLS (443)
     link3="vmess://$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)"
+
     mkdir -p /etc/xray   
     echo "### $user $exp" >> /etc/xray/vmess_users.txt
+    
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\E[44;1;39m      VMESS ACCOUNT DETAILS        \E[0m"
@@ -401,22 +399,22 @@ systemctl restart xray
     echo -e "Path      : /vmess"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "\033[0;32mLink WS TLS :\033[0m"
-    echo -e "vmess://$link1"
+    echo -e "$link1"
     echo -e ""
     echo -e "\033[0;32mLink WS None TLS :\033[0m"
-    echo -e "vmess://$link2"
+    echo -e "$link2"
     echo -e ""
     echo -e "\033[0;32mLink gRPC TLS :\033[0m"
-    echo -e "vmess://$link3"
+    echo -e "$link3"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- GENERATE PESAN VMESS ---
-MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
+    # Send Log Telegram (Jika ada fungsi send_log)
+    MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User :</b> <code>$user</code>
-📅 <b>exp  :</b> <code>$exp_date</code>
+📅 <b>exp  :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Link TLS (443) :</b>
 <code>$link1</code>
@@ -429,7 +427,10 @@ MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
-send_log "VMESS PREMIUM" "$MSG_VMESS"
+    if command -v send_log &> /dev/null; then
+        send_log "VMESS PREMIUM" "$MSG_VMESS"
+    fi
+
     read -p "Press Enter to return to menu..."
     dashboard_utama 
 }
