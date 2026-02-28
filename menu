@@ -51,7 +51,7 @@ change_port() {
     esac
 }
 
-cat <<EOF > /usr/bin/add_bot() {
+add_bot() {
 clear
 CONF_BOT="/etc/xray/bot.conf"
 
