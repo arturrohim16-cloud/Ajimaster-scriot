@@ -222,6 +222,31 @@ add_trojan() {
     echo -e "\033[0;32mLink Trojan gRPC TLS :\033[0m"
     echo -e "$link2"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "Created   : $hariini"
+    echo -e "Expired   : $exp"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+# --- FORMAT NOTIFIKASI TROJAN ---
+TROJAN_LOG="╔════════════════════╗
+      ⚔️ TROJAN PREMIUM ⚔️
+╚════════════════════╝
+👤 **User** : \`$user\`
+📅 **Expired** : \`$exp\`
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 **Link WS** :
+\`$link1\`
+
+🚀 **Link gRPC** :
+\`$link2\`
+━━━━━━━━━━━━━━━━━━━━━━
+✅ *Auto-Script By AJI VPN*"
+
+# Kirim ke Telegram
+send_log "TROJAN" "$TROJAN_LOG"
+
+    read -p "Press Enter to return to menu..."
+    dashboard_utama
+}
+
 add_vless() {
     clear
     CONF="/usr/local/etc/xray/config.json"
@@ -304,31 +329,7 @@ send_log "VLESS" "$VLESS_LOG"
 
     read -p "Press Enter to return to menu..."
     dashboard_utama 
-}    echo -e "Created   : $hariini"
-    echo -e "Expired   : $exp"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-# --- FORMAT NOTIFIKASI TROJAN ---
-TROJAN_LOG="╔════════════════════╗
-      ⚔️ TROJAN PREMIUM ⚔️
-╚════════════════════╝
-👤 **User** : \`$user\`
-📅 **Expired** : \`$exp\`
-━━━━━━━━━━━━━━━━━━━━━━
-🚀 **Link WS** :
-\`$link1\`
-
-🚀 **Link gRPC** :
-\`$link2\`
-━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
-
-# Kirim ke Telegram
-send_log "TROJAN" "$TROJAN_LOG"
-
-    read -p "Press Enter to return to menu..."
-    dashboard_utama
 }
-
 
 add_vmess() {
     clear
