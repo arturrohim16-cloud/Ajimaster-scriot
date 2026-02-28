@@ -319,7 +319,7 @@ add_vmess() {
         return
     fi
 
-    uuid=$(cat /proc/sys/kernel/random/uuid)
+    uuid="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
