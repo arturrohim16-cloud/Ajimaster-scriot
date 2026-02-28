@@ -228,27 +228,35 @@ add_trojan() {
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# --- GENERATE PESAN TROJAN ---
+# --- GENERATE PESAN TOJAN ---
 MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
-👤 <b>User :</b> <code>$user</code>
-🔑 <b>Pass :</b> <code>$pass_tr</code>
-📅 <b>Exp  :</b> <code>$exp_date</code>
+👤 <b>User    :</b> <code>$user</code>
+🆔 <b>UUID    :</b> <code>$uuid</code>
+📅 <b>Expired :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>Link TROJAN WS :</b>
+🌐 <b>Link WS TLS :</b>
 <code>$link1</code>
 
-🔗 <b>Link TROJAN HTTP :</b>
+🔗 <b>Link WS Non-TLS :</b>
 <code>$link2</code>
 
-🔗 <b>Link TROJAN gRPC :</b>
+🔗 <b>Link WS gRPC TLS :</b>
 <code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-✅ <b>Script By AJI VPN</b>"
+✅ <b>Admin: AJI STORE</b>"
 
-send_log "TROJAN PREMIUM" "$MSG_TROJAN"
+# --- KIRIM KE BOT ---
+if [ -f "/etc/xray/bot.conf" ]; then
+    source /etc/xray/bot.conf
+    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+        -d chat_id="${CHAT_ID}" \
+        -d text="${MSG_TROJAN}" \
+        -d parse_mode="HTML" > /dev/null
+fi
+
     read -p "Press Enter to return to menu..."
-    dashboard_utama
+    dashboard_utama 
 }
 
 add_vless() {
@@ -319,8 +327,8 @@ add_vless() {
     echo -e "$link3"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-  # --- GENERATE PESAN VLESS ---
-MSG_VLESS="✨ <b>VLESS PREMIUM GACOR</b> ✨
+   # --- GENERATE PESAN VLESS ---
+MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
 🆔 <b>UUID    :</b> <code>$uuid</code>
@@ -332,7 +340,7 @@ MSG_VLESS="✨ <b>VLESS PREMIUM GACOR</b> ✨
 🔗 <b>Link WS Non-TLS :</b>
 <code>$link2</code>
 
-🔗 <b>Link gRPC TLS :</b>
+🔗 <b>Link WS gRPC TLS :</b>
 <code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
@@ -453,6 +461,9 @@ MSG_VMESS="✨ <b>VMESS PREMIUM SULTAN</b> ✨
 <code>$link1</code>
 
 🔗 <b>Link WS Non-TLS :</b>
+<code>$link2</code>
+
+🔗 <b>Link WS gRPC TLS :</b>
 <code>$link2</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
