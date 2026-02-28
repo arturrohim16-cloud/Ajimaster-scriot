@@ -166,61 +166,46 @@ add_trojan() {
     CONF="/usr/local/etc/xray/config.json"
     domain="aji.izz-store.my.id"
 
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\E[44;1;39m       CREATE TROJAN ACCOUNT       \E[0m"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "       CREATE TROJAN ACCOUNT       "
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     read -p "Username : " user
     read -p "Expired (Days) : " masaaktif
 
-    # Perbaikan: Trojan pakai PASSWORD, bukan UUID
+    # Trojan tidak pakai UUID, pakai Password (8 karakter unik)
     password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
 
-    # Cek User
     if grep -q "\"email\": \"$user\"" "$CONF"; then
-        echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
-        sleep 2
-        return
+        echo -e "User $user Sudah Ada!"
+        sleep 2 ; return
     fi
 
-    # Masukkan ke Config (Gunakan $password)
+    # FIX JQ: Pakai variabel $password, bukan $uuid yang kosong
     jq --arg pw "$password" --arg mail "$user" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pw, "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
     
     systemctl restart xray > /dev/null 2>&1
 
-    # Generate Link (Gunakan $password)
+    # Link Menggunakan $password
     link1="trojan://$password@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
-    link2="trojan://$password@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
     link3="trojan://$password@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
 
-    mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
 
-    # --- KIRIM KE BOT TELEGRAM (PASTI SINKRON) ---
+    # --- KIRIM NOTIF (PASTI JALAN) ---
     if [ -f "/etc/xray/bot.conf" ]; then
         source /etc/xray/bot.conf
-        MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
+        MSG="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
 🔑 <b>Pass    :</b> <code>$password</code>
 📅 <b>Expired :</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>Link WS TLS :</b>
-<code>$link1</code>
-
-🔗 <b>Link WS Non-TLS :</b>
-<code>$link2</code>
-
-🔗 <b>Link gRPC TLS :</b>
-<code>$link3</code>
+🌐 <b>Link WS :</b> <code>$link1</code>
+🔗 <b>Link gRPC :</b> <code>$link3</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
-
-        curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-            -d chat_id="${CHAT_ID}" \
-            -d text="${MSG_TROJAN}" \
-            -d parse_mode="HTML" > /dev/null
+        curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="${MSG}" -d parse_mode="HTML" > /dev/null
     fi
 
     echo -e "Detail Akun Terkirim ke Bot Telegram!"
