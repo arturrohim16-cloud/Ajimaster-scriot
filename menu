@@ -559,7 +559,14 @@ MSG_SSH="✨ <b>SSH PREMIUM SULTAN EDITION</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
-send_log "SSH PREMIUM" "$MSG_SSH"
+# --- FUNGSI KIRIM LOG KE BOT ---
+if [ -f "/etc/xray/bot.conf" ]; then
+    source /etc/xray/bot.conf
+    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+        -d chat_id="${CHAT_ID}" \
+        -d text="${MSG_SSH}" \
+        -d parse_mode="HTML" > /dev/null
+fi
 
     read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
     dashboard_utama 
