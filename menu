@@ -186,21 +186,22 @@ add_trojan() {
         return
     fi
 
-    # FIX: Menggunakan password untuk pendaftaran di config
-    password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
-    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
+        # 1. Generate Password (Pastikan baris ini ada DI ATAS pembuatan link)
+    password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 10)
+    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+    hariini=$(date +"%Y-%m-%d")
 
-    # FIX: Argumen dirubah dari $uuid menjadi $password
-    jq --arg id "$password" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $id, "email": "'$user'"}]' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
-    
-    systemctl restart xray
-    systemctl restart nginx
+    # 2. Masukkan ke Config Xray (Gunakan email dan password yang benar)
+    # Kita tambahkan pengecekan agar jq tidak error
+    jq --arg pass "$password" --arg user "$user" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pass, "email": $user}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
 
-    # FIX: Link sekarang menggunakan $password, bukan $uuid yang kosong
-    link1="trojan://$password@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
-    link2="trojan://$password@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
-    link3="trojan://$password@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
+    # 3. Restart Service agar password aktif
+    systemctl restart xray > /dev/null 2>&1
+
+    # 4. GENERATE LINK (Sekarang $password pasti sudah ada isinya)
+    link1="trojan://${password}@${domain}:443?path=/trojan&security=tls&type=ws&sni=${domain}#${user}"
+    link2="trojan://${password}@${domain}:80?path=/trojan&security=none&type=ws&host=${domain}#${user}"
+    link3="trojan://${password}@${domain}:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=${domain}#${user}"
 
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
