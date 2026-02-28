@@ -240,15 +240,20 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
+  # --- LOGIKA KIRIM BOT TROJAN ---
+if [ -f "/etc/xray/bot.conf" ]; then
+    source /etc/xray/bot.conf
     curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
         -d chat_id="${CHAT_ID}" \
         -d text="${MSG_TROJAN}" \
         -d parse_mode="HTML" > /dev/null
 fi
 
-    read -p "Press Enter to return to menu..."
-    dashboard_utama 
-
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e " Detail Akun Terkirim ke Bot Telegram!"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    read -p " Press Enter to return to menu..."
+    dashboard_utama
 }
 
 add_vless() {
@@ -337,6 +342,9 @@ MSG_VLESS="✨ <b>VLESS PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
+   # --- 2. Logika Kirim Bot ---
+if [ -f "/etc/xray/bot.conf" ]; then
+    source /etc/xray/bot.conf
     curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
         -d chat_id="${CHAT_ID}" \
         -d text="${MSG_VLESS}" \
@@ -456,18 +464,21 @@ EOF
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
-    # Perintah Kirim ke Telegram
+   # --- LOGIKA KIRIM BOT VMESS ---
+if [ -f "/etc/xray/bot.conf" ]; then
+    source /etc/xray/bot.conf
     curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
         -d chat_id="${CHAT_ID}" \
         -d text="${MSG_VMESS}" \
         -d parse_mode="HTML" > /dev/null
 fi
 
-    read -p "Press Enter to return to menu..."
-    dashboard_utama 
-
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e " Detail Akun Terkirim ke Bot Telegram!"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    read -p " Press Enter to return to menu..."
+    dashboard_utama
 }
-
 
 add_ssh() {
     clear
