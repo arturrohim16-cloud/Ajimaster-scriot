@@ -70,6 +70,7 @@ fi
 read -p " Masukkan Token Bot : " NEW_TOKEN
 read -p " Masukkan Chat ID   : " NEW_ID
 
+# Simpan ke config pusat
 echo "BOT_TOKEN=\"\$NEW_TOKEN\"" > \$CONF_BOT
 echo "CHAT_ID=\"\$NEW_ID\"" >> \$CONF_BOT
 
@@ -78,20 +79,20 @@ LIST_FILES=("add-vmess" "add-vless" "add-tr" "trial-vmess" "trial-vless" "menu")
 
 for FILE in "\${LIST_FILES[@]}"; do
     if [ -f "/usr/bin/\$FILE" ]; then
-        # Cek apakah variabel sudah ada, jika belum baru tambahkan
-        grep -q "BOT_TOKEN=" "/usr/bin/\$FILE" || sed -i '2i BOT_TOKEN=""' /usr/bin/\$FILE
-        grep -q "CHAT_ID=" "/usr/bin/\$FILE" || sed -i '3i CHAT_ID=""' /usr/bin/\$FILE
+        # Hapus baris lama jika sudah ada (mencegah penumpukan)
+        sed -i "/BOT_TOKEN=/d" /usr/bin/\$FILE
+        sed -i "/CHAT_ID=/d" /usr/bin/\$FILE
         
-        # Injeksi Token & ID baru
-        sed -i "s|BOT_TOKEN=.*|BOT_TOKEN=\"\$NEW_TOKEN\"|g" /usr/bin/\$FILE
-        sed -i "s|CHAT_ID=.*|CHAT_ID=\"\$NEW_ID\"|g" /usr/bin/\$FILE
+        # Masukkan Token & ID baru di baris ke-2 (tepat setelah shebang #!/bin/bash)
+        sed -i "2i BOT_TOKEN=\"\$NEW_TOKEN\"" /usr/bin/\$FILE
+        sed -i "3i CHAT_ID=\"\$NEW_ID\"" /usr/bin/\$FILE
     fi
 done
 
 MSG="<b>✅ BOT TELEGRAM AKTIF</b>%0A━━━━━━━━━━━━━━━━━━━━━━━━%0A<b>Admin :</b> AJI STORE%0A<b>Status:</b> Online Gacor"
 curl -s -X POST "https://api.telegram.org/bot\$NEW_TOKEN/sendMessage" -d chat_id=\$NEW_ID -d text="\$MSG" -d parse_mode="HTML" > /dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m Setup Selesai!"
+echo -e "\033[0;32m[ OK ]\033[0m Setup Selesai! Bot Berhasil Disinkronkan."
 sleep 2
 menu
 EOF
@@ -986,13 +987,13 @@ dashboard_utama() {
     t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
     
     # Menghitung user VMESS dari catatan database vmess
-    t_vms=$(grep -c "###" /etc/xray/vmess_users.txt 2>/dev/null | echo "00")
+    t_vms=$(grep -C "###" /etc/xray/vmess_users.txt 2>/dev/null | echo "0")
     
     # Menghitung user VLESS dari catatan database vless
-    t_vls=$(grep -c "###" /etc/xray/vless_users.txt 2>/dev/null | echo "00")
+    t_vls=$(grep -C "###" /etc/xray/vless_users.txt 2>/dev/null | echo "0")
     
     # Menghitung user TROJAN dari catatan database trojan
-    t_trj=$(grep -c "###" /etc/xray/trojan_users.txt 2>/dev/null | echo "00")
+    t_trj=$(grep -C "###" /etc/xray/trojan_users.txt 2>/dev/null | echo "0")
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
