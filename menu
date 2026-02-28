@@ -172,64 +172,35 @@ add_trojan() {
     read -p "Username : " user
     read -p "Expired (Days) : " masaaktif
 
-    # Cek apakah jq sudah ada, jika belum install otomatis
-    if ! command -v jq &> /dev/null; then
-        apt install jq -y &> /dev/null
-    fi
+    # Perbaikan: Trojan pakai PASSWORD, bukan UUID
+    password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
+    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
+    hariini=`date +"%Y-%m-%d"`
 
+    # Cek User
     if grep -q "\"email\": \"$user\"" "$CONF"; then
         echo -e "\033[0;31mUser $user Sudah Ada!\033[0m"
         sleep 2
         return
     fi
 
-    password=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g' | head -c 8)
-    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
+    # Masukkan ke Config (Gunakan $password)
+    jq --arg pw "$password" --arg mail "$user" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pw, "email": $mail}]' "$CONF" > /tmp/config.json && mv /tmp/config.json "$CONF"
+    
+    systemctl restart xray > /dev/null 2>&1
 
-     jq --arg id "$uuid" '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $id}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
-     systemctl restart xray
-
-
-    chown root:root "$CONF" && chmod 644 "$CONF"
-    systemctl restart xray
-    systemctl restart nginx
-
-# 3. GENERATE LINK TROJAN (URI FORMAT)
-    # Link 1: WS TLS (443)
-    link1="trojan://$uuid@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
-
-    # Link 2: WS Non-TLS (80) - PASTI KONEK GACOR
-    link2="trojan://$uuid@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
-
-    # Link 3: gRPC TLS (443)
-    link3="trojan://$uuid@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
+    # Generate Link (Gunakan $password)
+    link1="trojan://$password@$domain:443?path=/trojan&security=tls&type=ws&sni=$domain#$user"
+    link2="trojan://$password@$domain:80?path=/trojan&security=none&type=ws&host=$domain#$user"
+    link3="trojan://$password@$domain:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
 
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
 
-    clear
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\E[44;1;39m      TROJAN ACCOUNT DETAILS       \E[0m"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "Remarks   : $user"
-    echo -e "Domain    : $domain"
-    echo -e "Password  : $password"
-    echo -e "Path WS   : /trojan"
-    echo -e "ServName  : trojan-grpc"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\033[0;32mLink Trojan WS TLS :\033[0m"
-    echo -e "$link1"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "\033[0;32mLink Trojan gRPC TLS :\033[0m"
-    echo -e "$link2"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "Created   : $hariini"
-    echo -e "Expired   : $exp"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-
-# --- GENERATE PESAN TROJAN ---
-MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
+    # --- KIRIM KE BOT TELEGRAM (PASTI SINKRON) ---
+    if [ -f "/etc/xray/bot.conf" ]; then
+        source /etc/xray/bot.conf
+        MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>User    :</b> <code>$user</code>
 🔑 <b>Pass    :</b> <code>$password</code>
@@ -246,15 +217,13 @@ MSG_TROJAN="✨ <b>TROJAN PREMIUM SULTAN</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Admin: AJI STORE</b>"
 
-# --- KIRIM KE BOT ---
-if [ -f "/etc/xray/bot.conf" ]; then
-    source /etc/xray/bot.conf
-    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-        -d chat_id="${CHAT_ID}" \
-        -d text="${MSG_TROJAN}" \
-        -d parse_mode="HTML" > /dev/null
-fi
+        curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d chat_id="${CHAT_ID}" \
+            -d text="${MSG_TROJAN}" \
+            -d parse_mode="HTML" > /dev/null
+    fi
 
+    echo -e "Detail Akun Terkirim ke Bot Telegram!"
     read -p "Press Enter to return to menu..."
     dashboard_utama 
 }
