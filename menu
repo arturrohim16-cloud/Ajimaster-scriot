@@ -264,7 +264,7 @@ send_log "VLESS" "$VLESS_LOG"
     dashboard_utama 
 }
 
-del_exp() {
+add_vmess() {
     clear
     CONF="/usr/local/etc/xray/config.json"
     
@@ -605,7 +605,7 @@ cek_online() {
     menu_manager
 }
 
-hapus_manual() {
+del_exp() {
 # --- 1. WARNA ---
 CYAN='\033[0;36m'
 BLUE='\033[0;34m'
