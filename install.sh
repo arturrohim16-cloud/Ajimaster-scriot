@@ -85,29 +85,46 @@ WantedBy=multi-user.target
 EOF
 systemctl enable ws-python
 
-# 5. Konfigurasi Nginx (Jalur Sultan Multi-Port)
+# 5. Konfigurasi Nginx (Jalur Sultan Multi-Port & Anti-Filter 2082)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
     listen [::]:80;
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
+    listen 2082;         # <--- Menambahkan listen 2082 di sini
+    listen [::]:2082;    # <--- Menambahkan listen 2082 IPv6
     server_name $DOMAIN;
 
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
     ssl_protocols TLSv1.2 TLSv1.3;
 
-    # SSH Websocket Path (Jalur SSH via Port 80/443)
+    # SSH Websocket (Jalur Port 80, 443 via Path /ssh-ws DAN Port 2082 Direct)
+    location / {
+        # Jika bukan path xray, maka otomatis dilempar ke SSH (Anti-Filter)
+        if (\$http_upgrade != "websocket") {
+            return 301 https://\$host\$request_uri;
+        }
+        proxy_pass http://127.0.0.1:143; # Arahkan langsung ke Dropbear
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+
+    # Backup Path lama agar tidak error
     location /ssh-ws {
-        proxy_redirect off;
-        proxy_pass http://127.0.0.1:2082;
+        proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_set_header Host \$http_host;
     }
 
+    # XRAY PATHS
     location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade"; proxy_set_header Host \$http_host; }
     location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade"; proxy_set_header Host \$http_host; }
     location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade"; proxy_set_header Host \$http_host; }
