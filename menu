@@ -78,7 +78,7 @@ update_script() {
     
     # Konfigurasi Token & Link
     TOKEN="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"
-    REPO_URL="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu"
+    REPO_URL="wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu?token=GHSAT0AAAAAADVPUQ6SIDZK3S4VQXA4C4XM2NDLITA" && chmod +x /usr/bin/menu
 
     echo -e "   [1] Menghapus file menu lama..."
     rm -f /usr/bin/menu
