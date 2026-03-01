@@ -85,34 +85,41 @@ WantedBy=multi-user.target
 EOF
 systemctl enable ws-python
 
-# 5. Konfigurasi Nginx (FIX: 80, 443, 2082 SEMUA ON)
+# 5. Konfigurasi Nginx (FIX TOTAL: Jalur Terpisah biar Gak OFF)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
+# Blok Jalur Biasa (80 & 2082)
 server {
     listen 80;
     listen [::]:80;
     listen 2082;
     listen [::]:2082;
-    listen 443 ssl http2;         # <--- Ini biar 443 ON
-    listen [::]:443 ssl http2;    # <--- Ini biar 443 IPv6 ON
-    server_name _; 
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:143;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host \$host;
+    }
+}
+
+# Blok Jalur Sultan SSL (443)
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name _;
 
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
     ssl_protocols TLSv1.2 TLSv1.3;
 
-    # Anti-Filter (Menerima Semua Payload ke Dropbear)
     location / {
-        proxy_pass http://127.0.0.1:143; 
+        proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
     }
 
     # Jalur Xray
@@ -122,7 +129,14 @@ server {
 }
 EOF
 
-# Restart agar perubahan aktif
+# Pastikan folder dan SSL ada sebelum restart
+mkdir -p /etc/xray
+if [ ! -f /etc/xray/xray.crt ]; then
+    openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
+    -subj "/C=ID/ST=Jakarta/L=Jakarta/O=Aji/CN=aji.izz-store.my.id" \
+    -keyout /etc/xray/xray.key -out /etc/xray/xray.crt
+fi
+
 systemctl restart nginx
 
 # 6. Konfigurasi Dropbear & Stunnel (Port 22, 143, 109, 444)
