@@ -1,23 +1,26 @@
 #!/bin/bash
 # ==========================================
-# Auto-Installer VPN AJI STORE - FINAL STABLE
-# UPDATE: SUPPORT VMESS/VLESS/TROJAN PORT 80 & 443
+# Auto-Installer VPN AJI STORE - SUPER STABLE
+# UPDATE: PYTHON WS FIX & AUTO-LOCK CONFIG
 # ==========================================
 
 DOMAIN="aji.izz-store.my.id"
 ID_VMESS="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
 ID_VLESS_TR="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
 
-# 1. Bersihkan sisa-sisa kegagalan (Wajib!)
-systemctl stop nginx xray dropbear stunnel4 2>/dev/null
-apt purge nginx xray -y && apt autoremove -y
-rm -rf /etc/nginx/conf.d/*
-rm -rf /etc/nginx/sites-enabled/*
-rm -rf /usr/local/etc/xray/*
-# 1. Hapus script yang error
-rm -f /usr/local/bin/ws-dropbear
+# 1. Bersihkan & Buka Kunci (Penting agar script bisa menulis ulang)
+chattr -i /etc/nginx/conf.d/xray.conf 2>/dev/null
+chattr -i /usr/local/etc/xray/config.json 2>/dev/null
+chattr -i /etc/stunnel/stunnel.conf 2>/dev/null
+systemctl stop nginx xray dropbear stunnel4 ws-dropbear 2>/dev/null
 
-# 2. Tulis ulang script dengan versi Python 3 yang benar
+# 2. Instalasi Core & Dependency
+apt update -y
+apt install nginx jq curl wget stunnel4 dropbear socat python3 -y
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+
+# 3. Perbaikan Script Python WS (Python 3 Version)
+rm -f /usr/local/bin/ws-dropbear
 cat <<EOF > /usr/local/bin/ws-dropbear
 import socket, threading, _thread
 
@@ -45,7 +48,7 @@ def main():
     while True:
         client, addr = server.accept()
         try:
-            data = client.recv(1024) # Menerima header HTTP Upgrade
+            data = client.recv(1024)
             client.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
             _thread.start_new_thread(handle, (client, addr))
         except:
@@ -54,24 +57,30 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
-
-# 3. Beri izin eksekusi dan restart service
 chmod +x /usr/local/bin/ws-dropbear
-systemctl restart ws-dropbear
 
+# Buat Service Python WS
+cat <<EOF > /etc/systemd/system/ws-dropbear.service
+[Unit]
+Description=Python SSH Websocket
+After=network.target
 
-# 2. Instal ulang Core
-apt update -y
-apt install nginx jq curl wget stunnel4 dropbear socat -y
-bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/local/bin/ws-dropbear 8880
+Restart=on-failure
 
-# 3. SSL Sultan (Biar Nginx Gak Merah)
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 4. SSL & Xray Config (Super Fix)
 mkdir -p /etc/xray
 openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
     -subj "/C=ID/ST=Jawa/L=Jakarta/O=Aji/CN=$DOMAIN" \
     -keyout /etc/xray/xray.key -out /etc/xray/xray.crt
 
-# 4. Config Xray (Paling Stabil)
 cat <<EOF > /usr/local/etc/xray/config.json
 {
   "inbounds": [
@@ -83,43 +92,23 @@ cat <<EOF > /usr/local/etc/xray/config.json
 }
 EOF
 
-# 5. Config Nginx (Support Port 80 & 443 untuk SEMUA)
+# 5. Config Nginx (Lock Path & WebSocket)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
     listen 2082;
-    server_name $DOMAIN;
-
-    # Jalur Vmess/Vless/Trojan di Port 80
-    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-
-    # Jalur SSH Websocket Port 80
-    location / {
-        proxy_pass http://127.0.0.1:143;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_set_header Host \$host;
-    }
-}
-
-server {
     listen 443 ssl http2;
     server_name $DOMAIN;
 
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
 
-    # Jalur Vmess/Vless/Trojan di Port 443
     location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 
-    # Jalur SSH SSL
     location / {
-        proxy_pass http://127.0.0.1:143;
+        proxy_pass http://127.0.0.1:8880;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
@@ -128,24 +117,26 @@ server {
 }
 EOF
 
-# 6. Dropbear & Stunnel (SSH 22, 143, 109, 444)
-sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
-echo 'DROPBEAR_EXTRA_ARGS="-p 109 -p 22"' > /etc/default/dropbear
-
+# 6. Stunnel Config (Port 444)
 cat <<EOF > /etc/stunnel/stunnel.conf
 cert = /etc/xray/xray.crt
 key = /etc/xray/xray.key
-[ssh]
+client = no
+socket = a:SO_REUSEADDR=1
+[ssh-ssl]
 accept = 444
 connect = 127.0.0.1:143
 EOF
 
-# 7. Aktifkan & Restart
+# 7. Finalisasi & LOCK (Kunci File)
+rm -f /etc/nginx/sites-enabled/default
 systemctl daemon-reload
-systemctl enable xray nginx stunnel4 dropbear
-systemctl restart xray nginx stunnel4 dropbear
-systemctl restart nginx
-systemctl enable nginx
+systemctl enable ws-dropbear xray nginx stunnel4 dropbear
+systemctl restart ws-dropbear xray nginx stunnel4 dropbear
 
+# --- BAGIAN SUPER LOCK ---
+chattr +i /etc/nginx/conf.d/xray.conf
+chattr +i /usr/local/etc/xray/config.json
+chattr +i /etc/stunnel/stunnel.conf
 
-echo "BOMM!! SEMUA HIJAU KING! PORT 80 & 443 READY!"
+echo "BOMM!! SEMUA HIJAU & DIKUNCI KING! AMAN DARI HAPUS USER!"
