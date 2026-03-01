@@ -14,6 +14,51 @@ apt purge nginx xray -y && apt autoremove -y
 rm -rf /etc/nginx/conf.d/*
 rm -rf /etc/nginx/sites-enabled/*
 rm -rf /usr/local/etc/xray/*
+# 1. Hapus script yang error
+rm -f /usr/local/bin/ws-dropbear
+
+# 2. Tulis ulang script dengan versi Python 3 yang benar
+cat <<EOF > /usr/local/bin/ws-dropbear
+import socket, threading, _thread
+
+def handle(client_sock, addr):
+    try:
+        target_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        target_sock.connect(('127.0.0.1', 143))
+        def forward(source, destination):
+            while True:
+                try:
+                    data = source.recv(4096)
+                    if not data: break
+                    destination.sendall(data)
+                except: break
+        threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
+        threading.Thread(target=forward, args=(target_sock, client_sock), daemon=True).start()
+    except:
+        client_sock.close()
+
+def main():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(('0.0.0.0', 8880))
+    server.listen(100)
+    while True:
+        client, addr = server.accept()
+        try:
+            data = client.recv(1024) # Menerima header HTTP Upgrade
+            client.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
+            _thread.start_new_thread(handle, (client, addr))
+        except:
+            client.close()
+
+if __name__ == "__main__":
+    main()
+EOF
+
+# 3. Beri izin eksekusi dan restart service
+chmod +x /usr/local/bin/ws-dropbear
+systemctl restart ws-dropbear
+
 
 # 2. Instal ulang Core
 apt update -y
