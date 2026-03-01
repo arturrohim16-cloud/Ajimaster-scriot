@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==========================================
 # Auto-Installer VPN AJI STORE - FINAL STABLE
-# SEMUA PORT (80, 443, 22, 2082, 444, 143) ON!
+# UPDATE: SUPPORT VMESS/VLESS/TROJAN PORT 80 & 443
 # ==========================================
 
 DOMAIN="aji.izz-store.my.id"
@@ -9,7 +9,7 @@ ID_VMESS="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
 ID_VLESS_TR="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
 
 # 1. Bersihkan sisa-sisa kegagalan (Wajib!)
-systemctl stop nginx xray dropbear stunnel4 ws-python 2>/dev/null
+systemctl stop nginx xray dropbear stunnel4 2>/dev/null
 apt purge nginx xray -y && apt autoremove -y
 rm -rf /etc/nginx/conf.d/*
 rm -rf /etc/nginx/sites-enabled/*
@@ -38,13 +38,19 @@ cat <<EOF > /usr/local/etc/xray/config.json
 }
 EOF
 
-# 5. Config Nginx (Pemisahan Port 80, 2082 & 443)
+# 5. Config Nginx (Support Port 80 & 443 untuk SEMUA)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
     listen 2082;
     server_name $DOMAIN;
 
+    # Jalur Vmess/Vless/Trojan di Port 80
+    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+
+    # Jalur SSH Websocket Port 80
     location / {
         proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
@@ -61,6 +67,12 @@ server {
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
 
+    # Jalur Vmess/Vless/Trojan di Port 443
+    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+
+    # Jalur SSH SSL
     location / {
         proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
@@ -68,10 +80,6 @@ server {
         proxy_set_header Connection "Upgrade";
         proxy_set_header Host \$host;
     }
-
-    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; }
-    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; }
-    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; }
 }
 EOF
 
@@ -92,4 +100,4 @@ systemctl daemon-reload
 systemctl enable xray nginx stunnel4 dropbear
 systemctl restart xray nginx stunnel4 dropbear
 
-echo "BOMM!! SEMUA HIJAU KING!"
+echo "BOMM!! SEMUA HIJAU KING! PORT 80 & 443 READY!"
