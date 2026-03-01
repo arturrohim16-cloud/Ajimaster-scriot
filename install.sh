@@ -99,5 +99,8 @@ EOF
 systemctl daemon-reload
 systemctl enable xray nginx stunnel4 dropbear
 systemctl restart xray nginx stunnel4 dropbear
+systemctl restart nginx
+systemctl enable nginx
+
 
 echo "BOMM!! SEMUA HIJAU KING! PORT 80 & 443 READY!"
