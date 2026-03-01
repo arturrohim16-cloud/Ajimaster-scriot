@@ -51,22 +51,27 @@ server {
     }
 }
 server {
-    listen 443 ssl http2;
+    listen 80;
+    listen [::]:80;
+    listen 2082;
+    listen [::]:2082;
     server_name _;
-    ssl_certificate /etc/xray/xray.crt;
-    ssl_certificate_key /etc/xray/xray.key;
+
     location / {
-        proxy_pass http://127.0.0.1:143;
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:143; # Tembak langsung ke Dropbear
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        proxy_set_header Host \$host;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        # Penahan koneksi biar gak Premature Close
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
     }
-    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 }
-EOF
 
 # 6. Dropbear & Stunnel
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
