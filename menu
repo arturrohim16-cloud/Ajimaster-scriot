@@ -71,37 +71,6 @@ $PESAN
         --data-urlencode "parse_mode=Markdown" > /dev/null
 }
 
-update_script() {
-    clear
-    # --- DEFINISI WARNA ---
-    BIRU='\033[1;34m'
-    KUNING='\033[1;33m'
-    NC='\033[0m'
-    TOKEN="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"
-    # Pastikan Nama File di Link ini sesuai dengan yang ada di GitHub kamu (menu)
-    URL="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/menu"
-
-    echo -e "${BIRU}=======================================${NC}"
-    echo -e "       ${KUNING}UPDATING SCRIPT DARI GITHUB${NC}      "
-    echo -e "${BIRU}=======================================${NC}"
-    echo -e "  ${KUNING}Mohon tunggu sebentar...${NC}"
-    echo -e "  ${KUNING}Sedang mengambil update terbaru...${NC}"
-    
-    # Proses Download Menggunakan Token (Menimpa file /usr/bin/menu lama)
-    wget -q --header="Authorization: token $TOKEN" -O /usr/bin/menu "$URL"
-    
-    # Memberi Izin Eksekusi agar bisa dijalankan
-    chmod +x /usr/bin/menu
-    
-    echo -e "${BIRU}---------------------------------------${NC}"
-    echo -e "  ${KUNING}Update Berhasil Diinstall!${NC}"
-    echo -e "  ${KUNING}Menjalankan ulang menu...${NC}"
-    echo -e "${BIRU}---------------------------------------${NC}"
-    sleep 2
-    
-    # Menjalankan menu yang baru saja didownload
-    menu
-}
 
 # Fungsi Backup Data Akun
 backup_restore() {
