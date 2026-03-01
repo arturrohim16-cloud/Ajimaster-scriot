@@ -1,93 +1,55 @@
 #!/bin/bash
 # ==========================================
-# Auto-Installer VPN Premium Full Jantung (V3)
+# Auto-Installer VPN Premium Full Jantung (V3.1 - FIX)
 # Multi-Port SSH WS, Xray, & Stunnel - By AJI VPN
 # ==========================================
 
 # --- KONFIGURASI UTAMA ---
-TOKEN="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"
-REPO_URL="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main"
 DOMAIN="aji.izz-store.my.id"
 ID_VMESS="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
 ID_VLESS_TR="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
 
-# 1. Update & Instal Semua Software
+# 1. Update & Instal Software Utama
 apt update -y && apt upgrade -y
-apt install nginx xray jq python3 python3-pip curl wget screen stunnel4 dropbear socat dbus-x11 -y
+apt install nginx jq python3 curl wget screen stunnel4 dropbear socat -y
+
+# Instal Xray Core Resmi (Mencegah Unable to locate package)
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 
 # 2. Persiapan Sertifikat SSL
 mkdir -p /etc/xray
+mkdir -p /var/log/xray
 openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj "/C=ID/ST=Jawa/L=Jakarta/O=Aji/CN=$DOMAIN" -keyout /etc/xray/xray.key -out /etc/xray/xray.crt
 chmod +r /etc/xray/xray.crt
 chmod +r /etc/xray/xray.key
 
-# 3. Konfigurasi Xray (Port Internal)
+# 3. Konfigurasi Xray (Port Internal 10001-10003)
 cat <<EOF > /usr/local/etc/xray/config.json
 {
   "log": { "access": "/var/log/xray/access.log", "loglevel": "info" },
   "inbounds": [
     { "port": 10001, "listen": "127.0.0.1", "protocol": "vmess", "settings": { "clients": [ { "id": "$ID_VMESS", "alterId": 0 } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vmess" } } },
-    { "port": 10002, "listen": "127.0.0.1", "protocol": "vless", "settings": { "clients": [ { "id": "$ID_VLESS_TR", "decryption": "none" } ], "decryption": "none" }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } },
+    { "port": 10002, "listen": "127.0.0.1", "protocol": "vless", "settings": { "clients": [ { "id": "$ID_VLESS_TR", "decryption": "none" } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } },
     { "port": 10003, "listen": "127.0.0.1", "protocol": "trojan", "settings": { "clients": [ { "password": "$ID_VLESS_TR" } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/trojan" } } }
   ],
   "outbounds": [ { "protocol": "freedom" } ]
 }
 EOF
 
-# 4. Instalasi SSH Websocket Python (Port 2082 & Proxying)
-echo -e "Memasang SSH Websocket Python..."
-wget -O /usr/local/bin/ws-python "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/main/Scriptku/ws-python.py" 2>/dev/null
-if [ $? -ne 0 ]; then
-# Jika file download gagal, buat script python sederhana di tempat
-cat <<EOF > /usr/local/bin/ws-python
-import socket, threading, sys
-def proxy(client, address):
-    try:
-        data = client.recv(1024).decode()
-        if 'Upgrade: websocket' in data:
-            client.send(b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n')
-            target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            target.connect(('127.0.0.1', 143)) # Connect ke Dropbear
-            def forward(src, dst):
-                try:
-                    while True:
-                        d = src.recv(4096)
-                        if not d: break
-                        dst.send(d)
-                except: pass
-            threading.Thread(target=forward, args=(client, target)).start()
-            threading.Thread(target=forward, args=(target, client)).start()
-    except: pass
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(('0.0.0.0', 2082))
-s.listen(1000)
-while True:
-    c, addr = s.accept()
-    threading.Thread(target=proxy, args=(c, addr)).start()
-EOF
-fi
-chmod +x /usr/local/bin/ws-python
+# 4. Matikan Python WS Lama (Agar tidak bentrok port 2082 dengan Nginx)
+systemctl stop ws-python 2>/dev/null
+systemctl disable ws-python 2>/dev/null
+rm -f /etc/systemd/system/ws-python.service
 
-# Buat Systemd Service untuk SSH WS agar auto-start
-cat <<EOF > /etc/systemd/system/ws-python.service
-[Unit]
-Description=SSH Websocket Python
-After=network.target
+# 5. Konfigurasi Nginx (Sultan Multi-Port & Anti-Filter)
+# Menghapus config default agar tidak conflict
+rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-available/default
+rm -f /etc/nginx/conf.d/aji_vpn.conf
+rm -f /etc/nginx/conf.d/vmess.conf
 
-[Service]
-Type=simple
-ExecStart=/usr/bin/python3 /usr/local/bin/ws-python
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl enable ws-python
-
-# 5. Konfigurasi Nginx (FIX TOTAL: Jalur Terpisah biar Gak OFF)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
-# Blok Jalur Biasa (80 & 2082)
+# Blok HTTP & Anti-Filter 2082
 server {
     listen 80;
     listen [::]:80;
@@ -101,10 +63,12 @@ server {
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     }
 }
 
-# Blok Jalur Sultan SSL (443)
+# Blok HTTPS SSL 443
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
@@ -114,6 +78,7 @@ server {
     ssl_certificate_key /etc/xray/xray.key;
     ssl_protocols TLSv1.2 TLSv1.3;
 
+    # SSH SSL Websocket
     location / {
         proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
@@ -122,27 +87,18 @@ server {
         proxy_set_header Host \$host;
     }
 
-    # Jalur Xray
+    # XRAY PATHS
     location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 }
 EOF
 
-# Pastikan folder dan SSL ada sebelum restart
-mkdir -p /etc/xray
-if [ ! -f /etc/xray/xray.crt ]; then
-    openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
-    -subj "/C=ID/ST=Jakarta/L=Jakarta/O=Aji/CN=aji.izz-store.my.id" \
-    -keyout /etc/xray/xray.key -out /etc/xray/xray.crt
-fi
-
-systemctl restart nginx
-
-# 6. Konfigurasi Dropbear & Stunnel (Port 22, 143, 109, 444)
+# 6. Konfigurasi Dropbear (SSH Direct 22, 143, 109)
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
 echo 'DROPBEAR_EXTRA_ARGS="-p 109 -p 22"' >> /etc/default/dropbear
 
+# 7. Konfigurasi Stunnel4 (Port 444)
 cat <<EOF > /etc/stunnel/stunnel.conf
 pid = /var/run/stunnel.pid
 cert = /etc/xray/xray.crt
@@ -154,16 +110,20 @@ accept = 444
 connect = 127.0.0.1:143
 EOF
 
-# 7. Finalisasi & Restart
+# 8. Finalisasi & Start
 systemctl daemon-reload
-systemctl restart xray nginx stunnel4 dropbear ws-python
-systemctl enable xray nginx stunnel4 dropbear ws-python
+systemctl restart xray nginx stunnel4 dropbear
+systemctl enable xray nginx stunnel4 dropbear
 
+clear
 echo -e "================================================="
 echo -e "   INSTALLASI SELESAI - SEMUA PORT AKTIF!       "
 echo -e "================================================="
-echo -e " SSH Websocket : 80, 443 (Path: /ssh-ws), 2082"
+echo -e " SSH Websocket : 80, 443, 2082 (Anti-Filter)"
 echo -e " SSH SSL/TLS   : 444"
 echo -e " SSH Direct    : 22, 143, 109"
-echo -e " V2RAY/XRAY    : 80, 443"
+echo -e " V2RAY/XRAY    : 80, 443 (Path: /vmess, /vless)"
+echo -e "================================================="
+echo -e " Domain        : $DOMAIN"
+echo -e " Port Nginx    : 80, 443, 2082"
 echo -e "================================================="
