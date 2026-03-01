@@ -85,16 +85,24 @@ WantedBy=multi-user.target
 EOF
 systemctl enable ws-python
 
+# 5. Konfigurasi Nginx (FIX: 80, 443, 2082 SEMUA ON)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
     listen [::]:80;
     listen 2082;
     listen [::]:2082;
-    server_name _; # Biar semua Host/SNI masuk
+    listen 443 ssl http2;         # <--- Ini biar 443 ON
+    listen [::]:443 ssl http2;    # <--- Ini biar 443 IPv6 ON
+    server_name _; 
 
+    ssl_certificate /etc/xray/xray.crt;
+    ssl_certificate_key /etc/xray/xray.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Anti-Filter (Menerima Semua Payload ke Dropbear)
     location / {
-        proxy_pass http://127.0.0.1:143; # Arahkan ke Dropbear
+        proxy_pass http://127.0.0.1:143; 
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
@@ -102,19 +110,19 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         
-        # Tambahan biar Cloudflare gak Error 520
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
     }
 
-    # Jalur Xray (Tetap Aman)
+    # Jalur Xray
     location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 }
 EOF
 
+# Restart agar perubahan aktif
 systemctl restart nginx
 
 
