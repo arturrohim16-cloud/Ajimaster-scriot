@@ -85,30 +85,38 @@ WantedBy=multi-user.target
 EOF
 systemctl enable ws-python
 
-# 5. Konfigurasi Nginx (FIX: Port 80, 443, 2082 ON TOTAL)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
     listen [::]:80;
     listen 2082;
     listen [::]:2082;
-    server_name $DOMAIN;
+    server_name _; # Biar semua Host/SNI masuk
 
-    # Pengalihan otomatis HTTP ke HTTPS (Port 80 ke 443)
-    # Jika ingin port 80 tetap bisa buat SSH WS, hapus bagian return 301 ini
     location / {
-        proxy_pass http://127.0.0.1:143; 
+        proxy_pass http://127.0.0.1:143; # Arahkan ke Dropbear
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        
+        # Tambahan biar Cloudflare gak Error 520
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 
-    # XRAY PATHS
-    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade"; proxy_set_header Host \$http_host; }
-    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade"; proxy_set_header Host \$http_host; }
-    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade"; proxy_set_header Host \$http_host; }
+    # Jalur Xray (Tetap Aman)
+    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 }
+EOF
+
+systemctl restart nginx
+
 
 server {
     listen 443 ssl http2;
