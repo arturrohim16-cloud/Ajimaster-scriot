@@ -364,7 +364,8 @@ add_vmess() {
     echo -e "Created   : $hariini"
     echo -e "Expired   : $exp"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-# --- FORMAT NOTIFIKASI VMESS ---
+# --- FORMAT NOTIFIKASI VMESS (DENGAN PREFIX vmess://) ---
+# Gunakan backtick (`) agar link panjang bisa diklik untuk copy
 VMESS_LOG="╔════════════════════╗
       ✨ VMESS PREMIUM ✨
 ╚════════════════════╝
@@ -372,17 +373,17 @@ VMESS_LOG="╔════════════════════╗
 📅 **Expired** : \`$exp\`
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 **Link TLS** :
-\`$link1\`
+\`vmess://$link1\`
 
 🌐 **Link Non-TLS** :
-\`$link2\`
+\`vmess://$link2\`
 
 🔗 **Link gRPC** :
-\`$link3\`
+\`vmess://$link3\`
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ *Auto-Script By AJI VPN*"
 
-# Kirim ke Telegram
+# Kirim ke Telegram (Gunakan fungsi send_log kamu yang gacor tadi)
 send_log "VMESS" "$VMESS_LOG"
 
     read -p "Press Enter to return to menu..."
