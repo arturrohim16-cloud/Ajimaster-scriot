@@ -1,28 +1,32 @@
 #!/bin/bash
 # ==========================================
-# Auto-Installer VPN Premium AJI STORE (V3.3)
-# FIX TOTAL: Nginx & Xray Stability
+# Auto-Installer VPN AJI STORE - FINAL STABLE
+# SEMUA PORT (80, 443, 22, 2082, 444, 143) ON!
 # ==========================================
 
 DOMAIN="aji.izz-store.my.id"
 ID_VMESS="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
 ID_VLESS_TR="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
 
-# 1. Update & Install
-apt update -y && apt upgrade -y
-apt install nginx jq python3 curl wget stunnel4 dropbear socat -y
+# 1. Bersihkan sisa-sisa kegagalan (Wajib!)
+systemctl stop nginx xray dropbear stunnel4 ws-python 2>/dev/null
+apt purge nginx xray -y && apt autoremove -y
+rm -rf /etc/nginx/conf.d/*
+rm -rf /etc/nginx/sites-enabled/*
+rm -rf /usr/local/etc/xray/*
 
-# 2. Install Xray Official (Pasti Hijau)
+# 2. Instal ulang Core
+apt update -y
+apt install nginx jq curl wget stunnel4 dropbear socat -y
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 
-# 3. Sertifikat & Folder
+# 3. SSL Sultan (Biar Nginx Gak Merah)
 mkdir -p /etc/xray
-mkdir -p /var/log/xray
-openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj "/C=ID/ST=Jawa/L=Jakarta/O=Aji/CN=$DOMAIN" -keyout /etc/xray/xray.key -out /etc/xray/xray.crt
-chmod +r /etc/xray/xray.crt
-chmod +r /etc/xray/xray.key
+openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
+    -subj "/C=ID/ST=Jawa/L=Jakarta/O=Aji/CN=$DOMAIN" \
+    -keyout /etc/xray/xray.key -out /etc/xray/xray.crt
 
-# 4. Config Xray (Bersih & Ringan)
+# 4. Config Xray (Paling Stabil)
 cat <<EOF > /usr/local/etc/xray/config.json
 {
   "inbounds": [
@@ -34,39 +38,29 @@ cat <<EOF > /usr/local/etc/xray/config.json
 }
 EOF
 
-# 5. Nginx Sultan (Gabungan Anti-Filter & SSL)
-rm -f /etc/nginx/sites-enabled/default
-rm -f /etc/nginx/conf.d/xray.conf
-
+# 5. Config Nginx (Pemisahan Port 80, 2082 & 443)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
-    listen [::]:80;
     listen 2082;
-    listen [::]:2082;
-    server_name _;
+    server_name $DOMAIN;
 
-    # Jalur SSH WS Anti-Filter
     location / {
         proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_set_header Host \$host;
-        proxy_read_timeout 3600s;
     }
 }
 
 server {
     listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name _;
+    server_name $DOMAIN;
 
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
 
-    # Jalur SSL SSH & Xray
     location / {
         proxy_pass http://127.0.0.1:143;
         proxy_http_version 1.1;
@@ -75,34 +69,27 @@ server {
         proxy_set_header Host \$host;
     }
 
-    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; }
+    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; }
+    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; }
 }
 EOF
 
-# 6. Dropbear (Port 143, 22, 109)
+# 6. Dropbear & Stunnel (SSH 22, 143, 109, 444)
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
-grep -q "-p 109 -p 22" /etc/default/dropbear || echo 'DROPBEAR_EXTRA_ARGS="-p 109 -p 22"' >> /etc/default/dropbear
+echo 'DROPBEAR_EXTRA_ARGS="-p 109 -p 22"' > /etc/default/dropbear
 
-# 7. Stunnel4
 cat <<EOF > /etc/stunnel/stunnel.conf
-pid = /var/run/stunnel.pid
 cert = /etc/xray/xray.crt
 key = /etc/xray/xray.key
-client = no
-socket = a:SO_REUSEADDR=1
 [ssh]
 accept = 444
 connect = 127.0.0.1:143
 EOF
 
-# 8. Finalisasi
+# 7. Aktifkan & Restart
 systemctl daemon-reload
-systemctl restart xray nginx stunnel4 dropbear
 systemctl enable xray nginx stunnel4 dropbear
+systemctl restart xray nginx stunnel4 dropbear
 
-clear
-echo "========================================="
-echo "   INSTALLASI SELESAI - SEMUA HIJAU!     "
-echo "========================================="
+echo "BOMM!! SEMUA HIJAU KING!"
