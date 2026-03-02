@@ -605,11 +605,27 @@ cek_online() {
     menu_manager
 }
 
-# Fungsi Hapus User Manual (Permanen)
+# Fungsi Hapus User Manual (Permanen) dengan Daftar Akun
 del_user() {
     clear
     echo -e "==============================================="
-    echo -e "       HAPUS USER PERMANEN (SSH & XRAY)        "
+    echo -e "       DAFTAR AKUN AKTIF (SSH & XRAY)          "
+    echo -e "==============================================="
+    
+    # Menampilkan daftar user SSH (User biasa, bukan system)
+    echo -e " [ USER SSH ]:"
+    cut -d: -f1 /etc/passwd | awk '$1>=1000' | grep -v "nobody" | column
+    echo -e "-----------------------------------------------"
+    
+    # Menampilkan daftar user dari Database Xray (jika ada)
+    echo -e " [ USER XRAY ]:"
+    if [ -f "/etc/xray/users.db" ]; then
+        awk '{print $1}' /etc/xray/users.db | column
+    else
+        # Jika tidak ada database, ambil langsung dari config.json (mencari field email/name)
+        grep -Po '(?<="email": ")[^"]*' /usr/local/etc/xray/config.json | column
+    fi
+    
     echo -e "==============================================="
     read -p "  Masukkan Nama User yang Akan Dihapus: " user
     
@@ -632,29 +648,28 @@ del_user() {
         userdel -f "$user" &>/dev/null
         echo -e "  [OK] User SSH [$user] Berhasil Dihapus."
     else
-        echo -e "  [!] User SSH [$user] Tidak Ditemukan."
+        echo -e "  [!] User SSH [$user] Tidak Ditemukan di Sistem."
     fi
 
     # 3. Proses Hapus User Xray (Vmess/Vless/Trojan)
-    # Menghapus baris yang mengandung nama user di config Xray
     if grep -q "$user" "/usr/local/etc/xray/config.json"; then
-        # Menghapus blok client berdasarkan kata kunci nama user
+        # Logika Hapus: Mencari baris user sampai penutup kurung kurawal
         sed -i "/$user/,/}/d" /usr/local/etc/xray/config.json
         echo -e "  [OK] User Xray [$user] Berhasil Dihapus dari Config."
     else
-        echo -e "  [!] User Xray [$user] Tidak Ditemukan di Config."
+        echo -e "  [!] User Xray [$user] Tidak Ditemukan di Config Xray."
     fi
 
-    # 4. Hapus dari Database User (Jika ada)
+    # 4. Sinkronisasi Database (Jika ada)
     if [ -f "/etc/xray/users.db" ]; then
         sed -i "/$user/d" /etc/xray/users.db
     fi
 
-    # 5. Restart Services agar Perubahan Aktif
+    # 5. Restart Services
     systemctl restart xray 2>/dev/null
     systemctl restart nginx 2>/dev/null
     
-    # 6. Kunci Kembali (Anti-Jebol)
+    # 6. Kunci Kembali
     chattr +i /etc/nginx/conf.d/xray.conf
     chattr +i /usr/local/etc/xray/config.json
     
