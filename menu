@@ -605,79 +605,64 @@ cek_online() {
     menu_manager
 }
 
-del_exp() {
-# --- 1. WARNA ---
-CYAN='\033[0;36m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-PURPLE='\033[0;35m'
-RED='\033[0;31m'
-NC='\033[0m'
-
-clear
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "          ${PURPLE}🔍 LIST ACTIVE USERS DETAILS${NC}          "
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-
-# Tampilkan Daftar User (SSH, VMESS, VLESS, TROJAN)
-echo -e "${YELLOW} [ SSH & OpenVPN Users ] ${NC}"
-awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | nl -s ". "
-echo -e "${CYAN}-------------------------------------------------${NC}"
-
-echo -e "${YELLOW} [ XRAY (VMESS/VLESS/TROJAN) Users ] ${NC}"
-grep -E "^### " /etc/xray/*_users.txt 2>/dev/null | cut -d ' ' -f 2 | sort | uniq | nl -s ". "
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-
-CONF="/usr/local/etc/xray/config.json"
-read -p " Masukkan Nama User yang ingin DIMATIKAN: " user
-
-if [ -z "$user" ]; then
-    echo -e "${RED} Error: Nama tidak boleh kosong!${NC}"
-    sleep 2
-    return
-fi
-
-echo -e "\n${RED}[!] Menghancurkan sesi user [ $user ]...${NC}"
-
-# --- 2. PROSES HAPUS & KILL SSH ---
-if id "$user" &>/dev/null; then
-    # Tendang user dari terminal (Kill all processes by user)
-    pkill -u "$user"
-    userdel -f "$user" &>/dev/null
-    echo -e "${GREEN} [OK]${NC} Sesi SSH [ $user ] Diputus & Dihapus."
-fi
-
-# --- 3. PROSES HAPUS & KILL XRAY (VMESS/VLESS/TROJAN) ---
-if [ -f "$CONF" ]; then
-    # Hapus dari Config JSON
-    jq --arg mail "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $mail))' "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
+# Fungsi Hapus User Manual (Permanen)
+del_user() {
+    clear
+    echo -e "==============================================="
+    echo -e "       HAPUS USER PERMANEN (SSH & XRAY)        "
+    echo -e "==============================================="
+    read -p "  Masukkan Nama User yang Akan Dihapus: " user
     
-    # Hapus dari Database TXT
-    sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
-    sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
-    sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
-    
-    # KUNCI MATI TOTAL: Restart Service + Putus Jalur Port
-    systemctl stop xray
-    systemctl stop nginx
-    
-    # Paksa putus semua koneksi TCP di port 443 & 80 (Menendang Zombi)
-    fuser -k 443/tcp 2>/dev/null
-    fuser -k 80/tcp 2>/dev/null
-    
-    # Nyalakan kembali (User yang valid akan auto-connect, si zombi tidak bisa)
-    systemctl start xray
-    systemctl start nginx
-    
-    echo -e "${GREEN} [OK]${NC} User Xray [ $user ] Dihapus & Sesi Diputus."
-fi
+    # Validasi input kosong
+    if [[ -z "$user" ]]; then
+        echo -e "  Error: Nama user tidak boleh kosong!"
+        read -n 1 -s -r -p "  Tekan sembarang tombol untuk kembali..."
+        return
+    fi
 
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "  ${GREEN}BERHASIL:${NC} Akun [ $user ] MATI TOTAL DETIK INI!"
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-sleep 2
-dashboard_utama
+    # 1. Buka Kunci Konfigurasi
+    chattr -i /etc/nginx/conf.d/xray.conf 2>/dev/null
+    chattr -i /usr/local/etc/xray/config.json 2>/dev/null
+    chattr -i /etc/stunnel/stunnel.conf 2>/dev/null
+
+    echo -e "-----------------------------------------------"
+    
+    # 2. Proses Hapus User SSH
+    if id "$user" &>/dev/null; then
+        userdel -f "$user" &>/dev/null
+        echo -e "  [OK] User SSH [$user] Berhasil Dihapus."
+    else
+        echo -e "  [!] User SSH [$user] Tidak Ditemukan."
+    fi
+
+    # 3. Proses Hapus User Xray (Vmess/Vless/Trojan)
+    # Menghapus baris yang mengandung nama user di config Xray
+    if grep -q "$user" "/usr/local/etc/xray/config.json"; then
+        # Menghapus blok client berdasarkan kata kunci nama user
+        sed -i "/$user/,/}/d" /usr/local/etc/xray/config.json
+        echo -e "  [OK] User Xray [$user] Berhasil Dihapus dari Config."
+    else
+        echo -e "  [!] User Xray [$user] Tidak Ditemukan di Config."
+    fi
+
+    # 4. Hapus dari Database User (Jika ada)
+    if [ -f "/etc/xray/users.db" ]; then
+        sed -i "/$user/d" /etc/xray/users.db
+    fi
+
+    # 5. Restart Services agar Perubahan Aktif
+    systemctl restart xray 2>/dev/null
+    systemctl restart nginx 2>/dev/null
+    
+    # 6. Kunci Kembali (Anti-Jebol)
+    chattr +i /etc/nginx/conf.d/xray.conf
+    chattr +i /usr/local/etc/xray/config.json
+    
+    echo -e "-----------------------------------------------"
+    echo -e "  USER [$user] TELAH DIHAPUS SELAMA-LAMANYA!   "
+    echo -e "==============================================="
+    read -n 1 -s -r -p "Tekan sembarang tombol untuk kembali ke menu..."
+    menu
 }
 
 exp_cleaner() {
