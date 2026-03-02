@@ -664,18 +664,27 @@ sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
-# 5. Hapus dari Sistem SSH (Jika user tersebut juga akun SSH)
+# 5. Hapus dari Sistem SSH & Putus Koneksi SSH (Jika ada)
 if id "$user" &>/dev/null; then
+    # Tendang user dari sesi SSH yang sedang aktif
+    pkill -u "$user"
     userdel -f "$user" &>/dev/null
 fi
 
-# 6. Restart Service & Lock Kembali
-echo -e "\n\033[0;36m[...]\033[0m Menghapus sesi dan merestart service..."
-systemctl restart xray
-systemctl restart nginx
+# 6. RESTART TOTAL & MEMBERSIHKAN CACHE (PENTING!)
+echo -e "\n\033[0;36m[...]\033[0m Menghapus sesi dan mematikan koneksi..."
+
+# Memaksa Xray berhenti total dulu baru nyala lagi (bukan reload)
+systemctl stop xray
+systemctl stop nginx
+sleep 1
+systemctl start xray
+systemctl start nginx
+
+# Lock kembali config agar aman
 chattr +i $CONF 2>/dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m User [$user] berhasil dihapus permanen!"
+echo -e "\033[0;32m[ OK ]\033[0m User [$user] TELAH MATI & Terhapus!"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
 sleep 2
