@@ -664,27 +664,35 @@ sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
-# 5. Hapus dari Sistem SSH & Putus Sesi Aktif
+# 5. Hapus dari Sistem SSH & Tendang Sesi
 if id "$user" &>/dev/null; then
-    # Tendang paksa semua proses yang dijalankan user ini (SSH/VPN)
-    pkill -9 -u "$user" 
+    pkill -9 -u "$user" 2>/dev/null
     userdel -f "$user" &>/dev/null
 fi
 
-# 6. RESTART TOTAL (STOP -> START)
-echo -e "\n\033[0;36m[...]\033[0m Menendang user dan mematikan jalur koneksi..."
+# 6. JURUS PAMUNGKAS: PUTUS JALUR KONEKSI (FLUSH)
+echo -e "\n\033[0;36m[...]\033[0m Memutus semua jalur internet user [$user]..."
 
-# Kita pakai STOP lalu START agar memori Xray benar-benar bersih
-systemctl stop xray
-systemctl stop nginx
-sleep 2 # Beri jeda agar port benar-benar lepas
-systemctl start xray
-systemctl start nginx
+# A. Matikan Service
+systemctl stop xray nginx 2>/dev/null
 
-# 7. Lock kembali config agar AMAN
+# B. Bersihkan "Conntrack" (Menghapus jejak koneksi di Kernel VPS)
+# Ini yang bikin user tetap konek walau service mati
+if command -v conntrack &> /dev/null; then
+    conntrack -F
+fi
+
+# C. Paksa bunuh semua proses yang pegang port VPN (80, 443, 2082)
+fuser -k 80/tcp 443/tcp 2082/tcp 2>/dev/null
+
+# D. Nyalakan ulang mesin dengan config baru
+sleep 2
+systemctl start xray nginx
+
+# 7. Lock kembali agar aman
 chattr +i $CONF 2>/dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m User [$user] TELAH TEWAS & TERPUTUS!"
+echo -e "\033[0;32m[ OK ]\033[0m JALUR DIPUTUS! User [$user] resmi ALMARHUM."
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
 sleep 2
