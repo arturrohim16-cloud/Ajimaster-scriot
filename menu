@@ -125,12 +125,14 @@ add_trojan() {
     hariini=`date +"%Y-%m-%d"`
 
     # PROSES INJEKSI (Menggunakan UUID Anda sebagai password Trojan)
-    jq --arg pw "$password" --arg mail "$user" \
+    chattr -i $CONF 2>/dev/null
+    jq --arg pw "$uuid" --arg mail "$user" \
     '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pw, "email": $mail}]' \
-    "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
+    $CONF > /tmp/config.tmp && mv /tmp/config.tmp $CONF
 
-    chown root:root "$CONF" && chmod 644 "$CONF"
+    # 4. Restart Service
     systemctl restart xray
+    chattr +i $CONF 2>/dev/null
 
     # GENERATE LINKS
     link1="trojan://$password@$domain:443?path=%2Ftrojan&security=tls&type=ws&sni=$domain#$user"
