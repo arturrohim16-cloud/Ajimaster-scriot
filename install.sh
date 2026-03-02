@@ -103,9 +103,9 @@ server {
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
 
-    location /vmess { proxy_pass http://127.0.0.1:80 443; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /vless { proxy_pass http://127.0.0.1:80 443; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
-    location /trojan { proxy_pass http://127.0.0.1:80 443; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vmess { proxy_pass http://127.0.0.1:1001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vless { proxy_pass http://127.0.0.1:1002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /trojan { proxy_pass http://127.0.0.1:1003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 
     location / {
         proxy_pass http://127.0.0.1:8880;
