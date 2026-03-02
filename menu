@@ -664,32 +664,33 @@ sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
-# ... (bagian atas tetap sama) ...
+# 5. EKSEKUSI HAPUS (MENCARI UUID & NAMA)
+echo -e "\n\033[0;36m[...]\033[0m Melacak ID Akun dan Menghapus..."
 
-# 5. EKSEKUSI HAPUS DARI SEMUA JALUR (XRAY & NGINX)
-echo -e "\n\033[0;36m[...]\033[0m Menghapus user dari semua konfigurasi..."
+# A. Ambil UUID user tersebut sebelum dihapus (Untuk memastikan)
+USER_UUID=$(grep -B 3 "\"email\": \"$user\"" $CONF | grep '"id":' | cut -d '"' -f 4)
 
-# A. Hapus dari Config Xray (VMess/VLess/Trojan)
+# B. Buka Kunci & Hapus menggunakan JQ (Paling Akurat untuk JSON)
 chattr -i $CONF 2>/dev/null
-jq --arg user "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $user))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+if [[ -n "$USER_UUID" ]]; then
+    # Hapus berdasarkan Email DAN ID agar tidak ada sisa
+    jq --arg email "$user" --arg id "$USER_UUID" 'del(.inbounds[].settings.clients[]? | select(.email == $email or .id == $id))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+else
+    # Jika UUID tidak ketemu, hapus berdasarkan email saja
+    jq --arg email "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $email))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+fi
 
-# B. Hapus dari Database Teks
+# C. Hapus dari database teks
 find /etc/xray/ -name "*.txt" -exec sed -i "/### $user/d" {} + 2>/dev/null
 
-# C. HAPUS DARI CONFIG NGINX (PENTING!)
-# Kode ini akan mencari nama user di semua file .conf Nginx dan menghapusnya
-find /etc/nginx/ -name "*.conf" -exec sed -i "/$user/d" {} + 2>/dev/null
-# Jika Mas menggunakan konfigurasi per-user di folder vhost
-rm -f /etc/nginx/conf.d/vps-$user.conf 2>/dev/null
+# 6. RESET TOTAL (FORCE KILL)
+echo -e "\033[0;36m[...]\033[0m Mematikan paksa jalur hantu..."
 
-# 6. RESTART TOTAL & FLUSH
-echo -e "\033[0;36m[...]\033[0m Merestart service dan membersihkan sisa koneksi..."
-
-# Matikan dulu
+# Hentikan semua tanpa ampun
 systemctl stop xray nginx 2>/dev/null
 killall -9 xray nginx python python3 2>/dev/null
 
-# Bersihkan jalur kernel
+# Membersihkan jalur data di level Kernel (PENTING!)
 if command -v conntrack &> /dev/null; then
     conntrack -F 2>/dev/null
 fi
@@ -699,7 +700,7 @@ sleep 2
 systemctl start xray nginx
 chattr +i $CONF 2>/dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m User [$user] TELAH TERHAPUS DARI NGINX & XRAY!"
+echo -e "\033[0;32m[ OK ]\033[0m Akun [$user] dengan ID [$USER_UUID] TELAH MATI!"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 sleep 2
 menu
