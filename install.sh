@@ -117,6 +117,49 @@ server {
 }
 EOF
 
+# 1. Buka kunci file agar bisa diedit
+chattr -i /etc/nginx/conf.d/xray.conf
+
+# 2. Tulis ulang konfigurasi dengan Domain yang sudah FIX
+cat <<EOF > /etc/nginx/conf.d/xray.conf
+server {
+    listen 80;
+    listen 2082;
+    listen 443 ssl http2;
+    server_name aji.izz-store.my.id;
+
+    ssl_certificate /etc/xray/xray.crt;
+    ssl_certificate_key /etc/xray/xray.key;
+
+    # Jalur Xray WS
+    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+
+    # Jalur SSH WS (Root)
+    location / {
+        proxy_pass http://127.0.0.1:8880;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host \$host;
+    }
+}
+EOF
+
+# 3. Tes konfigurasi lagi
+nginx -t
+
+# Restart Nginx & Xray
+systemctl restart nginx
+systemctl restart xray
+
+# Kunci kembali agar tidak dirusak script hapus user
+chattr +i /etc/nginx/conf.d/xray.conf
+
+# Cek status akhir
+systemctl status nginx xray --no-pager | grep "Active:"
+
 # 6. Stunnel Config (Port 444)
 cat <<EOF > /etc/stunnel/stunnel.conf
 cert = /etc/xray/xray.crt
