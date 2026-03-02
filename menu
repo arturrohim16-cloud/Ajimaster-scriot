@@ -606,55 +606,65 @@ cek_online() {
 }
 
 # Fungsi Hapus User Manual (Permanen) dengan Daftar Akun
-del_user() {
-    clear
-    echo -e "==============================================="
-    echo -e "       DAFTAR AKUN VPN AKTIF (STABLE)          "
-    echo -e "==============================================="
-    
-    # 1. Menampilkan User SSH (Hanya yang dibuat manual, UID 1000 keatas)
-    echo -e " [ USER SSH ]:"
-    # Filter: Hanya tampilkan user dengan UID >= 1000 dan abaikan 'nobody'
-    awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | column
-    echo -e "-----------------------------------------------"
-    
-    # 2. Menampilkan User XRAY (Vmess/Vless/Trojan)
-    echo -e " [ USER XRAY ]:"
-    # Mengambil ID/Email langsung dari config.json agar pasti ada jika akun dibuat
-    if [ -f "/usr/local/etc/xray/config.json" ]; then
-        grep -Po '(?<="email": ")[^"]*' /usr/local/etc/xray/config.json | sort | uniq | column
-    else
-        echo " (Config Xray tidak ditemukan)"
-    fi
-    
-    echo -e "==============================================="
-    echo -e " Ketik nama user dari daftar di atas untuk hapus."
-    read -p " Masukkan Nama User: " user
-    
-    if [[ -z "$user" ]]; then
-        echo -e " Error: Nama tidak boleh kosong!"
-        sleep 2; menu
-    fi
+del_exp() {
+# =========================================================
+# FUNGSI DISPLAY & HAPUS USER (SSH & XRAY) BY GEMINI
+# =========================================================
+# Script Hapus Akun Sampai Akar - AJI STORE
+CONF="/usr/local/etc/xray/config.json"
+clear
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "\E[44;1;39m          HAPUS AKUN SAMPAI KE AKAR           \E[0m"
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-    # Proses Eksekusi Hapus (Tetap sama seperti logika sebelumnya)
-    chattr -i /etc/nginx/conf.d/xray.conf 2>/dev/null
-    chattr -i /usr/local/etc/xray/config.json 2>/dev/null
+# 1. Cek apakah jq terinstall (Penting untuk edit config.json)
+if ! command -v jq &> /dev/null; then
+    apt install jq -y &> /dev/null
+fi
 
-    # Hapus SSH
-    userdel -f "$user" &>/dev/null
-    # Hapus Xray (Hapus blok yang mengandung nama user tersebut)
-    sed -i "/$user/,/}/d" /usr/local/etc/xray/config.json 2>/dev/null
-    
-    # Restart & Lock
-    systemctl restart xray nginx 2>/dev/null
-    chattr +i /etc/nginx/conf.d/xray.conf
-    chattr +i /usr/local/etc/xray/config.json
+# 2. List User Aktif agar Admin tidak bingung
+echo -e " User yang terdaftar di Config Xray:"
+USER_LIST=$(grep -E "email" $CONF | cut -d '"' -f 4 | sort | uniq)
 
-    echo -e "-----------------------------------------------"
-    echo -e " Berhasil! Akun [$user] telah dihapus total."
-    echo -e "==============================================="
-    read -n 1 -s -r -p " Tekan tombol apa saja untuk kembali..."
+if [[ -z "$USER_LIST" ]]; then
+    echo -e " \033[0;31m[!]\033[0m Tidak ada user yang ditemukan."
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    read -p " Press Enter to return to menu..."
     menu
+    exit 1
+fi
+
+echo "$USER_LIST" | sed 's/^/ - /'
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+read -p " Masukkan Username yang akan dihapus: " user
+
+if [[ -z "$user" ]]; then
+    echo -e " \033[0;31m[ Error ]\033[0m Nama user tidak boleh kosong!"
+    sleep 2
+    exit 1
+fi
+
+# 3. Logika Hapus dari Config Xray (VMess, VLess, Trojan)
+# Menggunakan JQ untuk menghapus objek email secara presisi
+jq --arg user "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $user))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+
+# 4. Bersihkan dari Database TXT
+sed -i "/### $user/d" /etc/xray/users.txt 2>/dev/null
+sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
+sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
+sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
+
+# 5. Restart Service (Mematikan Sesi User Aktif/Hantu)
+echo -e "\n\033[0;36m[...]\033[0m Menghapus sesi dan merestart service..."
+systemctl restart xray
+systemctl restart nginx
+
+echo -e "\033[0;32m[ OK ]\033[0m User [$user] berhasil dihapus permanen!"
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+sleep 2
+menu
 }
 
 exp_cleaner() {
@@ -859,7 +869,7 @@ dashboard_utama() {
     printf "${G}│ ${O}[05] ${G}SHADOW    ${G}│ ${O}[13] ${G}CLEAR LOG   ${G}│ ${O}[21] ${G}CACHE      ${G}│\n"
     printf "${G}│ ${O}[06] ${G}TRIAL     ${G}│ ${O}[14] ${G}CREATE SLOW ${G}│ ${O}[22] ${G}BNDWITH    ${G}│\n"
     printf "${G}│ ${O}[07] ${G}RAM/CPU   ${G}│ ${O}[15] ${G}BCKP/RSTR   ${G}│ ${O}[23] ${G}UP SCRIPT  ${G}│\n"
-    printf "${G}│ ${O}[08] ${G}DEL USER   ${G}│ ${O}[16] ${G}REBOOT VPS  ${G}│ ${O}[24] ${G}MENU BOT   ${G}│\n"
+    printf "${G}│ ${O}[08] ${G}DEL USER  ${G}│ ${O}[16] ${G}REBOOT VPS  ${G}│ ${O}[24] ${G}MENU BOT   ${G}│\n"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
     
     # === 7. FOOTER ===
@@ -879,7 +889,7 @@ dashboard_utama() {
         5|05) add_ssws ;;             # MENU SHADOW
         6|06) trial_menu ;;           # MENU TRIAL
         7|07) cek_ram ;;              # CEK RAM/CPU
-        8|08) del_user ;;              # DELL ALL EXP
+        8|08) del_exp ;;              # DELL ALL EXP
         9|09) auto_reboot ;;          # AUTO REBOOT
         10) change_port ;;            # MENU PORT
         11) run_speedtest ;;          # SPEEDTEST
