@@ -666,31 +666,40 @@ sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
 # ... (bagian atas tetap sama) ...
 
-# 5. Eksekusi Hapus dari Database & Config
+# 5. EKSEKUSI HAPUS DARI SEMUA JALUR (XRAY & NGINX)
+echo -e "\n\033[0;36m[...]\033[0m Menghapus user dari semua konfigurasi..."
+
+# A. Hapus dari Config Xray (VMess/VLess/Trojan)
 chattr -i $CONF 2>/dev/null
 jq --arg user "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $user))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+
+# B. Hapus dari Database Teks
 find /etc/xray/ -name "*.txt" -exec sed -i "/### $user/d" {} + 2>/dev/null
 
-# 6. JURUS SAPU JAGAT (MEMBUNUH GHOST PROCESS)
-echo -e "\n\033[0;36m[...]\033[0m Memutus paksa semua sesi user [$user]..."
+# C. HAPUS DARI CONFIG NGINX (PENTING!)
+# Kode ini akan mencari nama user di semua file .conf Nginx dan menghapusnya
+find /etc/nginx/ -name "*.conf" -exec sed -i "/$user/d" {} + 2>/dev/null
+# Jika Mas menggunakan konfigurasi per-user di folder vhost
+rm -f /etc/nginx/conf.d/vps-$user.conf 2>/dev/null
 
-# A. Hentikan service secara sopan
+# 6. RESTART TOTAL & FLUSH
+echo -e "\033[0;36m[...]\033[0m Merestart service dan membersihkan sisa koneksi..."
+
+# Matikan dulu
 systemctl stop xray nginx 2>/dev/null
-
-# B. Eksekusi mati semua proses yang masih bandel di RAM
 killall -9 xray nginx python python3 2>/dev/null
 
-# C. Flush Conntrack (Opsional tapi bagus untuk membersihkan jalur kernel)
+# Bersihkan jalur kernel
 if command -v conntrack &> /dev/null; then
     conntrack -F 2>/dev/null
 fi
 
-# D. Hidupkan kembali mesin yang sudah bersih
+# Nyalakan kembali
 sleep 2
 systemctl start xray nginx
 chattr +i $CONF 2>/dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m User [$user] TELAH TEWAS TOTAL!"
+echo -e "\033[0;32m[ OK ]\033[0m User [$user] TELAH TERHAPUS DARI NGINX & XRAY!"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 sleep 2
 menu
