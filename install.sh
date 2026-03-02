@@ -101,8 +101,10 @@ cat <<EOF > /usr/local/etc/xray/config.json
 EOF
 
 # 6. NGINX CONFIG (Master Port 80, 443, 2082)
-echo "Configuring Nginx..."
-rm -f /etc/nginx/sites-enabled/default
+echo "Cleaning Ports and Configuring Nginx..."
+# Paksa kosongkan port sebelum start
+fuser -k 80/tcp 443/tcp 2082/tcp 2>/dev/null 
+
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
