@@ -664,39 +664,37 @@ sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
-# 5. Hapus dari Sistem SSH & Tendang Sesi
-if id "$user" &>/dev/null; then
-    pkill -9 -u "$user" 2>/dev/null
-    userdel -f "$user" &>/dev/null
-fi
+# ... (bagian atas tetap sama) ...
 
-# 6. JURUS PAMUNGKAS: PUTUS JALUR KONEKSI (FLUSH)
-echo -e "\n\033[0;36m[...]\033[0m Memutus semua jalur internet user [$user]..."
+# 5. Eksekusi Hapus dari Database & Config
+chattr -i $CONF 2>/dev/null
+jq --arg user "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $user))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
+find /etc/xray/ -name "*.txt" -exec sed -i "/### $user/d" {} + 2>/dev/null
 
-# A. Matikan Service
+# 6. JURUS SAPU JAGAT (MEMBUNUH GHOST PROCESS)
+echo -e "\n\033[0;36m[...]\033[0m Memutus paksa semua sesi user [$user]..."
+
+# A. Hentikan service secara sopan
 systemctl stop xray nginx 2>/dev/null
 
-# B. Bersihkan "Conntrack" (Menghapus jejak koneksi di Kernel VPS)
-# Ini yang bikin user tetap konek walau service mati
+# B. Eksekusi mati semua proses yang masih bandel di RAM
+killall -9 xray nginx python python3 2>/dev/null
+
+# C. Flush Conntrack (Opsional tapi bagus untuk membersihkan jalur kernel)
 if command -v conntrack &> /dev/null; then
-    conntrack -F
+    conntrack -F 2>/dev/null
 fi
 
-# C. Paksa bunuh semua proses yang pegang port VPN (80, 443, 2082)
-fuser -k 80/tcp 443/tcp 2082/tcp 2>/dev/null
-
-# D. Nyalakan ulang mesin dengan config baru
+# D. Hidupkan kembali mesin yang sudah bersih
 sleep 2
 systemctl start xray nginx
-
-# 7. Lock kembali agar aman
 chattr +i $CONF 2>/dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m JALUR DIPUTUS! User [$user] resmi ALMARHUM."
+echo -e "\033[0;32m[ OK ]\033[0m User [$user] TELAH TEWAS TOTAL!"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-
 sleep 2
 menu
+
 }
 
 exp_cleaner() {
