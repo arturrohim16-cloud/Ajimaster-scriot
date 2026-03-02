@@ -132,7 +132,6 @@ add_trojan() {
 
     # 4. Restart Service
     systemctl restart xray
-    chattr +i $CONF 2>/dev/null
 
     # GENERATE LINKS
     link1="trojan://$password@$domain:443?path=%2Ftrojan&security=tls&type=ws&sni=$domain#$user"
