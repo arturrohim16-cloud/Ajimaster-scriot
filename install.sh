@@ -84,9 +84,9 @@ openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
 cat <<EOF > /usr/local/etc/xray/config.json
 {
   "inbounds": [
-    { "port": 80,443, "listen": "127.0.0.1", "protocol": "vmess", "settings": { "clients": [ { "id": "$ID_VMESS" } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vmess" } } },
-    { "port": 80,443, "listen": "127.0.0.1", "protocol": "vless", "settings": { "clients": [ { "id": "$ID_VLESS_TR" } ], "decryption": "none" }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } },
-    { "port": 80,443, "listen": "127.0.0.1", "protocol": "trojan", "settings": { "clients": [ { "password": "$ID_VLESS_TR" } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/trojan" } } }
+    { "port": 80 443, "listen": "127.0.0.1", "protocol": "vmess", "settings": { "clients": [ { "id": "$ID_VMESS" } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vmess" } } },
+    { "port": 80 443, "listen": "127.0.0.1", "protocol": "vless", "settings": { "clients": [ { "id": "$ID_VLESS_TR" } ], "decryption": "none" }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } },
+    { "port": 80 443, "listen": "127.0.0.1", "protocol": "trojan", "settings": { "clients": [ { "password": "$ID_VLESS_TR" } ] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/trojan" } } }
   ],
   "outbounds": [ { "protocol": "freedom" } ]
 }
