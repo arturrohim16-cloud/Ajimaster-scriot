@@ -120,7 +120,7 @@ add_trojan() {
     fi
 
     # Ganti baris password lama dengan UUID milik Anda
-    password="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
+    password=$(cat /proc/sys/kernel/random/uuid)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
@@ -202,7 +202,7 @@ add_vless() {
         return
     fi
 
-    uuid="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
+    uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
@@ -288,7 +288,7 @@ add_vmess() {
         return
     fi
 
-    uuid="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
+    uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
