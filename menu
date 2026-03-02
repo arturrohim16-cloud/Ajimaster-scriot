@@ -617,24 +617,32 @@ echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━�
 echo -e "\E[44;1;39m          HAPUS AKUN SAMPAI KE AKAR           \E[0m"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
-# 1. Cek apakah jq terinstall (Penting untuk edit config.json)
+# 1. Cek apakah jq terinstall
 if ! command -v jq &> /dev/null; then
     apt install jq -y &> /dev/null
 fi
 
-# 2. List User Aktif agar Admin tidak bingung
-echo -e " User yang terdaftar di Config Xray:"
-USER_LIST=$(grep -E "email" $CONF | cut -d '"' -f 4 | sort | uniq)
+# 2. LOGIKA SCAN USER (Membaca semua sumber agar user baru/lama muncul)
+echo -e " Daftar User yang Terdeteksi:"
+
+# Mengambil user dari semua database txt dan config xray
+USER_XRAY=$(grep -hE "###" /etc/xray/*.txt 2>/dev/null | cut -d ' ' -f 2)
+USER_XRAY_JSON=$(grep -E "email" $CONF 2>/dev/null | cut -d '"' -f 4)
+USER_SSH=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd)
+
+# Gabungkan semua, urutkan, dan hapus duplikat
+USER_LIST=$(echo -e "$USER_XRAY\n$USER_XRAY_JSON\n$USER_SSH" | grep -v "^$" | sort | uniq)
 
 if [[ -z "$USER_LIST" ]]; then
     echo -e " \033[0;31m[!]\033[0m Tidak ada user yang ditemukan."
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     read -p " Press Enter to return to menu..."
     menu
-    exit 1
+    return
 fi
 
-echo "$USER_LIST" | sed 's/^/ - /'
+# Tampilkan list dengan rapi (2 kolom agar tidak terlalu panjang ke bawah)
+echo "$USER_LIST" | sed 's/^/ - /' | column
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 
 read -p " Masukkan Username yang akan dihapus: " user
@@ -642,23 +650,30 @@ read -p " Masukkan Username yang akan dihapus: " user
 if [[ -z "$user" ]]; then
     echo -e " \033[0;31m[ Error ]\033[0m Nama user tidak boleh kosong!"
     sleep 2
-    exit 1
+    menu
+    return
 fi
 
-# 3. Logika Hapus dari Config Xray (VMess, VLess, Trojan)
-# Menggunakan JQ untuk menghapus objek email secara presisi
+# 3. Eksekusi Hapus dari Config Xray (VMess, VLess, Trojan)
+chattr -i $CONF 2>/dev/null
 jq --arg user "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $user))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
 
-# 4. Bersihkan dari Database TXT
+# 4. Bersihkan dari Database TXT (Semua Jalur)
 sed -i "/### $user/d" /etc/xray/users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
-# 5. Restart Service (Mematikan Sesi User Aktif/Hantu)
+# 5. Hapus dari Sistem SSH (Jika user tersebut juga akun SSH)
+if id "$user" &>/dev/null; then
+    userdel -f "$user" &>/dev/null
+fi
+
+# 6. Restart Service & Lock Kembali
 echo -e "\n\033[0;36m[...]\033[0m Menghapus sesi dan merestart service..."
 systemctl restart xray
 systemctl restart nginx
+chattr +i $CONF 2>/dev/null
 
 echo -e "\033[0;32m[ OK ]\033[0m User [$user] berhasil dihapus permanen!"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
