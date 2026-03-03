@@ -289,18 +289,16 @@ add_vmess() {
         return
     fi
 
-    uuid=$(cat /proc/sys/kernel/random/uuid)
+    new_uuid=$(cat /proc/sys/kernel/random/uuid)
+    chattr -i /usr/local/etc/xray/config.json
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-    jq --arg id "$uuid" --arg mail "$user" \
-    '(.inbounds[] | select(.protocol == "vmess")).settings.clients += [{"id": $id, "alterId": 0, "email": $mail}]' \
-    "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
-    
+    jq ".inbounds[0].settings.clients += [{\"id\": \"$new_uuid\", \"alterId\": 0}]" /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+
     # Fix Permission & Restart
-    chown root:root "$CONF"
-    chmod 644 "$CONF"
     systemctl restart xray
+    chattr +i /usr/local/etc/xray/config.json
 
     # GENERATE LINK (Struktur Identik dengan akun 'ako')
     link1=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
