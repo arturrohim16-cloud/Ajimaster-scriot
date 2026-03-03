@@ -855,6 +855,64 @@ clear_log() {
     dashboard_utama
 }
 
+# --- FUNGSI SUB-MENU EDIT BANNER (MENU 25) ---
+edit_banner() {
+    clear
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${RED_BG}${WHITE_BOLD}           MENU PENGATURAN BANNER SSH         ${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${YELLOW}[1]${NC} Edit Isi Banner (Teks & Warna HTML)"
+    echo -e "  ${YELLOW}[2]${NC} Jalankan / Update Banner ke Sistem"
+    echo -e "  ${YELLOW}[x]${NC} Kembali ke Menu Utama"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    read -p "  Pilih opsi [1-2 atau x]: " opt_banner
+    
+    case $opt_banner in
+    1)
+        # Opsi 1: Membuka editor nano untuk mengubah isi file banner.txt
+        echo -e "${BLUE}[*] Membuka editor... Simpan dengan CTRL+O, Keluar CTRL+X${NC}"
+        sleep 2
+        # Pastikan file ada sebelum di-edit
+        [ -f /etc/banner.txt ] || touch /etc/banner.txt
+        nano /etc/banner.txt
+        edit_banner
+        ;;
+    2)
+        # Opsi 2: Menghubungkan file banner ke Dropbear & Restart
+        echo -e "${BLUE}[*] Menyingkronkan banner dengan Dropbear...${NC}"
+        sleep 1
+        
+        # Backup config lama (jaga-jaga)
+        cp /etc/default/dropbear /etc/default/dropbear.bak
+        
+        # Cek apakah baris DROPBEAR_BANNER sudah ada atau masih kosong
+        if grep -q "DROPBEAR_BANNER=\"\"" /etc/default/dropbear; then
+            sed -i 's/DROPBEAR_BANNER=""/DROPBEAR_BANNER="\/etc\/banner.txt"/g' /etc/default/dropbear
+        else
+            # Jika sudah ada isinya atau berbeda, kita paksa arahkan ke /etc/banner.txt
+            sed -i 's|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER="/etc/banner.txt"|g' /etc/default/dropbear
+        fi
+        
+        # Restart Dropbear agar perubahan tampil di log HP user
+        systemctl restart dropbear
+        
+        echo -e "${GREEN}[ OK ] Banner berhasil AKTIF & DIJALANKAN!${NC}"
+        echo -e "${YELLOW}[!] Silakan tes konek SSH, banner akan muncul di LOG.${NC}"
+        sleep 3
+        edit_banner
+        ;;
+    x)
+        # Kembali ke menu utama script Mas
+        menu
+        ;;
+    *)
+        echo -e "${RED}Pilihan tidak tersedia, King!${NC}"
+        sleep 1
+        edit_banner
+        ;;
+    esac
+}
+
 dashboard_utama() {
     MYIP=$(wget -qO- ipinfo.io/ip)
     DOMAIN=$(cat /etc/xray/domain 2>/dev/null)
@@ -966,7 +1024,8 @@ t_total=$((t_ssh + t_vms + t_vls + t_trj))
     printf "${G}│ ${O}[07] ${G}RAM/CPU   ${G}│ ${O}[15] ${G}BCKP/RSTR   ${G}│ ${O}[23] ${G}UP SCRIPT  ${G}│\n"
     printf "${G}│ ${O}[08] ${G}DEL USER  ${G}│ ${O}[16] ${G}REBOOT VPS  ${G}│ ${O}[24] ${G}MENU BOT   ${G}│\n"
     echo -e "${C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${OFF}"
-    
+    printf "${G}│ ${O}[25] ${G}EDIT BNR  ${G}│\n"
+
     # === 7. FOOTER ===
     printf "${C}│ ${G}%-16s ${W}: %-32s ${C}│\n" "Script Version" "V2.4"
     printf "${C}│ ${G}%-16s ${G}: %-32s ${C}│\n" "Script Status" "(Active)"
