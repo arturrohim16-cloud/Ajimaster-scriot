@@ -674,43 +674,48 @@ sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
 sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
 
-# 5. EKSEKUSI HAPUS (MENCARI UUID & NAMA)
+# --- 5. EKSEKUSI HAPUS (MENCARI UUID & NAMA) ---
 echo -e "\n\033[0;36m[...]\033[0m Melacak ID Akun dan Menghapus..."
 
-# A. Ambil UUID user tersebut sebelum dihapus (Untuk memastikan)
+# A. Ambil UUID user tersebut sebelum dihapus
 USER_UUID=$(grep -B 3 "\"email\": \"$user\"" $CONF | grep '"id":' | cut -d '"' -f 4)
 
-# B. Buka Kunci & Hapus menggunakan JQ (Paling Akurat untuk JSON)
+# B. Buka Kunci & Hapus menggunakan JQ
 chattr -i $CONF 2>/dev/null
 if [[ -n "$USER_UUID" ]]; then
-    # Hapus berdasarkan Email DAN ID agar tidak ada sisa
     jq --arg email "$user" --arg id "$USER_UUID" 'del(.inbounds[].settings.clients[]? | select(.email == $email or .id == $id))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
 else
-    # Jika UUID tidak ketemu, hapus berdasarkan email saja
     jq --arg email "$user" 'del(.inbounds[].settings.clients[]? | select(.email == $email))' $CONF > /tmp/config.json && mv /tmp/config.json $CONF
 fi
 
-# C. Hapus dari database teks
-find /etc/xray/ -name "*.txt" -exec sed -i "/### $user/d" {} + 2>/dev/null
+# C. Hapus dari Database Teks (PENTING: Agar Total Akun Berkurang)
+sed -i "/^### $user /d" /etc/xray/users.txt 2>/dev/null
+sed -i "/### $user/d" /etc/xray/trojan_users.txt 2>/dev/null
+sed -i "/### $user/d" /etc/xray/vless_users.txt 2>/dev/null
+sed -i "/### $user/d" /etc/xray/vmess_users.txt 2>/dev/null
+# Hapus juga dari database SSH
+sed -i "/^$user /d" /etc/ssh/.ssh.db 2>/dev/null
 
-# 6. RESET TOTAL (FORCE KILL)
-echo -e "\033[0;36m[...]\033[0m Mematikan paksa jalur hantu..."
+# D. Hapus User dari Sistem Linux (SSH)
+userdel -f $user > /dev/null 2>&1
 
-# Hentikan semua tanpa ampun
-systemctl stop xray nginx 2>/dev/null
-killall -9 xray nginx python python3 2>/dev/null
+# --- 6. RESET TOTAL & FORCE DISCONNECT ---
+echo -e "\033[0;36m[...]\033[0m Mematikan paksa koneksi user $user..."
 
-# Membersihkan jalur data di level Kernel (PENTING!)
+# TENDANG USER DARI SSH/WS (Ini kuncinya agar langsung mati di HP!)
+pkill -u $user 2>/dev/null
+
+# Restart Service agar Config Baru Terbaca
+systemctl restart xray nginx 2>/dev/null
+
+# Membersihkan jalur data di level Kernel
 if command -v conntrack &> /dev/null; then
     conntrack -F 2>/dev/null
 fi
 
-# Nyalakan kembali
-sleep 2
-systemctl start xray nginx
 chattr +i $CONF 2>/dev/null
 
-echo -e "\033[0;32m[ OK ]\033[0m Akun [$user] dengan ID [$USER_UUID] TELAH MATI!"
+echo -e "\033[0;32m[ OK ]\033[0m Akun [$user] TELAH MATI TOTAL & DIHAPUS DARI LIST!"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 sleep 2
 menu
