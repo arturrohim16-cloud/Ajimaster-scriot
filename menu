@@ -289,21 +289,21 @@ add_vmess() {
         return
     fi
 
-            # 1. Persiapan Data (Satu UUID untuk semua)
+              # 1. Persiapan Data
     uuid=$(cat /proc/sys/kernel/random/uuid)
-    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
+    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
     
-    # 2. Buka gembok file agar bisa diedit
+    # 2. Buka gembok file
     chattr -i /usr/local/etc/xray/config.json
 
-    # 3. SUNTIK SATU UUID KE SEMUA INBOUNDS (Port 443 & 80)
-    # Tanda [] setelah .inbounds artinya: "Isi semua pintu yang ada dengan UUID ini"
+    # 3. SUNTIK UUID KE INDEX 0 DAN 1 (SPESIFIK)
+    # Kita panggil inbounds satu per satu di dalam jq agar tidak ada yang terlewat
     jq --arg id "$uuid" --arg user "$user" --arg exp "$exp" \
-    '.inbounds[].settings.clients += [{"id": $id, "alterId": 0, "email": ($user + " @ " + $exp)}]' \
+    '.inbounds[0].settings.clients += [{"id": $id, "alterId": 0, "email": ($user + " @ " + $exp)}] | 
+     .inbounds[1].settings.clients += [{"id": $id, "alterId": 0, "email": ($user + " @ " + $exp)}]' \
     /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
 
-    # 4. Finalisasi & Restart agar Xray sadar ada user baru
+    # 4. Finalisasi: Restart & Kunci Kembali
     systemctl restart xray
     chattr +i /usr/local/etc/xray/config.json
 
