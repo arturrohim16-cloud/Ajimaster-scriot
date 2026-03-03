@@ -25,21 +25,28 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
 # 3. PYTHON WS SETUP (Port 8880 Internal)
 echo "Setting up Python WS..."
 cat <<EOF > /usr/local/bin/ws-dropbear
-import socket, threading, _thread
+import socket, threading
+
+def forward(src, dst):
+    try:
+        while True:
+            buf = src.recv(4096)
+            if not buf: break
+            dst.sendall(buf)
+    except: pass
+
 def handle(client_sock, addr):
     try:
-        target_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        target_sock.connect(('127.0.0.1', 143))
-        def forward(source, destination):
-            while True:
-                try:
-                    data = source.recv(4096)
-                    if not data: break
-                    destination.sendall(data)
-                except: break
-        threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
-        threading.Thread(target=forward, args=(target_sock, client_sock), daemon=True).start()
-    except: client_sock.close()
+        data = client_sock.recv(1024).decode(errors='ignore')
+        if 'Upgrade: websocket' in data:
+            target_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            target_sock.connect(('127.0.0.1', 143))
+            client_sock.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
+            threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
+            forward(target_sock, client_sock)
+    except: pass
+    finally: client_sock.close()
+
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -47,10 +54,8 @@ def main():
     server.listen(100)
     while True:
         client, addr = server.accept()
-        try:
-            client.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
-            _thread.start_new_thread(handle, (client, addr))
-        except: client.close()
+        threading.Thread(target=handle, args=(client, addr), daemon=True).start()
+
 if __name__ == "__main__": main()
 EOF
 chmod +x /usr/local/bin/ws-dropbear
@@ -158,7 +163,7 @@ client = no
 socket = a:SO_REUSEADDR=1
 [ssh-ssl]
 accept = 444
-connect = 127.0.0.1:143
+connect = 127.0.0.1:8880
 EOF
 
 # 8. FINALIZING SERVICES
