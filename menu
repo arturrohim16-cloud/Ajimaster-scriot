@@ -877,27 +877,24 @@ edit_banner() {
         nano /etc/banner.txt
         edit_banner
         ;;
+
     2)
-        # Opsi 2: Update Banner Tanpa Merusak File
-        echo -e "${BLUE}[*] Menyingkronkan banner dengan Dropbear...${NC}"
-        sleep 1
+        # Opsi 2: Update Banner Versi Anti-Gagal
+        echo -e "${BLUE}[*] Membersihkan dan Memperbarui Konfigurasi...${NC}"
         
-        # Hapus dulu baris banner lama agar tidak double
-        sed -i '/DROPBEAR_BANNER/d' /etc/default/dropbear
+        # Menulis ulang file config agar selalu bersih (Anti-Typo)
+        printf "NO_START=0\nDROPBEAR_PORT=143\nDROPBEAR_EXTRA_ARGS=\"-p 109 -p 447\"\nDROPBEAR_BANNER=\"/etc/banner.txt\"\nDROPBEAR_RECEIVE_WINDOW=65536\n" > /etc/default/dropbear
         
-        # Tambahkan baris banner yang bersih di akhir file
-        echo 'DROPBEAR_BANNER="/etc/banner.txt"' >> /etc/default/dropbear
-        
-        # Restart service dengan validasi
+        # Restart total
         systemctl daemon-reload
-        systemctl restart dropbear >/dev/null 2>&1
+        systemctl restart dropbear
         
         if [ $? -eq 0 ]; then
-            echo -e "${GREEN}[ OK ] Banner AKTIF & Dropbear Berhasil Restart!${NC}"
+            echo -e "${GREEN}[ OK ] Dropbear Berhasil Aktif Kembali!${NC}"
         else
-            echo -e "${RED}[ ERROR ] Dropbear Gagal Restart! Cek manual config Mas.${NC}"
+            echo -e "${RED}[ ERROR ] Gagal! Cek port 143/109 apakah bentrok.${NC}"
         fi
-        sleep 3
+        sleep 2
         edit_banner
         ;;
 
