@@ -1,41 +1,50 @@
 #!/bin/bash
 # ==========================================
-# Auto-Installer VPN AJI STORE - PORT FIX
-# Nginx (80, 443, 2082) | Xray WS Internal
+# Auto-Installer VPN AJI STORE - TOTAL REMAKE
+# Gateway: Nginx (80, 443) | UDP Custom
 # ==========================================
 
-# --- CONFIG DATA ---
 DOMAIN="aji.izz-store.my.id"
 ID_VMESS="aaa5a187-d964-4fa9-b44b-21f1b6f820e7"
 ID_VLESS_TR="d4dc3d49-c35c-4c35-9528-18e0c7e062ee"
 
-# 1. CLEANING & UNLOCK
+# 1. CLEANING & UNLOCK (Hapus Stunnel karena sudah lewat Nginx)
 echo "Cleaning old configs..."
-chattr -i /etc/nginx/conf.d/xray.conf /usr/local/etc/xray/config.json /etc/stunnel/stunnel.conf 2>/dev/null
 systemctl stop nginx xray dropbear stunnel4 ws-dropbear 2>/dev/null
+chattr -i /etc/nginx/conf.d/xray.conf /usr/local/etc/xray/config.json 2>/dev/null
 
-# 2. INSTALL DEPENDENCIES & CORE
-echo "Installing Dependencies..."
+# 2. INSTALL DEPENDENCIES
 apt update -y
-apt install nginx jq curl wget stunnel4 dropbear socat python3 net-tools -y
+apt install nginx jq curl wget dropbear socat python3 net-tools -y
 
-# Install Xray Core Official
+# Install Xray Core
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 
-# 3. PYTHON WS SETUP (Port 8880 Internal)
-echo "Setting up Python WS..."
+# Install UDP Custom (Binary sakti untuk UDP 1-65535)
+wget -q -O /usr/bin/udp-custom https://github.com/up-the-limit/udp-custom/raw/main/udp-custom-linux-amd64
+chmod +x /usr/bin/udp-custom
+cat <<EOF > /etc/udp/config.json
+{
+  "listen": ":3671",
+  "stream_buffer": 33554432,
+  "receive_buffer": 33554432,
+  "auth": {
+    "type": "password",
+    "password": "1"
+  }
+}
+EOF
+
+# 3. PYTHON WS (Jembatan SSH Internal)
 cat <<EOF > /usr/local/bin/ws-dropbear
 import socket, threading
-
 def forward(src, dst):
     try:
         while True:
             buf = src.recv(4096)
             if not buf: break
             dst.sendall(buf)
-    except:
-        pass
-
+    except: pass
 def handle(client_sock, addr):
     try:
         data = client_sock.recv(1024).decode(errors='ignore')
@@ -45,151 +54,57 @@ def handle(client_sock, addr):
             client_sock.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
             threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
             forward(target_sock, client_sock)
-    except:
-        pass
-    finally:
-        try:
-            client_sock.close()
-        except:
-            pass
-
+    except: pass
+    finally: client_sock.close()
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('0.0.0.0', 8880))
+    server.bind(('127.0.0.1', 8880))
     server.listen(100)
     while True:
         client, addr = server.accept()
         threading.Thread(target=handle, args=(client, addr), daemon=True).start()
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
 EOF
 chmod +x /usr/local/bin/ws-dropbear
 
-# Create Service Python WS
-cat <<EOF > /etc/systemd/system/ws-dropbear.service
-[Unit]
-Description=Python SSH Websocket
-After=network.target
-[Service]
-Type=simple
-ExecStart=/usr/bin/python3 /usr/local/bin/ws-dropbear
-Restart=on-failure
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# 4. SSL GENERATOR
-mkdir -p /etc/xray
-openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
--subj "/C=ID/ST=Jawa/L=Jakarta/O=Aji/CN=$DOMAIN" \
--keyout /etc/xray/xray.key -out /etc/xray/xray.crt
-
-# 5. XRAY CONFIG (Internal Ports)
-echo "Configuring Xray..."
-cat <<EOF > /usr/local/etc/xray/config.json
-{
-  "log": {"loglevel": "info"},
-  "inbounds": [
-    {
-      "port": 10001, "listen": "127.0.0.1", "protocol": "vmess",
-      "settings": {"clients": [{"id": "$ID_VMESS"}]},
-      "streamSettings": {"network": "ws", "wsSettings": {"path": "/vmess"}}
-    },
-    {
-      "port": 10002, "listen": "127.0.0.1", "protocol": "vless",
-      "settings": {"clients": [{"id": "$ID_VLESS_TR"}], "decryption": "none"},
-      "streamSettings": {"network": "ws", "wsSettings": {"path": "/vless"}}
-    },
-    {
-      "port": 10003, "listen": "127.0.0.1", "protocol": "trojan",
-      "settings": {"clients": [{"password": "$ID_VLESS_TR"}]},
-      "streamSettings": {"network": "ws", "wsSettings": {"path": "/trojan"}}
-    }
-  ],
-  "outbounds": [{"protocol": "freedom"}]
-}
-EOF
-
-# 6. NGINX CONFIG (Master Port 80, 443, 2082)
-echo "Cleaning Ports and Configuring Nginx..."
-# Paksa kosongkan port sebelum start
-fuser -k 80/tcp 443/tcp 2082/tcp 2>/dev/null 
-
+# 4. NGINX CONFIG (The Master Gateway)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
 server {
     listen 80;
-    listen 2082;
     listen 443 ssl http2;
     server_name $DOMAIN;
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
+    
+    # VMESS, VLESS, TROJAN (Tetap di Path masing-masing)
+    location /vmess { proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /vless { proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
+    location /trojan { proxy_pass http://127.0.0.1:10003; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
 
-    # VMESS
-    location /vmess {
-        proxy_pass http://127.0.0.1:10001;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_set_header Host \$host;
-    }
-    # VLESS
-    location /vless {
-        proxy_pass http://127.0.0.1:10002;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_set_header Host \$host;
-    }
-    # TROJAN
-    location /trojan {
-        proxy_pass http://127.0.0.1:10003;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_set_header Host \$host;
-    }
-    # SSH WS
+    # SSH WEBSOCKET (Jalur Utama Root /)
     location / {
         proxy_pass http://127.0.0.1:8880;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_set_header Host \$host;
+        proxy_buffering off;
     }
 }
 EOF
 
-# 7. STUNNEL CONFIG (Port 444)
-echo "Configuring Stunnel..."
-cat <<EOF > /etc/stunnel/stunnel.conf
-cert = /etc/xray/xray.crt
-key = /etc/xray/xray.key
-client = no
-socket = a:SO_REUSEADDR=1
-[ssh-ssl]
-accept = 444
-connect = 127.0.0.1:8880
-EOF
-# Kunci kembali dan restart
-chattr +i /etc/stunnel/stunnel.conf
-systemctl restart stunnel4
-
-# 8. FINALIZING SERVICES
-echo "Finalizing..."
+# 5. FINALIZING
 systemctl daemon-reload
-systemctl enable ws-dropbear xray nginx stunnel4 dropbear
-systemctl restart ws-dropbear xray nginx stunnel4 dropbear
+systemctl enable ws-dropbear xray nginx dropbear
+systemctl restart ws-dropbear xray nginx dropbear
 
-# --- LOCK PROTECTION ---
+# --- LOCK ---
 chattr +i /etc/nginx/conf.d/xray.conf
 chattr +i /usr/local/etc/xray/config.json
-chattr +i /etc/stunnel/stunnel.conf
 
 echo "-------------------------------------------------------"
-echo "  AKSI SELESAI! SEMUA PORT AKTIF & TERKUNCI KING!      "
-echo "  Nginx  : 80, 443, 2082                               "
-echo "  Stunnel: 444                                         "
-echo "  SSH WS : 80, 443, 2082 (Via Nginx)                   "
+echo "  REMBOK TOTAL SELESAI! SEMUA SATU PINTU KING!         "
+echo "  PORT 80 & 443: VMESS, VLESS, TROJAN, SSH WS          "
+echo "  UDP CUSTOM   : AKTIF (1-65535)                       "
 echo "-------------------------------------------------------"
