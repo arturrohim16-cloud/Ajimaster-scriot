@@ -873,17 +873,35 @@ dashboard_utama() {
     fi
 
      # === 2. LOGIKA HITUNG AKUN (FIXED & ACCURATE) ===
-    # Menghitung user SSH asli dari system
-    t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
-    
-    # Menghitung user VMESS dari catatan database vmess
-    t_vms=$(grep -C "### $user $exp" >> /etc/xray/vmess_users.txt 2>/dev/null | echo "0")
-    
-    # Menghitung user VLESS dari catatan database vless
-    t_vls=$(grep -C "###" /etc/xray/vless_users.txt 2>/dev/null | echo "0")
-    
-    # Menghitung user TROJAN dari catatan database trojan
-    t_trj=$(grep -C "###" /etc/xray/trojan_users.txt 2>/dev/null | echo "0")
+
+# 1. Menghitung user SSH asli dari system
+# Kita ambil dari /etc/passwd yang memiliki shell /bin/false (khas akun VPN)
+t_ssh=$(grep -c "/bin/false" /etc/passwd)
+
+# 2. Menghitung user VMESS dari database vmess
+# Menghitung jumlah baris yang mengandung tanda "###"
+if [ -f /etc/xray/vmess_users.txt ]; then
+    t_vms=$(grep -c "###" /etc/xray/vmess_users.txt)
+else
+    t_vms=0
+fi
+
+# 3. Menghitung user VLESS dari database vless
+if [ -f /etc/xray/vless_users.txt ]; then
+    t_vls=$(grep -c "###" /etc/xray/vless_users.txt)
+else
+    t_vls=0
+fi
+
+# 4. Menghitung user TROJAN dari database trojan
+if [ -f /etc/xray/trojan_users.txt ]; then
+    t_trj=$(grep -c "###" /etc/xray/trojan_users.txt)
+else
+    t_trj=0
+fi
+
+# 5. Hitung Total Keseluruhan Akun
+t_total=$((t_ssh + t_vms + t_vls + t_trj))
 
     # === 3. WARNA (TIDAK BERUBAH - TETAP SULTAN) ===
     C='\e[1;96m'    # Biru (Garis)
