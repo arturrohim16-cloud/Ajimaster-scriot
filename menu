@@ -119,26 +119,36 @@ add_trojan() {
         return
     fi
 
-    # Ganti baris password lama dengan UUID milik Anda
+        # 1. Generate UUID sebagai Password Trojan
     password=$(cat /proc/sys/kernel/random/uuid)
-    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
+    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+    hariini=$(date +"%Y-%m-%d")
 
-    # PROSES INJEKSI (Menggunakan UUID Anda sebagai password Trojan)
+    # 2. Proses Injeksi ke Config Xray
+    # Memastikan file tidak terkunci sebelum diedit
     chattr -i $CONF 2>/dev/null
-    jq --arg pw "$uuid" --arg mail "$user" \
+    
+    # Gunakan variabel $password yang baru dibuat (Bukan $uuid)
+    jq --arg pw "$password" --arg mail "$user" \
     '(.inbounds[] | select(.protocol == "trojan")).settings.clients += [{"password": $pw, "email": $mail}]' \
     $CONF > /tmp/config.tmp && mv /tmp/config.tmp $CONF
 
-    # 4. Restart Service
-    systemctl restart xray
-
-    # GENERATE LINKS
-    link1="trojan://$password@$domain:443?path=%2Ftrojan&security=tls&type=ws&sni=$domain#$user"
-    link2="trojan://$password@$domain:443?mode=multi&security=tls&type=grpc&serviceName=trojan-grpc&sni=$domain#$user"
-
+    # 3. Catat ke Database Teks (Agar Hitungan Akun Akurat)
     mkdir -p /etc/xray
     echo "### $user $exp" >> /etc/xray/trojan_users.txt
+
+    # 4. Atur Ulang Izin & Restart Service
+    chown root:root $CONF && chmod 644 $CONF
+    chattr +i $CONF 2>/dev/null
+    systemctl restart xray
+    systemctl restart nginx
+
+    # 5. GENERATE LINKS (Khusus Jalur SSL 443 Nginx)
+    # Link 1: Trojan WS TLS (Jalur Utama kita)
+    link1="trojan://$password@$domain:443?path=%2Ftrojan&security=tls&type=ws&sni=$domain#$user"
+    
+    # Link 2: Trojan WS Non-TLS (Jika user ingin lewat port 80/2082)
+    link2="trojan://$password@$domain:80?path=%2Ftrojan&security=none&type=ws#$user"
 
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
