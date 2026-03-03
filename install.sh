@@ -172,6 +172,9 @@ socket = a:SO_REUSEADDR=1
 accept = 444
 connect = 127.0.0.1:8880
 EOF
+# Kunci kembali dan restart
+chattr +i /etc/stunnel/stunnel.conf
+systemctl restart stunnel4
 
 # 8. FINALIZING SERVICES
 echo "Finalizing..."
