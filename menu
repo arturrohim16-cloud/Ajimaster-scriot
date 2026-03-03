@@ -391,20 +391,22 @@ add_ssh() {
     exp=$(date -d "$masa_aktif days" +"%Y-%m-%d")
     
     # 1. Hapus user lama jika ada, lalu buat baru dengan shell /bin/false
+    # Kita tambahkan flag -f untuk memaksa penghapusan jika user sedang login
     userdel -f $user > /dev/null 2>&1
     useradd -e $exp -M -s /bin/false $user
     
     # 2. Cara ganti password yang paling kompatibel
     echo "$user:$pass" | chpasswd
     
-    # 3. Pastikan shell /bin/false terdaftar di sistem agar Dropbear mau terima
+    # 3. Pastikan shell /bin/false terdaftar agar Dropbear tidak menolak (Handshake Failed)
     if ! grep -q "^/bin/false" /etc/shells; then
         echo "/bin/false" >> /etc/shells
     fi
-    # --------------------------------
     
-    echo "$user $iplimit" >> /etc/ssh/.limit_ip
-    
+    # 4. Tambahkan User ke Database UDP Custom (Jika Mas pakai UDP Custom)
+    # Ini penting agar port 1-65535 nya sinkron dengan user SSH
+    echo "$user:$pass" >> /etc/udp/users.txt 2>/dev/null
+    # --------------------------------    
     clear
     echo -e "${CYAN} ╔══════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN} ║${NC}   ${RED_BG}${WHITE_BOLD}      SSH PREMIUM - AJIMASTER       ${NC}   ${CYAN}║${NC}"
@@ -412,25 +414,23 @@ add_ssh() {
     echo -e "   ${YELLOW}Host/Domain :${NC} ${WHITE_BOLD}$domain${NC}"
     echo -e "   ${YELLOW}Username    :${NC} ${WHITE_BOLD}$user${NC}"
     echo -e "   ${YELLOW}Password    :${NC} ${WHITE_BOLD}$pass${NC}"
-    echo -e "   ${YELLOW}Limit IP    :${NC} ${WHITE_BOLD}$iplimit IP${NC}"
     echo -e "   ${YELLOW}Expired     :${NC} ${WHITE_BOLD}$exp${NC}"
     echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
-    echo -e "   ${GREEN}SSH WS (N-TLS) :${NC} ${WHITE_BOLD}2082${NC}"
-    echo -e "   ${GREEN}SSH SSL (TLS)  :${NC} ${WHITE_BOLD}444${NC}"
+    echo -e "   ${GREEN}SSH WS (TLS)   :${NC} ${WHITE_BOLD}443${NC}"
+    echo -e "   ${GREEN}SSH WS (N-TLS) :${NC} ${WHITE_BOLD}80, 2082${NC}"
     echo -e "   ${GREEN}SSH DIRECT     :${NC} ${WHITE_BOLD}143, 109${NC}"
-    echo -e "   ${GREEN}UDPGW PORT     :${NC} ${WHITE_BOLD}7100-7300${NC}"
+    echo -e "   ${GREEN}UDP CUSTOM     :${NC} ${WHITE_BOLD}1-65535 (All Port)${NC}"
     echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
     echo -e "   ${BLUE}FORMAT KONEKSI (Tinggal Copy):${NC}"
-    echo -e "   ${WHITE_BOLD}SSL/TLS  : $domain:444@$user:$pass${NC}"
-    echo -e "   ${WHITE_BOLD}WS N-TLS : $domain:2082@$user:$pass${NC}"
-    echo -e "   ${WHITE_BOLD}UDP/GAME : $domain:7300@$user:$pass${NC}"
-    echo -e "              ${YELLOW}(Port UDP: 1-65535 aktif)${NC}"
+    echo -e "   ${WHITE_BOLD}SSL/TLS  : $domain:443@$user:$pass${NC}"
+    echo -e "   ${WHITE_BOLD}WS N-TLS : $domain:80@$user:$pass${NC}"
+    echo -e "   ${WHITE_BOLD}UDP/GAME : $domain:1-65535@$user:$pass${NC}"
     echo -e "${CYAN} ╠══════════════════════════════════════════════╣${NC}"
-    echo -e "   ${BLUE}PAYLOAD WS (Port 2082):${NC}"
-    echo -e "   ${WHITE_BOLD}GET / HTTP/1.1[crlf]Host: edu.ruangguru.com[crlf]Upgrade: websocket[crlf]Connection: Upgrade[crlf][crlf]${NC}"
+    echo -e "   ${BLUE}PAYLOAD WS (Port 80/443):${NC}"
+    echo -e "   ${WHITE_BOLD}GET / HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf]Connection: Upgrade[crlf][crlf]${NC}"
     echo -e ""
-    echo -e "   ${BLUE}SETTING SSL (Port 444):${NC}"
-    echo -e "   ${WHITE_BOLD}SNI/Server Name: edu.ruangguru.com${NC}"
+    echo -e "   ${BLUE}SETTING SSL (Port 443):${NC}"
+    echo -e "   ${WHITE_BOLD}SNI/Server Name: (Bug Mas)${NC}"
     echo -e "${CYAN} ╚══════════════════════════════════════════════╝${NC}"
     echo ""
 
@@ -443,18 +443,18 @@ MSG_SSH="✨ <b>SSH PREMIUM SULTAN EDITION</b> ✨
 ━━━━━━━━━━━━━━━━━━━━━━
 🌐 <b>Host/IP  :</b> <code>$domain</code>
 🔓 <b>OpenSSH  :</b> 22
-🐻 <b>Dropbear :</b> 109, 143
-🔐 <b>Stunnel  :</b> 444, 447
-🔌 <b>WS HTTP  :</b> 80, 2082
+🐻 <b>Dropbear :</b> 143
+🔐 <b>Stunnel  :</b> 443
+🔌 <b>WS HTTP  :</b> 80
 🚀 <b>All Port :</b> 1-65535
 ━━━━━━━━━━━━━━━━━━━━━━
 📝 <b>Payload Websocket :</b>
 <code>GET / HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf][crlf]</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 🔗 <b>Format Login (Copy-able) :</b>
-🔹 <b>WS :</b> <code>$domain:2082@$user:$pass</code>
-🔹 <b>SSL :</b> <code>$domain:444@$user:$pass</code>
-🔹 <b>DIR :</b> <code>$domain:1-65535@$user:$pass</code>
+🔹 <b>TLS :</b> <code>$domain:443@$user:$pass</code>
+🔹 <b>N-TLS :</b> <code>$domain:80@$user:$pass</code>
+🔹 <b>UDP :</b> <code>$domain:1-65535@$user:$pass</code>
 ━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
 
