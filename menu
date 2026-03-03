@@ -289,15 +289,24 @@ add_vmess() {
         return
     fi
 
+        # 1. Buat UUID Baru
     uuid=$(cat /proc/sys/kernel/random/uuid)
+    
+    # 2. Buka gembok file
     chattr -i /usr/local/etc/xray/config.json
+    
+    # 3. Hitung Masa Aktif
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
 
-    jq ".inbounds[0].settings.clients += [{\"id\": \"$new_uuid\", \"alterId\": 0}]" /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
+    # 4. SUNTIK UUID (Nama variabel harus sama: $uuid)
+    # Saya gunakan parameter --arg agar lebih aman dari error tanda kutip
+    jq --arg id "$uuid" '.inbounds[0].settings.clients += [{"id": $id, "alterId": 0}]' /usr/local/etc/xray/config.json > /tmp/config.json && mv /tmp/config.json /usr/local/etc/xray/config.json
 
-    # Fix Permission & Restart
+    # 5. Restart Xray agar User Baru Aktif
     systemctl restart xray
+    
+    # 6. Kunci Kembali
     chattr +i /usr/local/etc/xray/config.json
 
     # GENERATE LINK (Struktur Identik dengan akun 'ako')
