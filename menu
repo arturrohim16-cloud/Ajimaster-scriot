@@ -878,29 +878,29 @@ edit_banner() {
         edit_banner
         ;;
     2)
-        # Opsi 2: Menghubungkan file banner ke Dropbear & Restart
+        # Opsi 2: Update Banner Tanpa Merusak File
         echo -e "${BLUE}[*] Menyingkronkan banner dengan Dropbear...${NC}"
         sleep 1
         
-        # Backup config lama (jaga-jaga)
-        cp /etc/default/dropbear /etc/default/dropbear.bak
+        # Hapus dulu baris banner lama agar tidak double
+        sed -i '/DROPBEAR_BANNER/d' /etc/default/dropbear
         
-        # Cek apakah baris DROPBEAR_BANNER sudah ada atau masih kosong
-        if grep -q "DROPBEAR_BANNER=\"\"" /etc/default/dropbear; then
-            sed -i 's/DROPBEAR_BANNER=""/DROPBEAR_BANNER="\/etc\/banner.txt"/g' /etc/default/dropbear
+        # Tambahkan baris banner yang bersih di akhir file
+        echo 'DROPBEAR_BANNER="/etc/banner.txt"' >> /etc/default/dropbear
+        
+        # Restart service dengan validasi
+        systemctl daemon-reload
+        systemctl restart dropbear >/dev/null 2>&1
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}[ OK ] Banner AKTIF & Dropbear Berhasil Restart!${NC}"
         else
-            # Jika sudah ada isinya atau berbeda, kita paksa arahkan ke /etc/banner.txt
-            sed -i 's|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER="/etc/banner.txt"|g' /etc/default/dropbear
+            echo -e "${RED}[ ERROR ] Dropbear Gagal Restart! Cek manual config Mas.${NC}"
         fi
-        
-        # Restart Dropbear agar perubahan tampil di log HP user
-        systemctl restart dropbear
-        
-        echo -e "${GREEN}[ OK ] Banner berhasil AKTIF & DIJALANKAN!${NC}"
-        echo -e "${YELLOW}[!] Silakan tes konek SSH, banner akan muncul di LOG.${NC}"
         sleep 3
         edit_banner
         ;;
+
     x)
         # Kembali ke menu utama script Mas
         menu
