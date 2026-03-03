@@ -204,22 +204,34 @@ add_vless() {
     fi
 
     uuid=$(cat /proc/sys/kernel/random/uuid)
-    exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
-    hariini=`date +"%Y-%m-%d"`
+    exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+    hariini=$(date +"%Y-%m-%d")
 
+    # 1. Masukkan ke Config Xray (Cek Protokol Vless)
+    # Pastikan file config tidak terkunci
+    chattr -i "$CONF" 2>/dev/null
     jq --arg id "$uuid" --arg mail "$user" \
     '(.inbounds[] | select(.protocol == "vless")).settings.clients += [{"id": $id, "email": $mail}]' \
     "$CONF" > "$CONF.tmp" && mv "$CONF.tmp" "$CONF"
     
-    chown root:root "$CONF" && chmod 644 "$CONF"
-    systemctl restart xray
-
-    # GENERATE LINKS VLESS
-    link1="vless://$uuid@$domain:443?path=%2Fvless&security=tls&encryption=none&type=ws&sni=$domain#$user"
-    link2="vless://$uuid@$domain:80?path=%2Fvless&security=none&encryption=none&type=ws#$user"
-    link3="vless://$uuid@$domain:443?mode=multi&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=$domain#$user"
-
+    # 2. Catat ke Database Teks (Penting untuk Fitur Hitung Akun!)
     echo "### $user $exp" >> /etc/xray/vless_users.txt
+    
+    # 3. Atur Permission & Restart
+    chown root:root "$CONF" && chmod 644 "$CONF"
+    chattr +i "$CONF" 2>/dev/null
+    systemctl restart xray
+    systemctl restart nginx
+
+    # 4. GENERATE LINKS VLESS (Sesuai Jalur Nginx)
+    # Link 1: TLS (Lewat Nginx Port 443)
+    link1="vless://$uuid@$domain:443?path=%2Fvless&security=tls&encryption=none&type=ws&sni=$domain#$user"
+    
+    # Link 2: Non-TLS (Lewat Nginx Port 80 / 2082)
+    link2="vless://$uuid@$domain:80?path=%2Fvless&security=none&encryption=none&type=ws#$user"
+    
+    # Link 3: Alternatif Port HTTP (Misal 2082)
+    link3="vless://$uuid@$domain:2082?path=%2Fvless&security=none&encryption=none&type=ws#$user"
 
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
