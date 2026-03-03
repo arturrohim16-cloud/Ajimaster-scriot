@@ -35,9 +35,10 @@ cat <<EOF > /etc/udp/config.json
 }
 EOF
 
-# 3. PYTHON WS (Jembatan SSH Internal)
+# 3. PYTHON WS (Jembatan SSH Internal - Versi Soft/Universal)
 cat <<EOF > /usr/local/bin/ws-dropbear
 import socket, threading
+
 def forward(src, dst):
     try:
         while True:
@@ -45,27 +46,46 @@ def forward(src, dst):
             if not buf: break
             dst.sendall(buf)
     except: pass
+
 def handle(client_sock, addr):
     try:
-        data = client_sock.recv(1024).decode(errors='ignore')
-        if 'Upgrade: websocket' in data:
-            target_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            target_sock.connect(('127.0.0.1', 143))
-            client_sock.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
-            threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
-            forward(target_sock, client_sock)
+        # Membaca data awal dari payload (tapi tidak difilter ketat)
+        data = client_sock.recv(1024)
+        
+        # Langsung buatkan jalur ke Dropbear Port 143
+        target_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        target_sock.connect(('127.0.0.1', 143))
+        
+        # Kirim respon 101 secara otomatis agar HP menganggap koneksi sukses
+        # Tanpa peduli apa isi payload-nya
+        client_sock.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
+        
+        # Jalankan penerusan data dua arah
+        threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
+        forward(target_sock, client_sock)
     except: pass
-    finally: client_sock.close()
+    finally:
+        try: client_sock.close()
+        except: pass
+
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('127.0.0.1', 8880))
-    server.listen(100)
+    # Bind ke 0.0.0.0 agar bisa menerima dari Nginx maupun internal
+    server.bind(('0.0.0.0', 8880))
+    server.listen(500) # Kapasitas antrian ditingkatkan agar tidak nanggung
     while True:
         client, addr = server.accept()
         threading.Thread(target=handle, args=(client, addr), daemon=True).start()
-if __name__ == "__main__": main()
+
+if __name__ == "__main__":
+    main()
 EOF
+
+# Berikan izin eksekusi dan restart service
+chmod +x /usr/local/bin/ws-dropbear
+systemctl restart ws-dropbear
+
 chmod +x /usr/local/bin/ws-dropbear
 
 # 4. NGINX CONFIG (The Master Gateway)
