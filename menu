@@ -289,7 +289,7 @@ add_vmess() {
         return
     fi
 
-    new_uuid=$(cat /proc/sys/kernel/random/uuid)
+    uuid=$(cat /proc/sys/kernel/random/uuid)
     chattr -i /usr/local/etc/xray/config.json
     exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
     hariini=`date +"%Y-%m-%d"`
