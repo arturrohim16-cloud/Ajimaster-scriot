@@ -33,7 +33,8 @@ def forward(src, dst):
             buf = src.recv(4096)
             if not buf: break
             dst.sendall(buf)
-    except: pass
+    except:
+        pass
 
 def handle(client_sock, addr):
     try:
@@ -44,19 +45,25 @@ def handle(client_sock, addr):
             client_sock.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
             threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
             forward(target_sock, client_sock)
-    except: pass
-    finally: client_sock.close()
+    except:
+        pass
+    finally:
+        try:
+            client_sock.close()
+        except:
+            pass
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('127.0.0.1', 8880))
+    server.bind(('0.0.0.0', 8880))
     server.listen(100)
     while True:
         client, addr = server.accept()
         threading.Thread(target=handle, args=(client, addr), daemon=True).start()
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
 EOF
 chmod +x /usr/local/bin/ws-dropbear
 
