@@ -289,7 +289,7 @@ add_vmess() {
         return
     fi
 
-              # 1. Persiapan Data
+            # 1. Persiapan Data
     uuid=$(cat /proc/sys/kernel/random/uuid)
     exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
     
@@ -297,7 +297,7 @@ add_vmess() {
     chattr -i /usr/local/etc/xray/config.json
 
     # 3. SUNTIK UUID KE INDEX 0 DAN 1 (SPESIFIK)
-    # Kita panggil inbounds satu per satu di dalam jq agar tidak ada yang terlewat
+    # Memasukkan UUID random yang sama ke Port 443 dan Port 80 sekaligus
     jq --arg id "$uuid" --arg user "$user" --arg exp "$exp" \
     '.inbounds[0].settings.clients += [{"id": $id, "alterId": 0, "email": ($user + " @ " + $exp)}] | 
      .inbounds[1].settings.clients += [{"id": $id, "alterId": 0, "email": ($user + " @ " + $exp)}]' \
@@ -307,9 +307,14 @@ add_vmess() {
     systemctl restart xray
     chattr +i /usr/local/etc/xray/config.json
 
-    # GENERATE LINK (Struktur Identik dengan akun 'ako')
+    # 5. GENERATE LINK (Perbaikan pada Port 80 agar Host terisi otomatis)
+    # Link Port 443 (TLS)
     link1=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
-    link2=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"tls\":\"none\"}" | base64 -w 0)
+    
+    # Link Port 80 (Non-TLS) - DITAMBAHKAN "host" agar tidak kosong di HTTP Custom
+    link2=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"80\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"ws\",\"path\":\"/vmess\",\"type\":\"none\",\"host\":\"$domain\",\"tls\":\"none\"}" | base64 -w 0)
+    
+    # Link Port 443 (gRPC)
     link3=$(echo -n "{\"v\":\"2\",\"ps\":\"$user\",\"add\":\"$domain\",\"port\":\"443\",\"id\":\"$uuid\",\"aid\":\"0\",\"scy\":\"auto\",\"net\":\"grpc\",\"path\":\"vmess-grpc\",\"tls\":\"tls\",\"sni\":\"$domain\"}" | base64 -w 0)
 
     # Catat ke log user (Gunakan path yang pasti ada)
@@ -868,7 +873,7 @@ dashboard_utama() {
     t_ssh=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)
     
     # Menghitung user VMESS dari catatan database vmess
-    t_vms=$(grep -C "###" /etc/xray/vmess_users.txt 2>/dev/null | echo "0")
+    t_vms=$(grep -C "### $user $exp" >> /etc/xray/vmess_users.txt 2>/dev/null | echo "0")
     
     # Menghitung user VLESS dari catatan database vless
     t_vls=$(grep -C "###" /etc/xray/vless_users.txt 2>/dev/null | echo "0")
