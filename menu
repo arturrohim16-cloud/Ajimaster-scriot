@@ -71,6 +71,57 @@ $PESAN
         --data-urlencode "parse_mode=Markdown" > /dev/null
 }
 
+# --- FUNGSI INSTALASI UDP CUSTOM ---
+install_udp() {
+    clear
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "          PROSES INSTALASI UDP CUSTOM         "
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "[*] Mendownload Binary UDP Custom..."
+    
+    # Download binary
+    wget -q -O /usr/bin/udp-custom "https://raw.githubusercontent.com/AjiStore/udp/main/udp-custom"
+    chmod +x /usr/bin/udp-custom
+    
+    # Folder Konfigurasi
+    mkdir -p /etc/udp
+    
+    # Membuat Konfigurasi Default
+    cat <<EOF > /etc/udp/config.json
+{
+  "listen_port": 36712,
+  "stream_port": 7300,
+  "password": "aji",
+  "max_clients": 500
+}
+EOF
+
+    # Membuat Service Systemd
+    cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom Service By Aji Store
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/udp-custom server
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # Aktivasi Service
+    systemctl daemon-reload
+    systemctl enable udp-custom
+    systemctl start udp-custom
+    
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "[ OK ] UDP Custom Berhasil Aktif & Running!"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
+    menu
+}
 
 # Fungsi Backup Data Akun
 backup_restore() {
