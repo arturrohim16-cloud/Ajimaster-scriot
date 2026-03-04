@@ -39,46 +39,46 @@ EOF
 cat <<EOF > /usr/local/bin/ws-dropbear
 import socket, threading
 
-def forward(src, dst):
-    try:
-        while True:
-            buf = src.recv(4096)
-            if not buf: break
-            dst.sendall(buf)
-    except: pass
+def bridge(source, destination):
+    while True:
+        try:
+            data = source.recv(8192)
+            if not data: break
+            destination.sendall(data)
+        except: break
 
-def handle(client_sock, addr):
+def handle_client(client_soc):
     try:
-        # Membaca data awal dari payload (tapi tidak difilter ketat)
-        data = client_sock.recv(1024)
+        # 1. Terima Payload dari HP (Apapun isinya)
+        request = client_soc.recv(8192).decode('utf-8', errors='ignore')
         
-        # Langsung buatkan jalur ke Dropbear Port 143
-        target_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        target_sock.connect(('127.0.0.1', 143))
+        # 2. Kirim Respon Balasan Kilat (Kunci Utama)
+        # Kita kirim 101 Switching agar HP merasa jabat tangan sukses
+        # Dan kita tambahkan 200 OK untuk mengelabui payload 'keras'
+        client_soc.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
         
-        # Kirim respon 101 secara otomatis agar HP menganggap koneksi sukses
-        # Tanpa peduli apa isi payload-nya
-        client_sock.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
+        # 3. Hubungkan ke SSH internal (Pastikan Port 143 aktif!)
+        server_soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_soc.connect(('127.0.0.1', 143))
         
-        # Jalankan penerusan data dua arah
-        threading.Thread(target=forward, args=(client_sock, target_sock), daemon=True).start()
-        forward(target_sock, client_sock)
-    except: pass
+        # 4. Salurkan Data
+        threading.Thread(target=bridge, args=(client_soc, server_soc), daemon=True).start()
+        bridge(server_soc, client_soc)
+    except:
+        pass
     finally:
-        try: client_sock.close()
-        except: pass
+        client_soc.close()
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # Bind ke 0.0.0.0 agar bisa menerima dari Nginx maupun internal
-    server.bind(('0.0.0.0', 8880))
-    server.listen(500) # Kapasitas antrian ditingkatkan agar tidak nanggung
+    server.bind(('0.0.0.0', 80)) # Port 80
+    server.listen(500)
     while True:
         client, addr = server.accept()
-        threading.Thread(target=handle, args=(client, addr), daemon=True).start()
+        threading.Thread(target=handle_client, args=(client,), daemon=True).start()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 EOF
 
