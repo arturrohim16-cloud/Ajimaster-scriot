@@ -20,25 +20,13 @@ apt install nginx jq curl wget dropbear socat python3 net-tools -y
 # Install Xray Core
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 
-# Install UDP Custom (Binary sakti untuk UDP 1-65535)
-wget -q -O /usr/bin/udp-custom https://github.com/up-the-limit/udp-custom/raw/main/udp-custom-linux-amd64
-chmod +x /usr/bin/udp-custom
-cat <<EOF > /etc/udp/config.json
-{
-  "listen": ":3671",
-  "stream_buffer": 33554432,
-  "receive_buffer": 33554432,
-  "auth": {
-    "type": "password",
-    "password": "1"
-  }
-}
-EOF
+# 1. Bersihkan sisa-sisa python sebelumnya
+pkill -f proxy-aji
+pkill -f python3
 
-# 3. PYTHON WS (Jembatan SSH Internal - Versi Soft/Universal)
-cat <<EOF > /usr/local/bin/ws-dropbear
+# 2. Jalankan Proxy Universal di Port 8880
+cat <<EOF > /usr/bin/proxy-aji
 import socket, threading
-
 def bridge(source, destination):
     while True:
         try:
@@ -46,47 +34,34 @@ def bridge(source, destination):
             if not data: break
             destination.sendall(data)
         except: break
-
 def handle_client(client_soc):
     try:
-        # 1. Terima Payload dari HP (Apapun isinya)
-        request = client_soc.recv(8192).decode('utf-8', errors='ignore')
-        
-        # 2. Kirim Respon Balasan Kilat (Kunci Utama)
-        # Kita kirim 101 Switching agar HP merasa jabat tangan sukses
-        # Dan kita tambahkan 200 OK untuk mengelabui payload 'keras'
+        request = client_soc.recv(8192)
+        # Respon 101 WAJIB agar HTTP Custom tidak Timeout/Nanggung
         client_soc.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
-        
-        # 3. Hubungkan ke SSH internal (Pastikan Port 143 aktif!)
         server_soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_soc.connect(('127.0.0.1', 143))
-        
-        # 4. Salurkan Data
+        server_soc.connect(('127.0.0.1', 143)) # Menuju Dropbear yang sudah aktif
         threading.Thread(target=bridge, args=(client_soc, server_soc), daemon=True).start()
         bridge(server_soc, client_soc)
-    except:
-        pass
-    finally:
-        client_soc.close()
-
+    except: pass
+    finally: client_soc.close()
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('0.0.0.0', 80)) # Port 80
+    server.bind(('127.0.0.1', 8880))
     server.listen(500)
     while True:
         client, addr = server.accept()
         threading.Thread(target=handle_client, args=(client,), daemon=True).start()
-
 if __name__ == '__main__':
     main()
 EOF
 
-# Berikan izin eksekusi dan restart service
-chmod +x /usr/local/bin/ws-dropbear
-systemctl restart ws-dropbear
+# 3. Jalankan di background
+nohup python3 /usr/bin/proxy-aji > /dev/null 2>&1 &
 
-chmod +x /usr/local/bin/ws-dropbear
+# 4. Cek Verifikasi Akhir
+netstat -tunlp | grep :8880
 
 # 4. NGINX CONFIG (The Master Gateway)
 cat <<EOF > /etc/nginx/conf.d/xray.conf
