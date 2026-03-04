@@ -71,68 +71,106 @@ $PESAN
         --data-urlencode "parse_mode=Markdown" > /dev/null
 }
 
-install_udp() {
+animasi_loading() {
+    local pesan=$1
+    echo -ne "  [*] $pesan "
+    for ((i=0; i<20; i++)); do
+        echo -ne "█"
+        sleep 0.1
+    done
+    echo -e " [ DONE ]"
+}
+
+# Fungsi Clear RAM
+clear_ram() {
     clear
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "          PROSES INSTALASI UDP AJI STORE        "
+    echo -e "          RAM & CACHE CLEANER - AJI STORE       "
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    animasi_loading "Cleaning PageCache, Inodes, & Dentries"
+    sync; echo 3 > /proc/sys/vm/drop_caches
+    
+    animasi_loading "Optimizing Swap Memory               "
+    swapoff -a && swapon -a
+    
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "  [ OK ] RAM Berhasil Disegarkan!"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
+    SPED_tess
+}
 
-    # 1. Pastikan badvpn-udpgw sudah ada, jika belum kita install dari repo resmi sistem
-    if [ ! -f "/usr/bin/badvpn-udpgw" ]; then
-        echo -e "[*] Menginstall BadVPN dari Repository..."
-        apt-get update && apt-get install badvpn -y
+# Fungsi Aktifkan BBR (Ultra Low Latency)
+aktifkan_bbr() {
+    clear
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "      ULTRA NETWORK ACCELERATOR (GAME MODE)     "
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    animasi_loading "Configuring TCP BBR & FQ Algorithm    "
+    sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+    sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+
+    animasi_loading "Applying Ping Buster Kernel Tweaks    "
+    cat <<EOF > /etc/sysctl.d/99-game-speed.conf
+net.ipv4.tcp_fin_timeout = 10
+net.ipv4.tcp_keepalive_time = 300
+net.ipv4.tcp_keepalive_probes = 5
+net.ipv4.tcp_keepalive_intvl = 15
+net.ipv4.tcp_low_latency = 1
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_autocorking = 0
+net.ipv4.tcp_no_metrics_save = 1
+net.core.netdev_max_backlog = 250000
+net.ipv4.tcp_max_syn_backlog = 8192
+net.ipv4.tcp_max_tw_buckets = 2000000
+net.core.rmem_max = 67108864
+net.core.wmem_max = 67108864
+net.ipv4.tcp_rmem = 4096 87380 67108864
+net.ipv4.tcp_wmem = 4096 65536 67108864
+EOF
+
+    animasi_loading "Optimizing Network Interface MTU      "
+    sysctl -p /etc/sysctl.d/99-game-speed.conf > /dev/null 2>&1
+    sysctl --system > /dev/null 2>&1
+    iface=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
+    if [ -n "$iface" ]; then
+        ifconfig $iface mtu 1500
     fi
 
-    # 2. Buat Service UDP Port 7100, 7200, 7300, 36712
-    # Kita buat looping supaya cepat dan bersih
-    for port in 7100 7200 7300 36712; do
-        cat <<EOF > /etc/systemd/system/udp-$port.service
-[Unit]
-Description=UDP Gateway Port $port By Aji Store
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/badvpn-udpgw --listen-addr 127.0.0.1:$port --max-clients 500 --loglevel 0
-Restart=always
-User=root
-
-[Install]
-WantedBy=multi-user.target
-EOF
-        systemctl daemon-reload
-        systemctl enable udp-$port
-        systemctl restart udp-$port
-    done
-
-    # 3. Sinkronisasi dengan service "udp-custom" agar dashboard HIJAU
-    # Kita arahkan udp-custom service ke salah satu port aktif
-    cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom Status By Aji Store
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/badvpn-udpgw --listen-addr 127.0.0.1:36712
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable udp-custom
-    systemctl restart udp-custom
-
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "  STATUS: $(systemctl is-active udp-custom)"
-    echo -e "  PORT  : 7100, 7200, 7300, 36712"
+    echo -e "  STATUS     : ULTRA LOW LATENCY ACTIVE"
+    echo -e "  TARGET PING: 20ms - 30ms (Gaming Ready)"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "[ OK ] UDP BERHASIL AKTIF TANPA LINK GITHUB!"
     read -n 1 -s -r -p "Tekan [ Enter ] untuk kembali ke menu"
-    menu
+    SPED_tess
 }
+
+# Menu Utama SPED_tess
+run_speedtest() {
+    clear
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "         SPEED & GAME OPTIMIZER MENU           "
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "  [1] Aktifkan Ultra BBR (Game Ping 20ms)"
+    echo -e "  [2] Clear RAM & Cache (Vps Fresh)"
+    echo -e "  [x] Kembali ke Menu Utama"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -ne "  Pilih Menu [1-2 atau x] : "
+    read menu_pilihan
+
+    case $menu_pilihan in
+        1) aktifkan_bbr ;;
+        2) clear_ram ;;
+        x) menu ;;
+        *) echo -e "Pilihan salah!"; sleep 1; SPED_tess ;;
+    esac
+}
+
+# Jalankan Menu
+SPED_tess
 
 # Fungsi Backup Data Akun
 backup_restore() {
