@@ -70,6 +70,28 @@ apt upgrade -y
 apt install -y \
 curl wget nano vim git unzip zip screen jq cron \
 iptables fail2ban nginx dropbear stunnel4 socat certbot
+# // Clear
+clear
+clear && clear && clear
+clear;clear;clear
+
+# // Folder Sistem Yang Tidak Boleh Di Hapus
+mkdir -p /usr/bin
+# // Remove File & Directory
+rm -fr /usr/local/bin/xray
+rm -fr /usr/local/bin/stunnel
+rm -fr /usr/local/bin/stunnel5
+rm -fr /etc/nginx
+rm -fr /var/lib/scrz-prem/
+rm -fr /usr/bin/xray
+rm -fr /etc/xray
+rm -fr /usr/local/etc/xray
+# // Making Directory 
+mkdir -p /etc/nginx
+mkdir -p /var/lib/scrz-prem/
+mkdir -p /usr/bin/xray
+mkdir -p /etc/xray
+mkdir -p /usr/local/etc/xray
 
 IP=$(curl -s ipinfo.io/ip)
 
