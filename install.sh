@@ -73,13 +73,74 @@ wget -q -0 add-tr.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajima
 
 wget -q -0 add-ws.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh" && chmod +x add-ws.sh && ./add-ws.sh
 
-wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -O /usr/bin/add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-ssws.sh" && chmod +x add-ssws.sh && ./add-ssws.sh
 
-wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -O /usr/bin/add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-socks.sh" && chmod +x add-socks.sh && ./add-socks.sh
 
-wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -O /usr/bin/add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
 
-wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -O /usr/bin/autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
+
+wget -q -O /usr/bin/restart "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
+
+wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/tendang.sh"
+
+wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/clearlog.sh"
+
+wget -q -O /usr/bin/running "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/running.sh"
+
+wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/cek-trafik.sh"
+
+wget -q -O /usr/bin/cek-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py"
+
+wget -q -O /usr/bin/cek-bandwidth "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/cek-bandwidth.sh"
+
+wget -q -O /usr/bin/cek-ram "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ram.sh"
+
+wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/limit-speed.sh"
+
+wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-vless.sh"
+
+wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-vmess.sh"
+
+wget -q -O /usr/bin/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-socks.sh"
+
+wget -q -O /usr/bin/menu-ss "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-ss.sh"
+
+wget -q -O /usr/bin/menu-trojan "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-trojan.sh"
+
+wget -q -O /usr/bin/menu-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-trgo.sh"
+
+wget -q -O /usr/bin/menu-ssh "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-ssh.sh"
+
+wget -q -O /usr/bin/menu-bckp "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bekap-tg.sh"
+
+wget -q -O /usr/bin/menu-bckp "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-bckp-github.sh"
+
+wget -q -O /usr/bin/bckp "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bckpbot.sh"
+
+wget -q -O /usr/bin/usernew "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/usernew.sh"
+
+wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu.sh"
+
+wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu4.sh"
+
+wget -q -O /usr/bin/wbm "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/webmin.sh"
+
+wget -q -O /usr/bin/xp "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/xp.sh"
+
+wget -q -O /usr/bin/update "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/update.sh"
+
+wget -q -O /usr/bin/dns "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/dns.sh"
+
+wget -q -O /usr/bin/netf "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/netf.sh"
+
+wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bbr.sh"
+
+wget -q -O /usr/bin/del-xrays "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/del-xrays.sh"
+
+wget -q -O /usr/bin/user-xrays "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/user-xrays.sh"
+
 echo -e "${INFO} Mendownload Perintah Manajemen..."
 
 # [CONTOH PENEMPATAN DOWNLOAD COMMAND]
