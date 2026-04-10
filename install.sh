@@ -65,6 +65,21 @@ echo -e "${OKEY} Core Services Terpasang."
 
 # 6. DOWNLOAD MENU & COMMANDS
 # Folder /usr/bin adalah tempat perintah terminal (menu, add-ws, dll)
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+
+wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
 echo -e "${INFO} Mendownload Perintah Manajemen..."
 
 # [CONTOH PENEMPATAN DOWNLOAD COMMAND]
