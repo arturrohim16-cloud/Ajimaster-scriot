@@ -67,7 +67,7 @@ echo -e "${OKEY} Core Services Terpasang."
 # Folder /usr/bin adalah tempat perintah terminal (menu, add-ws, dll)
 wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
 
-wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -0 add-vless.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh" && chmod +x add-vless.sh && ./add-vless.sh
 
 wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
 
