@@ -99,7 +99,7 @@ wget -q -O /usr/bin/cek-ram "https://raw.githubusercontent.com/arturrohim16-clou
 
 wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-speed.sh"
 
-wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-vless.sh"
+wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh"
 
 wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-vmess.sh"
 
