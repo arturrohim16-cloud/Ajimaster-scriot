@@ -79,7 +79,7 @@ wget -q -O add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajima
 
 wget -q -O add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
 
-wget -q -O autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
+wget -q -O autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
 
 wget -q -O restart "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
 
