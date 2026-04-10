@@ -93,7 +93,7 @@ wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-c
 
 wget -q -O /usr/bin/cek-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py"
 
-wget -q -O /usr/bin/cek-bandwidth "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/cek-bandwidth.sh"
+wget -q -O /usr/bin/cek-bandwidth "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-badwing.sh"
 
 wget -q -O /usr/bin/cek-ram "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ram.sh"
 
