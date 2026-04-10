@@ -77,7 +77,7 @@ wget -q -O add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimas
 
 wget -q -O add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-socks.sh" && chmod +x add-socks.sh && ./add-socks.sh
 
-wget -q -O add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
+wget -q -O add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
 
 wget -q -O autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
 
