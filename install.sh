@@ -59,7 +59,7 @@ echo -e "${INFO} Memasang Core Services..."
 
 # [CONTOH PENEMPATAN LINK]
 # wget -q -O ssh-vpn.sh "LINK_KAMU" && chmod +x ssh-vpn.sh && ./ssh-vpn.sh
-# wget -q -O ins-xray.sh "LINK_KAMU" && chmod +x ins-xray.sh && ./ins-xray.sh
+ wget -q -O Ins-xray.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Ins-xray.sh" && chmod +x Ins-xray.sh && ./Ins-xray.sh
 
 echo -e "${OKEY} Core Services Terpasang."
 
