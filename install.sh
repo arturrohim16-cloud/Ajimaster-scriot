@@ -81,7 +81,7 @@ wget -q -O add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimas
 
 wget -q -O autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
 
-wget -q -O restart "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
+wget -q -O restart "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
 
 wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/tendang.sh"
 
