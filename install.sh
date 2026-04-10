@@ -87,7 +87,7 @@ wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-clou
 
 wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/clearlog.sh"
 
-wget -q -O /usr/bin/running "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/running.sh"
+wget -q -O /usr/bin/running "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/runing.sh" && chmod +x runing.sh && ./runing.sh
 
 wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh"
 
