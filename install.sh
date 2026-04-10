@@ -58,7 +58,7 @@ mkdir -p /usr/local/etc/xray
 echo -e "${INFO} Memasang Core Services..."
 
 # [CONTOH PENEMPATAN LINK]
-# wget -q -O ssh-vpn.sh "LINK_KAMU" && chmod +x ssh-vpn.sh && ./ssh-vpn.sh
+ wget -q -O ssh-vpn.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ssh-vpn.sh" && chmod +x ssh-vpn.sh && ./ssh-vpn.sh
  wget -q -O Ins-xray.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Ins-xray.sh" && chmod +x Ins-xray.sh && ./Ins-xray.sh
 
 echo -e "${OKEY} Core Services Terpasang."
