@@ -89,7 +89,7 @@ wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-clo
 
 wget -q -O /usr/bin/running "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/runing.sh" && chmod +x runing.sh && ./runing.sh
 
-wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh"
+wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh" && chmod +x cek-trafik.sg && ./cek-trafik.sh
 
 wget -q -O /usr/bin/cek-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py"
 
