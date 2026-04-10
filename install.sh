@@ -73,7 +73,7 @@ wget -q -0 add-tr.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajima
 
 wget -q -0 add-ws.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh" && chmod +x add-ws.sh && ./add-ws.sh
 
-wget -q -O add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-ssws.sh" && chmod +x add-ssws.sh && ./add-ssws.sh
+wget -q -O add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ssws.sh" && chmod +x add-ssws.sh && ./add-ssws.sh
 
 wget -q -O add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-socks.sh" && chmod +x add-socks.sh && ./add-socks.sh
 
