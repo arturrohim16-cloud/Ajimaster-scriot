@@ -89,7 +89,7 @@ wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-clo
 
 wget -q -O /usr/bin/running "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/running.sh"
 
-wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/cek-trafik.sh"
+wget -q -O /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh"
 
 wget -q -O /usr/bin/cek-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py"
 
