@@ -69,7 +69,7 @@ wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Aj
 
 wget -q -0 add-vless.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh" && chmod +x add-vless.sh && ./add-vless.sh
 
-wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -0 add-tr.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-tr.sh" && chmod +x add-tr.sh && ./add-tr.sh
 
 wget -q -0 add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
 
