@@ -73,15 +73,15 @@ wget -q -0 add-tr.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajima
 
 wget -q -0 add-ws.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh" && chmod +x add-ws.sh && ./add-ws.sh
 
-wget -q -O /usr/bin/add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-ssws.sh" && chmod +x add-ssws.sh && ./add-ssws.sh
+wget -q -O add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-ssws.sh" && chmod +x add-ssws.sh && ./add-ssws.sh
 
-wget -q -O /usr/bin/add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-socks.sh" && chmod +x add-socks.sh && ./add-socks.sh
+wget -q -O add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-socks.sh" && chmod +x add-socks.sh && ./add-socks.sh
 
-wget -q -O /usr/bin/add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
+wget -q -O add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
 
-wget -q -O /usr/bin/autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
+wget -q -O autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
 
-wget -q -O /usr/bin/restart "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
+wget -q -O restart "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
 
 wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/tendang.sh"
 
