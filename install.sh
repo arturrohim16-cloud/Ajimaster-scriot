@@ -137,7 +137,7 @@ wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot
 
 wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/netf.sh && chmod +x netf.sh && ./netf.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bbr.sh && chmod +x bbr.sh && ./bbr.sh
+wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/bbr.sh && chmod +x bbr.sh && ./bbr.sh
 
 wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/del-xray.sh && chmod +x del-xray.sh && ./del-xray.sh
 
