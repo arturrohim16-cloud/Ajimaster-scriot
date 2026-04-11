@@ -140,6 +140,9 @@ chmod +x /etc/init.d/stunnel5
 chmod +x /usr/local/lamvpn/stunnel5
 systemctl daemon-reload
 systemctl enable stunnel5
+systemctl start stunnel5
+systemctl stop stunnel5
+systemctl restart stunnel5
 
 systemctl daemon-reload
 systemctl enable ws-dropbear ws-ovpn
