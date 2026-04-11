@@ -133,7 +133,7 @@ wget -q -O /usr/bin/xp "https://raw.githubusercontent.com/arturrohim16-cloud/Aji
 
 wget -q -O /usr/bin/dns "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/dns.sh"
 
-wget -q -O /usr/bin/netf "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/netf.sh"
+wget -q -O /usr/bin/netf "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/netf.sh"
 
 wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bbr.sh"
 
