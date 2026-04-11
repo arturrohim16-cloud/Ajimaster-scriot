@@ -67,53 +67,53 @@ echo -e "${OKEY} Core Services Terpasang."
 
 # 6. DOWNLOAD MENU & COMMANDS
 # Folder /usr/bin adalah tempat perintah terminal (menu, add-ws, dll)
-wget -q -0 /bin/bash/add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -0 /bin/bash/add-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
 
-wget -q -0 /bin/bash/add-vless.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh" && chmod +x add-vless.sh && ./add-vless.sh
+wget -q -0 /bin/bash/add-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh" && chmod +x add-vless.sh && ./add-vless.sh
 
-wget -q -0 /bin/bash/add-tr.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-tr.sh" && chmod +x add-tr.sh && ./add-tr.sh
+wget -q -0 /bin/bash/add-tr "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-tr.sh" && chmod +x add-tr.sh && ./add-tr.sh
 
-wget -q -0 https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh && chmod +x add-ws.sh && ./add-ws.sh
+wget -q -0 /bin/bash/add-ws "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh" && chmod +x add-ws.sh && ./add-ws.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ssws.sh && chmod +x add-ssws.sh && ./add-ssws.sh
+wget -q -O /bin/bash/add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ssws.sh" && chmod +x add-ssws.sh && ./add-ssws.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-socks.sh && chmod +x add-socks.sh && ./add-socks.sh
+wget -q -O /bin/bash/add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-socks.sh" && chmod +x add-socks.sh && ./add-socks.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-trgo.sh && chmod +x add-trgo.sh && ./add-tego.sh
+wget -q -O /bin/bash/add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-trgo.sh" && chmod +x add-trgo.sh && ./add-tego.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/autoreboot.sh && chmod +x autoreboot.sh && ./autoreboot.sh
+wget -q -O /bin/bash/autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/autoreboot.sh" && chmod +x autoreboot.sh && ./autoreboot.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/restart.sh && chmod +x restart.sh && ./restart.sh
+wget -q -O /bin/bash/restart "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/restart.sh" && chmod +x restart.sh && ./restart.sh
 
-#wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/tendang.sh"
+#wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/tendang.sh
 
-#wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/clearlog.sh"
+#wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/clearlog.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/runing.sh && chmod +x runing.sh && ./runing.sh
+wget -q -O /bin/bash/runing "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/runing.sh" && chmod +x runing.sh && ./runing.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh && chmod +x cek-trafik.sg && ./cek-trafik.sh
+wget -q -O /bin/bash/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh" && chmod +x cek-trafik.sg && ./cek-trafik.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py && chmod +x speedtes_cli.py && ./speedtes_cli.py
+wget -q -O /bin/bash/speedtes-cli "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py" && chmod +x speedtes_cli.py && ./speedtes_cli.py
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-badwing.sh && chmod +x cek-badwing.sh && ./cek-badwing.sh
+wget -q -O /bin/bash/cek-badwing "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-badwing.sh" && chmod +x cek-badwing.sh && ./cek-badwing.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ram.sh && chmod +x ram.sh && ./ram.sh
+wget -q -O /bin/bash/ram "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ram.sh" && chmod +x ram.sh && ./ram.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-speed.sh && chmod +x limit-speed.sh && ./limit-speed.sh
+wget -q -O /bin/bash/limit-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-speed.sh" && chmod +x limit-speed.sh && ./limit-speed.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh && chmod +x menu-vless.sh && ./menu-vless.sh
+wget -q -O /bin/bash/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh" && chmod +x menu-vless.sh && ./menu-vless.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vmess.sh && chmod +x menu-vmess.sh && ./menu-vmess.sh
+wget -q -O /bin/bash/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vmess.sh" && chmod +x menu-vmess.sh && ./menu-vmess.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-socks.sh && chmod +x menu-socks.sh && ./menu-socks.sh
+wget -q -O /bin/bash/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-socks.sh" && chmod +x menu-socks.sh && ./menu-socks.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ss.sh && chmod +x menu-ss.sh && ./ menu-ss.sh
+wget -q -O /bin/bash/menu-ss "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ss.sh" && chmod +x menu-ss.sh && ./ menu-ss.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trojan.sh && chmod +x menu-trojan.sh && ./menu-trojan.sh
+wget -q -O /bin/bash/menu-trojan "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trojan.sh" && chmod +x menu-trojan.sh && ./menu-trojan.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trgo.sh && chmod +x menu-trgo.sh && ./menu-trgo.sh
+wget -q -O /bin/bash/menu-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trgo.sh" && chmod +x menu-trgo.sh && ./menu-trgo.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ssh.sh && chmod +x menu-ssh.sh && ./menu-ssh
+wget -q -O /bin/bash/menu-ssh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ssh.sh" && chmod +x menu-ssh.sh && ./menu-ssh
 
 #wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bekap-tg.sh
 
@@ -121,66 +121,67 @@ wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot
 
 #wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bckpbot.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/usernew.sh && chmod +x usernew.sh && ./usernew.sh
+wget -q -O /bin/bash/usernew "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/usernew.sh" && chmod +x usernew.sh && ./usernew.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu && chmod +x menu.sh && ./menu.sh
+wget -q -O /bin/bash/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu.sh" && chmod +x menu.sh && ./menu.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu1.sh && chmod +x menu1.sh && ./menu1.sh
+wget -q -O /bin/bash/menu1 "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu1.sh" && chmod +x menu1.sh && ./menu1.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/webbin.sh && chmod +x webbin.sh && ./webbin.sh
+wget -q -O /bin/bash/webbin "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/webbin.sh" && chmod +x webbin.sh && ./webbin.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/xp.sh && chmod +x xp.sh && ./xp.sh
+wget -q -O /bin/bash/xp "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/xp.sh" && chmod +x xp.sh && ./xp.sh
 
 #wget -q -O /usr/bin/update "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/update.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/dns.sh && chmod +x dns.sh && ./dns.sh
+wget -q -O /bin/bash/dns "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/dns.sh" && chmod +x dns.sh && ./dns.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/netf.sh && chmod +x netf.sh && ./netf.sh
+wget -q -O /bin/bash/netf "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/netf.sh" && chmod +x netf.sh && ./netf.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/bbr.sh && chmod +x bbr.sh && ./bbr.sh
+wget -q -O /bin/bash/bber "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/bbr.sh" && chmod +x bbr.sh && ./bbr.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/del-xray.sh && chmod +x del-xray.sh && ./del-xray.sh
+wget -q -O /bin/bash/del-xray "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/del-xray.sh" && chmod +x del-xray.sh && ./del-xray.sh
 
-wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/user-xray.sh && chmod +x user-xray.sh && ./user-xray.sh
+wget -q -O /bin/bash/user-xray "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/user-xray.sh" && chmod +x user-xray.sh && ./user-xray.sh
 
 echo -e "${INFO} Mendownload Perintah Manajemen..."
 
 # [CONTOH PENEMPATAN DOWNLOAD COMMAND]
-chmod +x /usr/bin/add-ws
-chmod +x /usr/bin/add-ssws
-chmod +x /usr/bin/add-socks
-chmod +x /usr/bin/add-vless
-chmod +x /usr/bin/add-tr
-chmod +x /usr/bin/add-trgo
-chmod +x /usr/bin/usernew
-chmod +x /usr/bin/autoreboot
-chmod +x /usr/bin/restart
-chmod +x /usr/bin/tendang
-chmod +x /usr/bin/clearlog
-chmod +x /usr/bin/running
-chmod +x /usr/bin/cek-trafik
-chmod +x /usr/bin/cek-speed
-chmod +x /usr/bin/cek-bandwidth
-chmod +x /usr/bin/cek-ram
-chmod +x /usr/bin/limit-speed
-chmod +x /usr/bin/menu-vless
-chmod +x /usr/bin/menu-vmess
-chmod +x /usr/bin/menu-ss
-chmod +x /usr/bin/menu-socks
-chmod +x /usr/bin/menu-trojan
-chmod +x /usr/bin/menu-trgo
-chmod +x /usr/bin/menu-ssh
-chmod +x /usr/bin/menu-bckp
-chmod +x /usr/bin/menu
-chmod +x /usr/bin/bckp
-chmod +x /usr/bin/wbm
-chmod +x /usr/bin/xp
-chmod +x /usr/bin/update
-chmod +x /usr/bin/dns
-chmod +x /usr/bin/netf
-chmod +x /usr/bin/bbr
-chmod +x /usr/bin/del-xrays
-chmod +x /usr/bin/user-xrays
+chmod +x /bin/bash/add-ws
+chmod +x /bin/bash/add-ssws
+chmod +x /bin/bash/add-socks
+chmod +x /bin/bash/add-vless
+chmod +x /bin/bash/add-tr
+chmod +x /bin/bash/add-trgo
+chmod +x /bin/bash/usernew
+chmod +x /bin/bash/autoreboot
+chmod +x /bin/bash/restart
+chmod +x /bin/bash/tendang
+chmod +x /bin/bash/clearlog
+chmod +x /bin/bash/running
+chmod +x /bin/bash/cek-trafik
+chmod +x /bin/bash/cek-speed
+chmod +x /bin/bash/cek-badwing
+chmod +x /bin/bash/cek-ram
+chmod +x /bin/bash/limit-speed
+chmod +x /bin/bash/menu-vless
+chmod +x /bin/bash/menu-vmess
+chmod +x /bin/bash/menu-ss
+chmod +x /bin/bash/menu-socks
+chmod +x /bin/bash/menu-trojan
+chmod +x /bin/bash/menu-trgo
+chmod +x /bin/bash/menu-ssh
+chmod +x /bin/bash/menu-bckp
+chmod +x /bin/bash/menu
+chmod +x /bin/bash/menu1
+chmod +x /bin/bash/bckp
+chmod +x /bin/bash/wbm
+chmod +x /bin/bash/xp
+chmod +x /bin/bash/update
+chmod +x /bin/bash/dns
+chmod +x /bin/bash/netf
+chmod +x /bin/bash/bbr
+chmod +x /bin/bash/del-xray
+chmod +x /bin/bash/user-xray
 
 # 7. SETUP SSL CERTIFICATE (CERTBOT)
 # Dilakukan setelah Nginx terpasang tapi sebelum dikonfigurasi penuh
