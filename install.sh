@@ -125,7 +125,7 @@ wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/A
 
 wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu1.sh"
 
-wget -q -O /usr/bin/wbm "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/webmin.sh"
+wget -q -O /usr/bin/wbm "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/webbin.sh"
 
 wget -q -O /usr/bin/xp "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/xp.sh"
 
