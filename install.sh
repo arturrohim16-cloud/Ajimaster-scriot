@@ -144,8 +144,41 @@ wget -q -O /usr/bin/user-xrays "https://raw.githubusercontent.com/arturrohim16-c
 echo -e "${INFO} Mendownload Perintah Manajemen..."
 
 # [CONTOH PENEMPATAN DOWNLOAD COMMAND]
-# wget -q -O /usr/bin/menu "LINK_MENU"
-# chmod +x /usr/bin/menu
+chmod +x /usr/bin/add-ws
+chmod +x /usr/bin/add-ssws
+chmod +x /usr/bin/add-socks
+chmod +x /usr/bin/add-vless
+chmod +x /usr/bin/add-tr
+chmod +x /usr/bin/add-trgo
+chmod +x /usr/bin/usernew
+chmod +x /usr/bin/autoreboot
+chmod +x /usr/bin/restart
+chmod +x /usr/bin/tendang
+chmod +x /usr/bin/clearlog
+chmod +x /usr/bin/running
+chmod +x /usr/bin/cek-trafik
+chmod +x /usr/bin/cek-speed
+chmod +x /usr/bin/cek-bandwidth
+chmod +x /usr/bin/cek-ram
+chmod +x /usr/bin/limit-speed
+chmod +x /usr/bin/menu-vless
+chmod +x /usr/bin/menu-vmess
+chmod +x /usr/bin/menu-ss
+chmod +x /usr/bin/menu-socks
+chmod +x /usr/bin/menu-trojan
+chmod +x /usr/bin/menu-trgo
+chmod +x /usr/bin/menu-ssh
+chmod +x /usr/bin/menu-bckp
+chmod +x /usr/bin/menu
+chmod +x /usr/bin/bckp
+chmod +x /usr/bin/wbm
+chmod +x /usr/bin/xp
+chmod +x /usr/bin/update
+chmod +x /usr/bin/dns
+chmod +x /usr/bin/netf
+chmod +x /usr/bin/bbr
+chmod +x /usr/bin/del-xrays
+chmod +x /usr/bin/user-xrays
 
 # 7. SETUP SSL CERTIFICATE (CERTBOT)
 # Dilakukan setelah Nginx terpasang tapi sebelum dikonfigurasi penuh
