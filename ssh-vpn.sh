@@ -42,7 +42,7 @@ wget -q -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim1
 chmod +x /usr/local/bin/ws-ovpn
 
 # WS TLS
-wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-tls.sh"
+wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
 chmod +x /usr/local/bin/ws-tls
 
 # [ 4. REGISTER SYSTEMD SERVICES ]
