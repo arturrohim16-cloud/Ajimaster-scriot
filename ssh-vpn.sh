@@ -48,6 +48,10 @@ chmod +x /usr/local/bin/ws-tls
 #ws nontls
 wget -q -0 /user/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
 chmod +x /user/local/bin/ws-nontls
+
+#install srunel15
+wget -q -0 /user/local/bin/stunel15 "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/stunel15.init"
+chmod +x /user/local/bin/stunel15
 # [ 4. REGISTER SYSTEMD SERVICES ]
 # Service WS Dropbear (Port 8880)
 cat > /etc/systemd/system/ws-dropbear.service << END
@@ -113,6 +117,29 @@ Restart=on-failure
 WantedBy=multi-user.target
 END
 
+#sevice stunel15
+cat > /etc/systemd/systemd/stunel15 << END
+[Unit]
+Description=Stunnel5 Service
+After=network.target auditd.service
+ConditionFileNotEmpty=/etc/stunnel5/stunnel5.conf
+
+[Service]
+Type=forking
+ExecStart=/usr/local/lamvpn/stunnel5 /etc/stunnel5/stunnel5.conf
+KillMode=process
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
+END
+
+chmod +x /etc/init.d/stunnel5
+chmod +x /usr/local/lamvpn/stunnel5
+systemctl daemon-reload
+systemctl enable stunnel5
 
 systemctl daemon-reload
 systemctl enable ws-dropbear ws-ovpn
