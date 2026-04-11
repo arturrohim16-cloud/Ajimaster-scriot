@@ -45,6 +45,9 @@ chmod +x /usr/local/bin/ws-ovpn
 wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
 chmod +x /usr/local/bin/ws-tls
 
+#ws nontls
+wget -q -0 /user/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
+chmod +x /user/local/bin/ws-nontls
 # [ 4. REGISTER SYSTEMD SERVICES ]
 # Service WS Dropbear (Port 8880)
 cat > /etc/systemd/system/ws-dropbear.service << END
