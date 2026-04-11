@@ -81,6 +81,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 END
 
+#service ws openvpn (port 443)
 cat > /etc/systemd/systemd/ws-tls.service << END
 [Unit]
 Description=SSH Websocket Service
@@ -96,12 +97,34 @@ Restart=on-failure
 WantedBy=multi-user.target
 END
 
+#service ws openvpn (port 80)
+cat > /etc/systemd/systemd/ws-nontls.service << END
+[Unit]
+Description=SSH Websocket service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-nontls 8880
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+END
+
 
 systemctl daemon-reload
 systemctl enable ws-dropbear ws-ovpn
 systemctl restart ws-dropbear ws-ovpn
+
+systemctl daemon-reload
+systemctl enabel ws-tls ws-ovpn
 systemctl restart ws-tls ws-ovpn
 
+systemctl daemon-reload
+systemctl enabel ws-nontls ws-ovpn
+systemctl restart ws-nontls ws ovpn
 # [ 5. CONFIGURE SSH & DROPBEAR ]
 echo -e "[ ${GREEN}INFO${NC} ] Configuring SSH & Dropbear..."
 # SSH Port 22 & 2253
