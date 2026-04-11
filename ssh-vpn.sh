@@ -81,9 +81,26 @@ Restart=on-failure
 WantedBy=multi-user.target
 END
 
+cat > /etc/systemd/systemd/ws-tls.service << END
+[Unit]
+Description=SSH Websocket Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-tls 443
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+END
+
+
 systemctl daemon-reload
 systemctl enable ws-dropbear ws-ovpn
 systemctl restart ws-dropbear ws-ovpn
+systemctl restart ws-tls ws-ovpn
 
 # [ 5. CONFIGURE SSH & DROPBEAR ]
 echo -e "[ ${GREEN}INFO${NC} ] Configuring SSH & Dropbear..."
