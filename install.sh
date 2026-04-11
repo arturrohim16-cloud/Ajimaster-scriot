@@ -137,7 +137,7 @@ wget -q -O /usr/bin/netf "https://raw.githubusercontent.com/arturrohim16-cloud/A
 
 wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bbr.sh"
 
-wget -q -O /usr/bin/del-xrays "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/del-xrays.sh"
+wget -q -O /usr/bin/del-xrays "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/del-xray.sh"
 
 wget -q -O /usr/bin/user-xrays "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/user-xrays.sh"
 
