@@ -119,7 +119,7 @@ wget -q -O /usr/bin/menu-bckp "https://raw.githubusercontent.com/arturrohim16-cl
 
 wget -q -O /usr/bin/bckp "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bckpbot.sh"
 
-wget -q -O /usr/bin/usernew "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/usernew.sh"
+wget -q -O /usr/bin/usernew "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/usernew.sh"
 
 wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu.sh"
 
