@@ -34,7 +34,7 @@ ln -sf /usr/bin/python3 /usr/bin/python
 echo -e "[ ${GREEN}INFO${NC} ] Downloading Websocket Scripts..."
 
 # WS Dropbear
-wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/kenDevXD/0/main/ws-dropbear"
+wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-drobear.py"
 chmod +x /usr/local/bin/ws-dropbear
 
 # WS OpenVPN
