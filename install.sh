@@ -105,7 +105,7 @@ wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-c
 
 wget -q -O /usr/bin/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-socks.sh" && chmod +x menu-socks.sh && ./menu-socks.sh
 
-wget -q -O /usr/bin/menu-ss "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-ss.sh"
+wget -q -O /usr/bin/menu-ss "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ss.sh"
 
 wget -q -O /usr/bin/menu-trojan "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-trojan.sh"
 
