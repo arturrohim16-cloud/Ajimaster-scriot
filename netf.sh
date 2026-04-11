@@ -1,3 +1,11 @@
+#!/bin/bash
+# =========================================
+# Quick Setup | Script Setup Manager
+# Edition : Stable Edition V1.0
+# Auther  : NevermoreSSH
+# (C) Copyright 2022
+# =========================================
+# // Export Color & Information
 Font_Black="\033[30m";
 Font_Red="\033[31m";
 Font_Green="\033[32m";
