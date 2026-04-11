@@ -123,7 +123,7 @@ wget -q -O /usr/bin/usernew "https://raw.githubusercontent.com/arturrohim16-clou
 
 wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu"
 
-wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu4.sh"
+wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu1.sh"
 
 wget -q -O /usr/bin/wbm "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/webmin.sh"
 
