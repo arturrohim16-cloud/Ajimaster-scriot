@@ -38,7 +38,7 @@ wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/arturro
 chmod +x /usr/local/bin/ws-dropbear
 
 # WS OpenVPN
-wget -q -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-opnvpn.sh"
+wget -q -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
 chmod +x /usr/local/bin/ws-ovpn
 
 # WS TLS
