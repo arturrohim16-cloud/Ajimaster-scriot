@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 import socket, threading, select, sys, time, getopt
 
 # Listen
