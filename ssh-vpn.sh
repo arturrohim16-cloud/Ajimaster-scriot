@@ -24,6 +24,9 @@ fi
 # [ 2. INSTALL DEPENDENCIES ]
 echo -e "[ ${GREEN}INFO${NC} ] Installing Dependencies..."
 apt update -y
+apt upgrade -y
+apt install -y software-properties-common
+add-apt-repository ppa:ondrej/nginx -y # Untuk Nginx terbaru
 apt install -y nginx xray jq python3 python3-pip curl wget screen stunnel4 dropbear socat build-essential libssl-dev zlib1g-dev make
 
 # Link Python3 ke Python (Agar script lama tetap jalan)
