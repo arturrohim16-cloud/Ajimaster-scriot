@@ -67,11 +67,11 @@ echo -e "${OKEY} Core Services Terpasang."
 
 # 6. DOWNLOAD MENU & COMMANDS
 # Folder /usr/bin adalah tempat perintah terminal (menu, add-ws, dll)
-wget -q -0 https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh && chmod +x add-vmess.sh && ./add-vmess.sh
+wget -q -0 /bin/bash/add-vmess.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" && chmod +x add-vmess.sh && ./add-vmess.sh
 
-wget -q -0 https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh && chmod +x add-vless.sh && ./add-vless.sh
+wget -q -0 /bin/bash/add-vless.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh" && chmod +x add-vless.sh && ./add-vless.sh
 
-wget -q -0 https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-tr.sh && chmod +x add-tr.sh && ./add-tr.sh
+wget -q -0 /bin/bash/add-tr.sh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-tr.sh" && chmod +x add-tr.sh && ./add-tr.sh
 
 wget -q -0 https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh && chmod +x add-ws.sh && ./add-ws.sh
 
