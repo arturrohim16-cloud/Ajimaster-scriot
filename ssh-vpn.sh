@@ -118,7 +118,7 @@ WantedBy=multi-user.target
 END
 
 #sevice stunel15
-cat > /etc/systemd/systemd/stunel15 << END
+cat > /etc/systemd/systemd/stunel15.service << END
 [Unit]
 Description=Stunnel5 Service
 After=network.target auditd.service
