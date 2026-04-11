@@ -97,13 +97,13 @@ wget -q -O /usr/bin/cek-bandwidth "https://raw.githubusercontent.com/arturrohim1
 
 wget -q -O /usr/bin/cek-ram "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ram.sh" && chmod +x ram.sh && ./ram.sh
 
-wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-speed.sh" && +x limit-speed.sh && ./limit-speed.sh
+wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-speed.sh" && chmod +x limit-speed.sh && ./limit-speed.sh
 
-wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh" && +x menu-vless.sh && ./menu-vless.sh
+wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh" && chmod +x menu-vless.sh && ./menu-vless.sh
 
-wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vmess.sh" &&+x menu-vmess.sh && ./menu-vmess.sh
+wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vmess.sh" && chmod +x menu-vmess.sh && ./menu-vmess.sh
 
-wget -q -O /usr/bin/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-socks.sh"
+wget -q -O /usr/bin/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-socks.sh" && chmod +x menu-socks.sh && ./menu-socks.sh
 
 wget -q -O /usr/bin/menu-ss "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-ss.sh"
 
