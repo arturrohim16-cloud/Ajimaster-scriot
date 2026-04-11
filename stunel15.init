@@ -1,0 +1,47 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          stunnel5
+# Required-Start:    $local_fs $remote_fs $network
+# Required-Stop:     $local_fs $remote_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Stunnel5 Service Wrapper
+### END INIT INFO
+
+DAEMON=/usr/local/lamvpn/stunnel5
+CONFIG=/etc/stunnel5/stunnel5.conf
+NAME=stunnel5
+DESC="Stunnel5 TLS Tunnel"
+
+test -x $DAEMON || exit 0
+
+case "$1" in
+  start)
+    echo "Starting $DESC..."
+    $DAEMON $CONFIG
+    ;;
+  stop)
+    echo "Stopping $DESC..."
+    pkill -f $DAEMON
+    ;;
+  restart)
+    echo "Restarting $DESC..."
+    pkill -f $DAEMON
+    sleep 1
+    $DAEMON $CONFIG
+    ;;
+  status)
+    if pgrep -f $DAEMON > /dev/null; then
+        echo "$NAME is running."
+    else
+        echo "$NAME is stopped."
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
+
