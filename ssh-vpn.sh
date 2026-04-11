@@ -138,22 +138,18 @@ END
 
 chmod +x /etc/init.d/stunnel5
 chmod +x /usr/local/lamvpn/stunnel5
+
 systemctl daemon-reload
 systemctl enable stunnel5
 systemctl start stunnel5
 systemctl stop stunnel5
 systemctl restart stunnel5
 
-systemctl daemon-reload
 systemctl enable ws-dropbear ws-ovpn
-systemctl restart ws-dropbear ws-ovpn
-
-systemctl daemon-reload
 systemctl enable ws-tls ws-ovpn
-systemctl restart ws-tls ws-ovpn
-
-systemctl daemon-reload
 systemctl enable ws-nontls ws-ovpn
+systemctl restart ws-dropbear ws-ovpn
+systemctl restart ws-tls ws-ovpn
 systemctl restart ws-nontls ws ovpn
 # [ 5. CONFIGURE SSH & DROPBEAR ]
 echo -e "[ ${GREEN}INFO${NC} ] Configuring SSH & Dropbear..."
