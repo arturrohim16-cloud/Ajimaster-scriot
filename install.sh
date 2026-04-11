@@ -109,7 +109,7 @@ wget -q -O /usr/bin/menu-ss "https://raw.githubusercontent.com/arturrohim16-clou
 
 wget -q -O /usr/bin/menu-trojan "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trojan.sh"
 
-wget -q -O /usr/bin/menu-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-trgo.sh"
+wget -q -O /usr/bin/menu-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trgo.sh"
 
 wget -q -O /usr/bin/menu-ssh "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-ssh.sh"
 
