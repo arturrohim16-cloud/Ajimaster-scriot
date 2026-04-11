@@ -101,7 +101,7 @@ wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/arturrohim16-
 
 wget -q -O /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh" && +x menu-vless.sh && ./menu-vless.sh
 
-wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-vmess.sh"
+wget -q -O /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vmess.sh" &&+x menu-vmess.sh && ./menu-vmess.sh
 
 wget -q -O /usr/bin/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-socks.sh"
 
