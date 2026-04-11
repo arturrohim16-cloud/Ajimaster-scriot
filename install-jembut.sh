@@ -1,109 +1,108 @@
 #!/bin/bash
-BIBlack='\033[1;90m'      # Black
-BIRed='\033[1;91m'        # Red
-BIGreen='\033[1;92m'      # Green
-BIYellow='\033[1;93m'     # Yellow
-BIBlue='\033[1;94m'       # Blue
-BIPurple='\033[1;95m'     # Purple
-BICyan='\033[1;96m'       # Cyan
-BIWhite='\033[1;97m'      # White
-UWhite='\033[4;37m'       # White
-On_IPurple='\033[0;105m'  #
-On_IRed='\033[0;101m'
-IBlack='\033[0;90m'       # Black
-IRed='\033[0;91m'         # Red
-IGreen='\033[0;92m'       # Green
-IYellow='\033[0;93m'      # Yellow
-IBlue='\033[0;94m'        # Blue
-IPurple='\033[0;95m'      # Purple
-ICyan='\033[0;96m'        # Cyan
-IWhite='\033[0;97m'       # White
-NC='\e[0m'
 
-# // Export Color & Information
-export RED='\033[0;31m'
-export GREEN='\033[0;32m'
-export YELLOW='\033[0;33m'
-export BLUE='\033[0;34m'
-export PURPLE='\033[0;35m'
-export CYAN='\033[0;36m'
-export LIGHT='\033[0;37m'
-export NC='\033[0m'
+# // Color Definitions
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-# // Export Banner Status Information
-export EROR="[${RED} EROR ${NC}]"
-export INFO="[${YELLOW} INFO ${NC}]"
-export OKEY="[${GREEN} OKEY ${NC}]"
-export PENDING="[${YELLOW} PENDING ${NC}]"
-export SEND="[${YELLOW} SEND ${NC}]"
-export RECEIVE="[${YELLOW} RECEIVE ${NC}]"
-
-# // Export Align
-export BOLD="\e[1m"
-export WARNING="${RED}\e[5m"
-export UNDERLINE="\e[4m"
-
-# // Exporting URL Host
-export Server_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/test"
-export Server1_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/limit"
-export Server_Port="443"
-export Server_IP="underfined"
-export Script_Mode="Stable"
-export Auther=".geovpn"
+# // Export Banner Status
+EROR="[${RED} EROR ${NC}]"
+INFO="[${YELLOW} INFO ${NC}]"
+OKEY="[${GREEN} OKEY ${NC}]"
 
 # // Root Checking
 if [ "${EUID}" -ne 0 ]; then
-		echo -e "${EROR} Please Run This Script As Root User !"
-		exit 1
+    echo -e "${EROR} Please Run This Script As Root User !"
+    exit 1
 fi
 
-# // Exporting IP Address
-export IP=$( curl -s https://ipinfo.io/ip/ )
-IP=$(curl -s ipinfo.io/ip )
-IP=$(curl -sS ipv4.icanhazip.com)
-IP=$(curl -sS ifconfig.me )
-
-# // Exporting Network Interface
-export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
-
-
-
-red='\e[1;31m'
-green='\e[1;32m'
-yell='\e[1;33m'
-NC='\e[0m'
-green() { echo -e "\\033[32;1m${*}\\033[0m"; }
-red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+# // Simple OS Check
+source /etc/os-release
+if [[ $ID != "ubuntu" && $ID != "debian" ]]; then
+    echo -e "${EROR} This script is only for Ubuntu/Debian!"
+    exit 1
+fi
 
 clear
-if [[ -e /etc/debian_version ]]; then
-	source /etc/os-release
-	OS=$ID # debian or ubuntu
-elif [[ -e /etc/centos-release ]]; then
-	source /etc/os-release
-	OS=centos
-fi
-
-echo "Jembot"
-echo "Progress..."
+echo -e "${INFO} Memulai instalasi vnStat 2.6..."
 sleep 2
 
-/etc/init.d/vnstat restart >/dev/null 2>&1
+# // Install Dependencies
+echo -e "${INFO} Installing dependencies..."
+apt update -y
+apt install -y wget curl tar make gcc libsqlite3-dev pkg-config build-essential >/dev/null 2>&1
+
+# // Exporting Network Interface
+# Mengambil interface utama secara otomatis
+NET=$(ip route show to default | awk '{print $5}')
+
+# // Cleanup Old Version
+systemctl stop vnstat >/dev/null 2>&1
+apt purge vnstat -y >/dev/null 2>&1
+
+# // Download and Compile
+echo -e "${INFO} Downloading and Compiling vnStat 2.6..."
+cd /root
 wget -q https://github.com/NevermoreSSH/vnstat/releases/download/vnstat/vnstat-2.6.tar.gz
-tar zxvf vnstat-2.6.tar.gz
+tar -zxvf vnstat-2.6.tar.gz >/dev/null 2>&1
 cd vnstat-2.6
-./configure --prefix=/usr --sysconfdir=/etc >/dev/null 2>&1 && make >/dev/null 2>&1 && make install >/dev/null 2>&1
-cd
-vnstat -u -i $NET
-sed -i 's/Interface "'""eth0""'"/Interface "'""$NET""'"/g' /etc/vnstat.conf
+
+# Proses Compile
+./configure --prefix=/usr --sysconfdir=/etc >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    make >/dev/null 2>&1
+    make install >/dev/null 2>&1
+else
+    echo -e "${EROR} Configure failed! Check dependencies."
+    exit 1
+fi
+
+# // Configuration
+cd /root
+# Update interface di config
+sed -i "s/Interface \"eth0\"/Interface \"$NET\"/g" /etc/vnstat.conf
+
+# Buat user vnstat jika belum ada (mencegah error chown)
+id -u vnstat &>/dev/null || useradd -r -s /bin/false vnstat
+
+# Create database directory
+mkdir -p /var/lib/vnstat
 chown vnstat:vnstat /var/lib/vnstat -R
+
+# // Initialize Database
+sudo -u vnstat vnstat --create -i "$NET" >/dev/null 2>&1
+
+# // Setup Systemd Service
+# Karena install manual, kita buatkan file servicenya agar support systemctl
+cat > /etc/systemd/system/vnstat.service << EOF
+[Unit]
+Description=vnStat network traffic monitor
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/vnstatd -n
+User=vnstat
+Group=vnstat
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# // Start Service
+systemctl daemon-reload
 systemctl enable vnstat >/dev/null 2>&1
-/etc/init.d/vnstat restart >/dev/null 2>&1
-rm -f /root/vnstat-2.6.tar.gz >/dev/null 2>&1
-rm -rf /root/vnstat-2.6 >/dev/null 2>&1
+systemctl start vnstat >/dev/null 2>&1
 
-yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
-yellow "JEMBOOT successfully installed..."
-sleep 3
+# // Cleanup
+rm -f /root/vnstat-2.6.tar.gz
+rm -rf /root/vnstat-2.6
+
 clear
-
+echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo -e "  ${OKEY} vnStat 2.6 Installed"
+echo -e "  Interface : $NET"
+echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+sleep 2
