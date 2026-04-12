@@ -91,8 +91,8 @@ chmod +x /etc/pam.d/common-password
 # go to root
 cd
 # Perbaikan: Memisahkan link download dan chmod
-wget -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
-chmod +x /usr/local/bin/ws-ovpn
+wget -O /usr/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
+chmod +x /usr/bin/ws-ovpn
 
 cat > /etc/systemd/system/ws-ovpn.service << END
 [Unit]
@@ -117,11 +117,11 @@ systemctl restart ws-ovpn
 clear
 
 # Getting websocket dropbear
-wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-drobear.py"
-chmod +x /usr/local/bin/ws-drobear
+wget -q -O /usr/bin/ws-dropbear "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-dropbear.py"
+chmod +x /usr/bin/ws-dropbear
 
 # Installing Service
-cat > /etc/systemd/system/ws-drobear.service << END
+cat > /etc/systemd/system/ws-dropbear.service << END
 [Unit]
 Description=Ssh Websocket By Akhir Zaman
 Documentation=https://xnxx.com
@@ -133,7 +133,7 @@ User=root
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-drobear 8880
+ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-dropbear 8880
 Restart=on-failure
 
 [Install]
@@ -141,15 +141,15 @@ WantedBy=multi-user.target
 END
 
 systemctl daemon-reload
-systemctl enable ws-drobear
-systemctl start ws-drobear
-systemctl restart ws-drobear
+systemctl enable ws-dropbear
+systemctl start ws-dropbear
+systemctl restart ws-dropbear
 
 clear
 
 # Perbaikan link download
-wget -q -O /usr/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
-chmod +x /usr/local/bin/ws-nontls
+wget -q -O /usr/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
+chmod +x /usr/bin/ws-nontls
 
 cat > /etc/systemd/system/ws-nontls.service << END
 [Unit]
@@ -205,8 +205,8 @@ clear
 
 # // 2. WEBSOCKET TLS (Port 443)
 echo -e "[ ${GREEN}INFO${NC} ] Setup WS-TLS..."
-wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
-chmod +x /usr/local/bin/ws-tls
+wget -q -O /usr/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
+chmod +x /usr/bin/ws-tls
 
 cat > /etc/systemd/system/ws-tls.service << END
 [Unit]
@@ -231,8 +231,8 @@ systemctl restart ws-tls
 clear
 
 # Getting websocket ssl stunnel
-wget -O /usr/local/bin/ws-stunnel "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-stunnel.py"
-chmod +x /usr/local/bin/ws-stunnel
+wget -O /usr/bin/ws-stunnel "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-stunnel.py"
+chmod +x /usr/bin/ws-stunnel
 
 # Installing Service Ovpn Websocket
 cat > /etc/systemd/system/ws-stunnel.service << END
