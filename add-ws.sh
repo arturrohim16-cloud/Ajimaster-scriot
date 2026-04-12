@@ -105,6 +105,8 @@ menu
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
 read -p "Expired (days): " masaaktif
+read -p "Limit IP Login: " iplimit
+read -p "Limit Quota GB: " gblimit
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 sed -i '/#vmess$/a\#vms '"$user $exp"'\
 },{"id": "'""$uuid""'","alterId": '"0"',"email": "'""$user""'"' /etc/xray/config.json
@@ -114,6 +116,16 @@ sed -i '/#vmesskuota$/a\### '"$user $exp"'\
 },{"id": "'""$uuid""'","alterId": '"0"',"email": "'""$user""'"' /etc/xray/config.json
 sed -i '/#vmessgrpc$/a\#vmsg '"$user $exp"'\
 },{"id": "'""$uuid""'","alterId": '"0"',"email": "'""$user""'"' /etc/xray/config.json
+# --- Tambahan Fitur Limit ---
+# Pastikan folder database tersedia
+mkdir -p /etc/vmess
+
+# Simpan data limit IP ke database vmess
+echo "$user $iplimit" >> /etc/vmess/limit-ip
+
+# Simpan data limit Kuota ke database vmess
+echo "$user $gblimit" >> /etc/vmess/limit-quota
+# ----------------------------
 asu=`cat<<EOF
       {
       "v": "2",
