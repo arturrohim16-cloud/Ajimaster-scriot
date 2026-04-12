@@ -185,6 +185,22 @@ echo $DOMAIN > /etc/xray/domain
 echo "Domain aktif : $DOMAIN"
 
 sleep 2
+wget https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-ip.py
+chmod +x limit-ip.py
+./limit-ip.py
+# Refresh sistem service
+systemctl daemon-reload
+
+# Aktifkan agar jalan otomatis saat boot
+systemctl enable limit-ip
+
+# Jalankan sekarang
+systemctl start limit-ip
+
+# Cek apakah sudah jalan hijau
+systemctl status limit-ip
+slep 1
+wget 
 
 echo -e "$white\033[0;34m┌─────────────────────────────────────────┐${NC}"
 echo -e " \E[41;1;39m           ⇱ Install Jembot ⇲            \E[0m$NC"
