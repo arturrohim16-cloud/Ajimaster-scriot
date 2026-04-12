@@ -379,5 +379,66 @@ cd /root/limit
     git commit -m "Update DB" &> /dev/null
     git branch -M main &> /dev/null
 cd
+echo "1.1" >> /home/.ver
+rm -fr /root/limit
+curl -sS ifconfig.me > /etc/myipvps
+echo " "
+echo "====================-[ NevermoreSSH TUNNELING ]-===================="
+echo ""
+echo "------------------------------------------------------------"
+echo ""
+echo ""
+echo "   >>> Service & Port"  | tee -a log-install.txt
+echo "   - OpenSSH                 : 22"  | tee -a log-install.txt
+echo "   - SSH Websocket           : 80" | tee -a log-install.txt
+echo "   - SSH SSL Websocket       : 443" | tee -a log-install.txt
+echo "   - Stunnel5                : 447, 777" | tee -a log-install.txt
+echo "   - Dropbear                : 109, 143" | tee -a log-install.txt
+echo "   - Badvpn                  : 7100-7300" | tee -a log-install.txt
+echo "   - Nginx                   : 81" | tee -a log-install.txt
+echo "   - XRAY  Vmess TLS         : 443" | tee -a log-install.txt
+echo "   - XRAY  Vmess None TLS    : 80" | tee -a log-install.txt
+echo "   - XRAY  Vless TLS         : 443" | tee -a log-install.txt
+echo "   - XRAY  Vless None TLS    : 80" | tee -a log-install.txt
+echo "   - Trojan GRPC             : 443" | tee -a log-install.txt
+echo "   - Trojan WS               : 443" | tee -a log-install.txt
+echo "   - Trojan GO               : 443" | tee -a log-install.txt
+#echo "   - Trojan GFW              : 443" | tee -a log-install.txt
+echo "   - Sodosok WS/GRPC         : 443" | tee -a log-install.txt
+echo ""  | tee -a log-install.txt
+echo "   >>> Server Information & Other Features"  | tee -a log-install.txt
+echo "   - Timezone                : Asia/Kuala_Lumpur (GMT +8)"  | tee -a log-install.txt
+echo "   - Fail2Ban                : [ON]"  | tee -a log-install.txt
+echo "   - Dflate                  : [ON]"  | tee -a log-install.txt
+echo "   - IPtables                : [ON]"  | tee -a log-install.txt
+echo "   - Auto-Reboot             : [ON]"  | tee -a log-install.txt
+echo "   - IPv6                    : [OFF]"  | tee -a log-install.txt
+echo "   - Autoreboot Off          : $aureb:00 $gg GMT + 8" | tee -a log-install.txt
+echo "   - Autobackup Data" | tee -a log-install.txt
+echo "   - AutoKill Multi Login User" | tee -a log-install.txt
+echo "   - Auto Delete Expired Account" | tee -a log-install.txt
+echo "   - Fully automatic script" | tee -a log-install.txt
+echo "   - VPS settings" | tee -a log-install.txt
+echo "   - Admin Control" | tee -a log-install.txt
+echo "   - Change port" | tee -a log-install.txt
+echo "   - Restore Data" | tee -a log-install.txt
+echo "   - Full Orders For Various Services" | tee -a log-install.txt
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo ""
+echo "===============-[ Script Mod By NEVERMORESSH TUNNELING ]-==============="
+echo -e ""
+echo ""
+echo "" | tee -a log-install.txt
+rm -fr /root/weleh.sh 
+rm -fr /root/jembot.sh 
+rm -fr /root/ssh-vpn.sh
+rm -fr /root/ins-xray.sh
+rm -fr /root/setup.sh
+rm -fr /root/domain
+history -c
 
-# ... (bagian tampilan log-install tetap sama) ...
+read -p "$( echo -e "Press ${orange}[ ${NC}${green}Enter${NC} ${CYAN}]${NC} For Reboot") "
+reboot
+
