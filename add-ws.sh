@@ -238,26 +238,33 @@ vmesslink5="vmess://$(echo $grpc | base64 -w 0)"
 vmesslink6="vmess://$(echo $ama | base64 -w 0)"
 vmesslink7="vmess://$(echo $ami | base64 -w 0)"
 
-source /usr/bin/bot.sh
-VMESS_MSG="╔════════════════════╗
-      ✨ VMESS PREMIUM ✨
-╚════════════════════╝
-👤 <b>User :</b> <code>$user</code>
-📅 <b>Expired :</b> <code>$exp</code>
-🌐 <b>Domain :</b> <code>$domain</code>
-━━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>Link TLS :</b>
+# --- INTEGRASI BOT TELEGRAM ---
+if [ -f "/etc/root/bot.conf" ]; then
+    source /etc/root/bot.conf
+    
+    # Gunakan format yang lebih simpel tanpa banyak spasi/enter di awal
+    TEXT="🚀 <b>VMESS ACCOUNT CREATED</b> 🚀
+━━━━━━━━━━━━━━━━━━━━
+👤 <b>User:</b> <code>$user</code>
+🔑 <b>Limit IP:</b> <code>$iplimit Device</code>
+📊 <b>Limit GB:</b> <code>$gblimit GB</code>
+📅 <b>Expired:</b> <code>$exp</code>
+━━━━━━━━━━━━━━━━━━━━
+🌐<b>VMESS TLS:</b>
 <code>$vmesslink1</code>
-
-🌐 <b>Link Non-TLS :</b>
+━━━━━━━━━━━━━━━━━━━━
+🌐<b>VMESS NON TLS:</b>
 <code>$vmesslink2</code>
-
-🔗 <b>Link gRPC :</b>
+━━━━━━━━━━━━━━━━━━━━
+🌐<b>VMESS GRPC:</b>
 <code>$vmesslink3</code>
-━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
-
-send_log "$VMESS_MSG"
+━━━━━━━━━━━━━━━━━━━━"
+    # Menggunakan --data-urlencode agar karakter aneh di config Vmess tidak bikin error
+    curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+    --data-urlencode "chat_id=${CHATID}" \
+    --data-urlencode "text=${TEXT}" \
+    -d "parse_mode=HTML" > /dev/null
+fi
 
 END
 systemctl restart xray > /dev/null 2>&1
