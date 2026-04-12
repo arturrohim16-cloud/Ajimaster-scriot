@@ -22,6 +22,14 @@ RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnectio
 RESPONSE = b'HTTP/1.1 200 Connection Established\r\n\r\n'
 # Response universal untuk mendukung semua jenis payload
 RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n'
+RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\n' \
+           b'Upgrade: websocket\r\n' \
+           b'Connection: Upgrade\r\n' \
+           b'Sec-WebSocket-Accept: foo\r\n' \
+           b'Server: nginx/1.18.0\r\n' \
+           b'Content-Type: application/octet-stream\r\n' \
+           b'\r\n'
+
 class Server(threading.Thread):
     def __init__(self, host, port):
         threading.Thread.__init__(self)
