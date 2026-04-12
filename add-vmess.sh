@@ -235,14 +235,11 @@ vmesslink6="vmess://$(echo $ama | base64 -w 0)"
 vmesslink7="vmess://$(echo $ami | base64 -w 0)"
 
 # --- INTEGRASI BOT TELEGRAM ---
-# 1. Cek apakah file config bot ada
 if [ -f "/etc/root/bot.conf" ]; then
-    # 2. Ambil data Token & ID
     source /etc/root/bot.conf
     
-    # 3. Susun Pesan (Ambil variabel dari script Vmess Anda)
-    TEXT="
-🚀 <b>VMESS ACCOUNT CREATED</b> 🚀
+    # Gunakan format yang lebih simpel tanpa banyak spasi/enter di awal
+    TEXT="🚀 <b>VMESS ACCOUNT CREATED</b> 🚀
 ━━━━━━━━━━━━━━━━━━━━
 👤 <b>User:</b> <code>$user</code>
 🔑 <b>Limit IP:</b> <code>$iplimit Device</code>
@@ -251,20 +248,14 @@ if [ -f "/etc/root/bot.conf" ]; then
 ━━━━━━━━━━━━━━━━━━━━
 <b>VMESS TLS:</b>
 <code>$asu</code>
-━━━━━━━━━━━━━━━━━━━━
-<b>VMESS NON-TLS:</b>
-<code>$ask</code>
-━━━━━━━━━━━━━━━━━━━━
-<b>VMESS GRPC:</b>
-<code>$asi</code>
 ━━━━━━━━━━━━━━━━━━━━"
-    # 4. Kirim menggunakan cURL
-    curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
-    -d chat_id="$CHATID" \
-    -d text="$TEXT" \
-    -d parse_mode="HTML" > /dev/null
+
+    # Menggunakan --data-urlencode agar karakter aneh di config Vmess tidak bikin error
+    curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+    --data-urlencode "chat_id=${CHATID}" \
+    --data-urlencode "text=${TEXT}" \
+    -d "parse_mode=HTML" > /dev/null
 fi
-# --- END BOT TELEGRAM ---
 
 END
 systemctl restart xray > /dev/null 2>&1
