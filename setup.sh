@@ -199,9 +199,11 @@ systemctl start limit-ip
 
 # Cek apakah sudah jalan hijau
 systemctl status limit-ip
-slep 1
-wget 
-
+sleep 1
+wget https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-kuota.py
+chmod +x limit-kuota.py
+./limit-kuota.py
+sleep 1
 echo -e "$white\033[0;34m┌─────────────────────────────────────────┐${NC}"
 echo -e " \E[41;1;39m           ⇱ Install Jembot ⇲            \E[0m$NC"
 echo -e "$white\033[0;34m└─────────────────────────────────────────┘${NC}"
