@@ -18,7 +18,10 @@ DEFAULT_HOST = '127.0.0.1:109'
 
 # Response menggunakan format bytes (b'')
 RESPONSE = b'HTTP/1.1 200 Websocket_openvpn\r\nContent-length: 0\r\nHTTP/1.1 200 Connection established\r\n\r\n'
-
+RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n'
+RESPONSE = b'HTTP/1.1 200 Connection Established\r\n\r\n'
+# Response universal untuk mendukung semua jenis payload
+RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n'
 class Server(threading.Thread):
     def __init__(self, host, port):
         threading.Thread.__init__(self)
