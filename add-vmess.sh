@@ -234,26 +234,38 @@ vmesslink5="vmess://$(echo $grpc | base64 -w 0)"
 vmesslink6="vmess://$(echo $ama | base64 -w 0)"
 vmesslink7="vmess://$(echo $ami | base64 -w 0)"
 
-source /usr/bin/bot.sh
-VMESS_MSG="╔════════════════════╗
-      ✨ VMESS PREMIUM ✨
-╚════════════════════╝
-👤 <b>User :</b> <code>$user</code>
-📅 <b>Expired :</b> <code>$exp</code>
-🌐 <b>Domain :</b> <code>$domain</code>
-━━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>Link TLS :</b>
-<code>$vmesslink1</code>
-
-🌐 <b>Link Non-TLS :</b>
-<code>$vmesslink2</code>
-
-🔗 <b>Link gRPC :</b>
-<code>$vmesslink3</code>
-━━━━━━━━━━━━━━━━━━━━━━
-✅ *Auto-Script By AJI VPN*"
-
-send_log "$VMESS_MSG"
+# --- INTEGRASI BOT TELEGRAM ---
+# 1. Cek apakah file config bot ada
+if [ -f "/etc/root/bot.conf" ]; then
+    # 2. Ambil data Token & ID
+    source /etc/root/bot.conf
+    
+    # 3. Susun Pesan (Ambil variabel dari script Vmess Anda)
+    TEXT="
+🚀 <b>VMESS ACCOUNT CREATED</b> 🚀
+━━━━━━━━━━━━━━━━━━━━
+👤 <b>User:</b> <code>$user</code>
+🔑 <b>Limit IP:</b> <code>$iplimit Device</code>
+📊 <b>Limit GB:</b> <code>$gblimit GB</code>
+📅 <b>Expired:</b> <code>$exp</code>
+━━━━━━━━━━━━━━━━━━━━
+<b>VMESS TLS:</b>
+<code>$asu</code>
+━━━━━━━━━━━━━━━━━━━━
+<b>VMESS NON-TLS:</b>
+<code>$ask</code>
+━━━━━━━━━━━━━━━━━━━━
+<b>VMESS GRPC:</b>
+<code>$asi</code>
+━━━━━━━━━━━━━━━━━━━━
+"
+    # 4. Kirim menggunakan cURL
+    curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
+    -d chat_id="$CHATID" \
+    -d text="$TEXT" \
+    -d parse_mode="HTML" > /dev/null
+fi
+# --- END BOT TELEGRAM ---
 
 END
 systemctl restart xray > /dev/null 2>&1
