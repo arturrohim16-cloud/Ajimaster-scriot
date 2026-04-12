@@ -240,7 +240,7 @@ systemctl restart ws-tls
 clear
 
 # Getting websocket ssl stunnel
-wget -O /usr/local/bin/ws-stunnel "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-stunnel.py"
+wget -O /usr/local/bin/ws-stunnel "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-stunnel.py"
 chmod +x /usr/local/bin/ws-stunnel
 
 # Installing Service Ovpn Websocket
