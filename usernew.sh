@@ -87,6 +87,8 @@ echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━�
 read -p "Username : " Login
 read -p "Password : " Pass
 read -p "Expired (hari): " masaaktif
+read -p "Limit IP Login  : " iplimit
+read -p "Limit Kuota (GB): " gblimit
 
 IP=$(curl -sS ifconfig.me);
 IP=$(curl -s ipinfo.io/ip )
@@ -112,6 +114,11 @@ useradd -e `date -d "$masaaktif days" +"%Y-%m-%d"` -s /bin/false -M $Login
 exp="$(chage -l $Login | grep "Account expires" | awk -F": " '{print $2}')"
 echo -e "$Pass\n$Pass\n"|passwd $Login &> /dev/null
 PID=`ps -ef |grep -v grep | grep sshws |awk '{print $2}'`
+# Menyimpan data limit IP
+echo "$Login $iplimit" >> /etc/ssh/limit-ip
+
+# Menyimpan data limit Kuota
+echo "$Login $gblimit" >> /etc/ssh/limit-quota
 
 source /usr/bin/bot.sh
 msg="🚀 <b>SSH ACCOUNT CREATED</b> 🚀
