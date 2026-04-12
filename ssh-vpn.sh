@@ -1,12 +1,3 @@
-#!/bin/bash
-# =========================================
-# Quick Setup | Script Setup Manager
-# Edition : Stable Edition V1.0
-# Auther  : NevermoreSSH
-# (C) Copyright 2022
-# =========================================
-
-clear
 BIBlack='\033[1;90m'      # Black
 BIRed='\033[1;91m'        # Red
 BIGreen='\033[1;92m'      # Green
@@ -408,17 +399,58 @@ systemctl daemon-reload
 systemctl enable stunnel5
 systemctl restart stunnel5
 
+#confik SSH-WS
+# Membuat service untuk SSH-WS Port 80
+cat > /etc/systemd/system/ws-stunnel.service << 'END'
+[Unit]
+Description=SSH Websocket Service
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/bin/ws-stunnel 80
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+END
+
+# Membuat service untuk SSH-WS Port 8880 (Dropbear)
+cat > /etc/systemd/system/ws-dropbear.service << 'END'
+[Unit]
+Description=SSH Websocket Dropbear Service
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/bin/ws-stunnel 8880
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+END
+# Reload sistem service
+systemctl daemon-reload
+
+# Aktifkan dan jalankan Nginx
+nginx -t && systemctl restart nginx
+systemctl enable nginx
+
 # Install BBR & Optimize
 modprobe tcp_bbr
 echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 sysctl -p
 
-# Finishing
-apt autoremove -y
-systemctl restart cron
-systemctl restart ssh
-systemctl restart dropbear
+# Aktifkan dan jalankan SSH-WS
+systemctl enable ws-stunnel
+systemctl enable ws-dropbear
+systemctl restart ws-stunnel
+systemctl restart ws-dropbear
 
 history -c
 echo "unset HISTFILE" >> /etc/profile
