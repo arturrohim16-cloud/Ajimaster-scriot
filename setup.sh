@@ -212,97 +212,29 @@ chmod +x Ins-xray.sh
 wget https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/set-br.sh
 chmod +x set-br.sh 
 ./set-br.sh
+#dounlod semua menu
+REPO="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main"
 
-# 6. DOWNLOAD MENU & COMMANDS
-# Folder /usr/bin adalah tempat perintah terminal (menu, add-ws, dll)
-wget  /usr/bin/add-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vmess.sh" 
-wget  /usr/bin/add-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-vless.sh" 
-wget  /usr/bin/add-tr "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-tr.sh" 
-wget  /usr/bin/add-ws "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ws.sh" 
-wget  /usr/bin/add-ssws "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-ssws.sh" 
-wget  /usr/bin/add-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-socks.sh" 
-wget  /usr/bin/add-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/add-trgo.sh" 
-wget  /usr/bin/autoreboot "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/autoreboot.sh" 
-wget  /usr/bin/restart "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/restart.sh" 
+# Masukkan semua nama file sesuai yang ada di GitHub Anda (tanpa .sh)
+files=(
+    "menu" "menu1" "running" "runing" "usernew" "speedtest-cli" "xp" 
+    "add-vmess" "add-vless" "add-tr" "add-ws" "add-ssws" "add-socks" "add-trgo" 
+    "menu-vless" "menu-vmess" "menu-socks" "menu-ss" "menu-trojan" "menu-trgo" "menu-ssh"
+    "restart" "autoreboot" "ram" "limit-speed" "cek-trafik" "cek-badwing" 
+    "webbin" "dns" "netf" "bbr" "del-xray" "user-xray"
+)
 
-#wget -q -O /usr/bin/tendang "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/tendang.sh
+echo -e "Sedang mendownload semua file script..."
 
-#wget -q -O /usr/bin/clearlog "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/clearlog.sh
+for f in "${files[@]}"; do
+    # Mengunduh dan menyimpan ke /usr/bin
+    wget -q -O /usr/bin/$f "$REPO/${f}.sh"
+    
+    # Memberikan izin eksekusi
+    chmod +x /usr/bin/$f
+done
 
-wget  /usr/bin/runing "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/runing.sh" 
-wget  /usr/bin/cek-trafik "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-trafik.sh" 
-wget  /usr/bin/speedtes-cli "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/speedtes_cli.py" 
-wget  /usr/bin/cek-badwing "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/cek-badwing.sh" 
-wget  /usr/bin/ram "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ram.sh" 
-wget  /usr/bin/limit-speed "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/limit-speed.sh"
-wget  /usr/bin/menu-vless "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vless.sh" 
-wget  /usr/bin/menu-vmess "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-vmess.sh" 
-wget  /usr/bin/menu-socks "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-socks.sh" 
-wget  /usr/bin/menu-ss "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ss.sh" 
-wget  /usr/bin/menu-trojan "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trojan.sh" 
-wget  /usr/bin/menu-trgo "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-trgo.sh" 
-wget  /usr/bin/menu-ssh "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu-ssh.sh" 
-
-#wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bekap-tg.sh
-
-#wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/menu-bckp-github.sh
-
-#wget -q -O https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bckpbot.sh
-
-wget  /usr/bin/usernew "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/usernew.sh" 
-wget  /usr/bin/menu "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu.sh" 
-wget  /usr/bin/menu1 "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/menu1.sh" 
-wget  /usr/bin/webbin "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/webbin.sh" 
-wget  /usr/bin/xp "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/xp.sh" 
-
-#wget -q -O /usr/bin/update "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/update.sh
-
-wget  /usr/bin/dns"https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/dns.sh" 
-wget  /usr/bin/netf "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/netf.sh" 
-wget  /usr/bin/bber "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/bbr.sh" 
-wget  /usr/bin/del-xray "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/del-xray.sh" 
-wget  /usr/bin/user-xray "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/user-xray.sh" 
-
-echo -e "${INFO} Mendownload Perintah Manajemen..."
-
-# [CONTOH PENEMPATAN DOWNLOAD COMMAND]
-chmod +x /usr/bin/add-ws
-chmod +x /usr/bin/add-ssws
-chmod +x /usr/bin/add-socks
-chmod +x /usr/bin//add-vless
-chmod +x /usr/bin/add-tr
-chmod +x /usr/bin/add-trgo
-chmod +x /usr/bin/add-vmess
-chmod +x /usr/bin/usernew
-chmod +x /usr/bin/autoreboot
-chmod +x /usr/bin/restart
-#chmod +x /bin/bash/tendang
-#chmod +x /bin/bash/clearlog
-chmod +x /usr/bin/runing
-chmod +x /usr/bin/cek-trafik
-chmod +x /usr/bin/speedtes-cli
-chmod +x /usr/bin/cek-badwing
-chmod +x /usr/bin/ram
-chmod +x /usr/bin/limit-speed
-chmod +x /usr/bin/menu-vless
-chmod +x /usr/bin/menu-vmess
-chmod +x /usr/bin/menu-ss
-chmod +x /usr/bin/menu-socks
-chmod +x /usr/bin/menu-trojan
-chmod +x /usr/bin/menu-trgo
-chmod +x /usr/bin/menu-ssh
-#chmod +x /bin/bash/menu-bckp
-chmod +x /usr/bin/menu
-chmod +x /usr/bin/menu1
-#chmod +x /bin/bash/bckp
-chmod +x /usr/bin/webbin
-chmod +x /usr/bin/xp
-#chmod +x /bin/bash/update
-chmod +x /usr/bin/dns
-chmod +x /usr/bin/netf
-chmod +x /usr/bin/bbr
-chmod +x /usr/bin/del-xray
-chmod +x /usr/bin/user-xray
+echo -e "Berhasil! Sekarang ketik 'menu1' untuk melihat dashboard."
 
 # > install gotop
     # Perbaikan: Menambahkan -f (fix-broken) setelah dpkg untuk memastikan dependencies terinstall otomatis
