@@ -15,6 +15,7 @@ PASS = ''
 BUFLEN = 4096 * 4
 TIMEOUT = 60
 DEFAULT_HOST = '127.0.0.1:109'
+
 # Copy dan paste kode ini untuk menggantikan bagian RESPONSE di script Anda
 RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: foo\r\nServer: nginx/1.18.0\r\nContent-Type: application/octet-stream\r\n\r\n'
 
