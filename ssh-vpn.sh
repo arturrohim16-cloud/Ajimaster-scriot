@@ -100,8 +100,8 @@ chmod +x /etc/pam.d/common-password
 # go to root
 cd
 # Perbaikan: Memisahkan link download dan chmod
-wget -O /usr/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
-chmod +x /usr/bin/ws-ovpn
+wget -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
+chmod +x /usr/local/bin/ws-ovpn
 
 cat > /etc/systemd/system/ws-ovpn.service << END
 [Unit]
@@ -126,8 +126,8 @@ systemctl restart ws-ovpn
 clear
 
 # Getting websocket dropbear
-wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/kenDevXD/0/main/ws-dropbear"
-chmod +x /usr/local/bin/ws-dropbear
+wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-drobear.py"
+chmod +x /usr/local/bin/ws-drobear
 
 # Installing Service
 cat > /etc/systemd/system/ws-dropbear.service << END
