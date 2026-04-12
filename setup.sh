@@ -102,30 +102,55 @@ apt update -y
 # // Install Requirement Tools
 apt --reinstall --fix-missing install -y sudo dpkg psmisc socat jq ruby wondershaper tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip vim curl nano sed gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent openssl easy-rsa fail2ban vnstat libsqlite3-dev cron bash-completion ntpdate xz-utils gnupg2 dnsutils lsb-release chrony python3 python3-pip python3-dev python-is-python3
 gem install lolcat
-# ======================
-# SSL
-# ======================
+# Mendapatkan IP VPS secara otomatis
+IP=$(curl -sS ipv4.icanhazip.com)
 
+echo "--- INSTALL SSL CERTIFICATE ---"
+# Meminta input domain dari pengguna
+read -p " Masukkan Domain Anda: " DOMAIN
+
+# Validasi jika input kosong
+if [[ -z "$DOMAIN" ]]; then
+    echo "Error: Domain tidak boleh kosong!"
+    exit 1
+fi
+
+echo "Memulai proses instalasi SSL untuk $DOMAIN..."
+
+# Pastikan certbot sudah terinstall
+if ! command -v certbot &> /dev/null; then
+    echo "Certbot belum terinstall. Menginstall certbot..."
+    apt update && apt install -y certbot
+fi
+
+# Menghentikan layanan yang menggunakan port 80
 systemctl stop nginx
+systemctl stop xray
+systemctl stop dropbear
 
+# Proses request SSL
 certbot certonly \
 --standalone \
 -d $DOMAIN \
 --non-interactive \
 --agree-tos \
--m admin@$DOMAIN
+-m admin@$DOMAIN --force-renewal
 
+# Menjalankan kembali layanan
 systemctl start nginx
-
 systemctl restart nginx
 systemctl restart xray
 systemctl restart dropbear
 
-echo ""
-echo "INSTALL SELESAI"
-echo "Domain : $DOMAIN"
-echo "IP : $IP"
-echo "SSL : AKTIF"
+# Membersihkan layar dan menampilkan hasil
+clear
+echo "==============================="
+echo "       INSTALL SELESAI"
+echo "==============================="
+echo " Domain : $DOMAIN"
+echo " IP     : $IP"
+echo " SSL    : AKTIF / SUCCESS"
+echo "==============================="
 
 # // Update & Upgrade
 apt update -y
