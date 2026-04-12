@@ -450,6 +450,13 @@ sysctl -p
 systemctl enable ws-stunnel
 systemctl enable ws-dropbear
 systemctl restart ws-stunnel
+# 1. Hentikan semua yang pakai port 80
+fuser -k 80/tcp
+
+# 2. Restart Nginx (dia akan ambil jalur IPv6 jika perlu, atau tetap di 80)
+systemctl restart nginx
+
+# 3. Pastikan ws-dropbear jalan di 8880 (biar tidak bentrok)
 systemctl restart ws-dropbear
 
 history -c
