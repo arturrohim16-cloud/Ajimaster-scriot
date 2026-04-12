@@ -1,0 +1,14 @@
+cat > /usr/bin/limit-quota << 'END'
+#!/bin/bash
+# Logika sederhana menggunakan vnstat untuk memantau interface
+while true; do
+    cat /etc/ssh/limit-quota | while read user limit_gb; do
+        # Logika: Jika pemakaian user > limit_gb, maka matikan user
+        # (Catatan: Anda perlu script tambahan untuk menghitung trafik per user)
+        # userdel -f $user (atau ganti password agar tidak bisa login)
+    done
+    sleep 60
+done
+END
+chmod +x /usr/bin/limit-quota
+
