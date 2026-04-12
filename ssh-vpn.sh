@@ -326,6 +326,46 @@ make
 make install
 cd /root
 rm -rf stunnel5.zip stunnel
+#confik xray.conf
+cat > /etc/nginx/conf.d/xray.conf << 'END'
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name _;
+    root /var/www/html;
+    index index.html;
+
+    # Konfigurasi Path untuk V2RAY / XRAY
+    location /vless {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:14016;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+
+    location /vmess {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:24016;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+
+    location /trojan-ws {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:34016;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+}
+END
 
 # Config Stunnel5
 mkdir -p /etc/stunnel5
