@@ -100,8 +100,8 @@ chmod +x /etc/pam.d/common-password
 # go to root
 cd
 # Perbaikan: Memisahkan link download dan chmod
-wget -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-opnvpn.sh"
-chmod +x /usr/local/bin/ws-ovpn
+wget -O /usr/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
+chmod +x /usr/bin/ws-ovpn
 
 cat > /etc/systemd/system/ws-ovpn.service << END
 [Unit]
