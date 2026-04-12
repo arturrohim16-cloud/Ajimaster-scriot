@@ -1,0 +1,15 @@
+cat > /usr/bin/limit-ip << 'END'
+#!/bin/bash
+while true; do
+    cat /etc/ssh/limit-ip | while read user limit; do
+        current=$(ps -u $user | grep sshd | wc -l)
+        if [ $current -gt $limit ]; then
+            pkill -u $user
+            echo "User $user over limit IP ($current/$limit) - Disconnected" >> /var/log/ssh-limit.log
+        fi
+    done
+    sleep 5
+done
+END
+chmod +x /usr/bin/limit-ip
+
