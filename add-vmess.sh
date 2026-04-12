@@ -114,6 +114,9 @@ sed -i '/#vmesskuota$/a\### '"$user $exp"'\
 },{"id": "'""$uuid""'","alterId": '"0"',"email": "'""$user""'"' /etc/xray/config.json
 sed -i '/#vmessgrpc$/a\#vmsg '"$user $exp"'\
 },{"id": "'""$uuid""'","alterId": '"0"',"email": "'""$user""'"' /etc/xray/config.json
+mkdir -p /etc/vmess
+echo "$user $iplimit" >> /etc/vmess/limit-ip
+echo "$user $gblimit" >> /etc/vmess/limit-quota
 asu=`cat<<EOF
       {
       "v": "2",
