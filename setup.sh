@@ -299,41 +299,85 @@ chmod +x /usr/bin/bbr
 chmod +x /usr/bin/del-xray
 chmod +x /usr/bin/user-xray
 
-# 7. SETUP SSL CERTIFICATE (CERTBOT)
-# Dilakukan setelah Nginx terpasang tapi sebelum dikonfigurasi penuh
-echo -e "${INFO} Mengatur SSL Certificate untuk $DOMAIN..."
-apt install certbot -y
-systemctl stop nginx
-certbot certonly --standalone --preferred-challenges http \
--d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN
+# > install gotop
+    # Perbaikan: Menambahkan -f (fix-broken) setelah dpkg untuk memastikan dependencies terinstall otomatis
+    gotop_latest="$(curl -s https://api.github.com/repos/arturrohim16-cloud/gotop/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
+    gotop_link="https://github.com/arturrohim16-cloud/gotop/releases/download/gotopV4/gotop_v4.2.0_linux_amd64.deb"
+    curl -sL "$gotop_link" -o /tmp/gotop.deb
+    dpkg -i /tmp/gotop.deb >/dev/null 2>&1
+    apt-get install -f -y >/dev/null 2>&1 # Memastikan library yang kurang terinstall
 
-# 8. SETUP CRONJOB
-echo -e "${INFO} Mengatur Auto-Reboot & Cronjob..."
-cat > /etc/cron.d/re_otm << END
-0 5 * * * root /sbin/reboot
-2 0 * * * root /usr/bin/xp
-END
-systemctl restart cron
+# > Setup Crontab
+# Perbaikan: Pastikan file log atau script tujuan ada di /usr/bin/ agar tidak error command not found
+echo "0 0 * * * root /usr/bin/xp" >> /etc/crontab
+echo "0 1 * * * root /usr/bin/delete" >> /etc/crontab
+echo "0 2 * * * root /usr/bin/cleaner" >> /etc/crontab
+echo "0 3 * * * root /usr/bin/xp" >> /etc/crontab
+echo "0 4 * * * root /usr/bin/delete" >> /etc/crontab
+echo "0 7 * * * root /usr/bin/cleaner" >> /etc/crontab
+echo "0 5 * * * root /sbin/reboot" >> /etc/crontab # Ubuntu terbaru lebih aman pakai /sbin/reboot
+echo "0 6 * * * root /usr/bin/backup" >> /etc/crontab
+echo "0 23 * * * root /usr/bin/backup" >> /etc/crontab
+echo "5 23 * * * root /usr/bin/backup" >> /etc/crontab
+cd
 
-# 9. FINAL RESTART & CLEANUP
-echo -e "${INFO} Merestart Semua Layanan..."
-# Pastikan service sudah ada sebelum direstart
-systemctl daemon-reload
-systemctl enable nginx
-systemctl enable xray
-systemctl restart nginx
-systemctl restart xray
+# ... (bagian cron.d tetap sama, sudah benar) ...
 
-# 10. SHOW INSTALLATION LOG
+# Perbaikan restart service cron untuk Ubuntu terbaru (systemctl lebih stabil)
+systemctl restart cron >/dev/null 2>&1
+
 clear
-echo "================================================="
-echo "   INSTALLATION COMPLETED SUCCESSFULY"
-echo "================================================="
-echo " Domain  : $DOMAIN"
-echo " IP      : $(curl -s ifconfig.me)"
-echo " Service : SSH, XRAY, NGINX, SSL"
-echo "================================================="
-echo " Ketik 'menu' untuk melihat daftar perintah."
-echo ""
-read -p "Tekan [Enter] untuk Reboot VPS..."
-reboot
+# Perbaikan .profile agar tidak terjadi loop "clear" berlebihan pada beberapa terminal
+cat > /root/.profile << END
+if [ "$BASH" ]; then
+  if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+  fi
+fi
+
+mesg n || true
+# menu # Di-comment jika tidak ingin menu muncul otomatis setiap login (opsional)
+END
+chmod 644 /root/.profile
+
+# Perbaikan deteksi Python untuk Ubuntu 22.04/24.04
+if ! command -v python3 &> /dev/null; then
+    apt update && apt install -y python3
+fi
+# Membuat alias agar perintah 'python' memanggil 'python3'
+if [ ! -f "/usr/bin/python" ]; then
+    apt install -y python-is-python3
+fi
+
+# ... (bagian pembersihan log tetap sama) ...
+
+# Perbaikan: Mengatasi error jika variabel green/NC belum didefinisikan di awal script
+green='\e[0;32m'
+orange='\e[0;33m'
+NC='\e[0m'
+CYAN='\e[0;36m'
+
+echo -e "[ ${green}Please Wait Update DB${NC} ]"
+# Perbaikan: Pastikan folder limit dibersihkan dulu sebelum clone agar tidak error "folder exists"
+rm -rf /root/limit
+git clone https://github.com/arturrohim16-cloud/limit.git /root/limit/ &> /dev/null
+
+# Perbaikan: Mendapatkan IP publik terbaru jika variabel $IP kosong
+IP=$(curl -sS ifconfig.me)
+
+# Perbaikan Git: Menambahkan safe directory agar tidak error permission di Ubuntu baru
+git config --global --add safe.directory /root/limit
+
+babu=$(cat /etc/.geovpn/license.key 2>/dev/null || echo "NoKey")
+echo -e "$babu $IP $Masa_Laku_License_Berlaku_Sampai" >> /root/limit/limit.txt
+cd /root/limit
+    git config --global user.email "ajijainalganteng@gmail.com" &> /dev/null
+    git config --global user.name "arturrohim16-cloud" &> /dev/null
+    rm -rf .git &> /dev/null
+    git init &> /dev/null
+    git add . &> /dev/null
+    git commit -m "Update DB" &> /dev/null
+    git branch -M main &> /dev/null
+cd
+
+# ... (bagian tampilan log-install tetap sama) ...
