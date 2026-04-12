@@ -1,70 +1,147 @@
 #!/bin/bash
 # =========================================
-# Quick Setup | SSH & OVPN Manager
-# Edition : Stable Edition V1.0 - AJI SYSTEM
+# Quick Setup | Script Setup Manager
+# Edition : Stable Edition V1.0
+# Auther  : NevermoreSSH
+# (C) Copyright 2022
 # =========================================
 
-# [ 1. INITIAL SETUP ]
-export LANG='en_US.UTF-8'
-export LANGUAGE='en_US.UTF-8'
 clear
+BIBlack='\033[1;90m'      # Black
+BIRed='\033[1;91m'        # Red
+BIGreen='\033[1;92m'      # Green
+BIYellow='\033[1;93m'     # Yellow
+BIBlue='\033[1;94m'       # Blue
+BIPurple='\033[1;95m'     # Purple
+BICyan='\033[1;96m'       # Cyan
+BIWhite='\033[1;97m'      # White
+UWhite='\033[4;37m'       # White
+On_IPurple='\033[0;105m'  #
+On_IRed='\033[0;101m'
+IBlack='\033[0;90m'       # Black
+IRed='\033[0;91m'         # Red
+IGreen='\033[0;92m'       # Green
+IYellow='\033[0;93m'      # Yellow
+IBlue='\033[0;94m'        # Blue
+IPurple='\033[0;95m'      # Purple
+ICyan='\033[0;96m'        # Cyan
+IWhite='\033[0;97m'       # White
+NC='\e[0m'
 
-# Warna & Banner (Sesuai kode kamu)
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+# // Export Color & Information
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export YELLOW='\033[0;33m'
+export BLUE='\033[0;34m'
+export PURPLE='\033[0;35m'
+export CYAN='\033[0;36m'
+export LIGHT='\033[0;37m'
+export NC='\033[0m'
 
-# Check Root
+# // Export Banner Status Information
+export EROR="[${RED} EROR ${NC}]"
+export INFO="[${YELLOW} INFO ${NC}]"
+export OKEY="[${GREEN} OKEY ${NC}]"
+export PENDING="[${YELLOW} PENDING ${NC}]"
+export SEND="[${YELLOW} SEND ${NC}]"
+export RECEIVE="[${YELLOW} RECEIVE ${NC}]"
+
+# // Export Align
+export BOLD="\e[1m"
+export WARNING="${RED}\e[5m"
+export UNDERLINE="\e[4m"
+
+# // Exporting URL Host
+export Server_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/test"
+export Server1_URL="raw.githubusercontent.com/NevermoreSSH/Blueblue/main/limit"
+export Server_Port="443"
+export Server_IP="underfined"
+export Script_Mode="Stable"
+export Auther=".geovpn"
+
+# // Root Checking
 if [ "${EUID}" -ne 0 ]; then
-    echo -e "${RED}Error: Please Run As Root!${NC}"
-    exit 1
+		echo -e "${EROR} Please Run This Script As Root User !"
+		exit 1
 fi
 
-# [ 2. INSTALL DEPENDENCIES ]
+# // Exporting IP Address
+export IP=$( curl -s https://ipinfo.io/ip/ )
+
+# // Exporting Network Interface
+export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
+
+# // Install Dependencies
 echo -e "[ ${GREEN}INFO${NC} ] Installing Dependencies..."
-apt update -y
-apt upgrade -y
-apt install -y software-properties-common
-add-apt-repository ppa:ondrej/nginx -y # Untuk Nginx terbaru
-apt install -y nginx xray jq python3 python3-pip curl wget screen stunnel4 dropbear socat build-essential libssl-dev zlib1g-dev make
+apt update -y && apt upgrade -y
+# Tambahkan python-is-python3 agar script lama tetap berjalan di Ubuntu baru
+apt install nginx xray jq python3 python3-pip python-is-python3 curl wget screen stunnel4 dropbear socat dbus-x11 -y
 
-# Link Python3 ke Python (Agar script lama tetap jalan)
-ln -sf /usr/bin/python3 /usr/bin/python
+export DEBIAN_FRONTEND=noninteractive
+MYIP=$(curl -sS ifconfig.me);
+MYIP2="s/xxxxxxxxx/$MYIP/g";
+NET=$(ip -o -4 route show to default | awk '{print $5}');
+source /etc/os-release
+ver=$VERSION_ID
 
-# [ 3. SETUP WEBSOCKET SERVICES ]
-# Menghindari kesalahan kutip pada wget
-echo -e "[ ${GREEN}INFO${NC} ] Downloading Websocket Scripts..."
+# detail nama perusahaan
+country=ID
+state=Indonesia
+locality=Indonesia
+organization=www.aixxy.codes
+organizationalunit=www.aixxy.codes
+commonname=www.aixxy.codes
+email=admin@aixxy.com
 
-# WS Dropbear
-wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-drobear.py"
-chmod +x /usr/local/bin/ws-dropbear
+# simple password minimal
+wget -q -O /etc/pam.d/common-password "https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/password"
+chmod +x /etc/pam.d/common-password
 
-# WS OpenVPN
-wget -q -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-ovpn.py"
+# go to root
+cd
+# Perbaikan: Memisahkan link download dan chmod
+wget -O /usr/local/bin/ws-ovpn "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-opnvpn.sh"
 chmod +x /usr/local/bin/ws-ovpn
 
-# WS TLS
-wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
-chmod +x /usr/local/bin/ws-tls
-
-#ws nontls
-wget -q -0 /user/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
-chmod +x /user/local/bin/ws-nontls
-
-#install srunel15
-wget -q -0 /user/local/bin/stunel15 "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/stunel15.init"
-chmod +x /user/local/bin/stunel15
-# [ 4. REGISTER SYSTEMD SERVICES ]
-# Service WS Dropbear (Port 8880)
-cat > /etc/systemd/system/ws-dropbear.service << END
+cat > /etc/systemd/system/ws-ovpn.service << END
 [Unit]
-Description=SSH Websocket Service
-After=network.target
+Description=Websocket OpenVPN Service
+After=network.target nss-lookup.target
 
 [Service]
 Type=simple
 User=root
+ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-ovpn 2086
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl daemon-reload
+systemctl enable ws-ovpn
+systemctl restart ws-ovpn
+
+clear
+
+# Getting websocket dropbear
+wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/kenDevXD/0/main/ws-dropbear"
+chmod +x /usr/local/bin/ws-dropbear
+
+# Installing Service
+cat > /etc/systemd/system/ws-dropbear.service << END
+[Unit]
+Description=Ssh Websocket By Akhir Zaman
+Documentation=https://xnxx.com
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
 ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-dropbear 8880
 Restart=on-failure
 
@@ -72,47 +149,29 @@ Restart=on-failure
 WantedBy=multi-user.target
 END
 
-# Service WS OpenVPN (Port 2086)
-cat > /etc/systemd/system/ws-ovpn.service << END
+systemctl daemon-reload
+systemctl enable ws-dropbear
+systemctl start ws-dropbear
+systemctl restart ws-dropbear
+
+clear
+
+# Perbaikan link download
+wget -q -O /usr/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-nontls.sh"
+chmod +x /usr/local/bin/ws-nontls
+
+cat > /etc/systemd/system/ws-nontls.service << END
 [Unit]
-Description=Websocket OpenVPN Service
-After=network.target
+Description=Python Proxy Mod By geovpn
+Documentation=https://t.me/geovpn
+After=network.target nss-lookup.target
 
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-ovpn 2086
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-END
-
-#service ws openvpn (port 443)
-cat > /etc/systemd/systemd/ws-tls.service << END
-[Unit]
-Description=SSH Websocket Service
-After=network.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-tls 443
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-END
-
-#service ws openvpn (port 80)
-cat > /etc/systemd/systemd/ws-nontls.service << END
-[Unit]
-Description=SSH Websocket service
-After=network.target
-
-[Service]
-Type=simple
-User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
 ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-nontls 8880
 Restart=on-failure
 
@@ -120,71 +179,163 @@ Restart=on-failure
 WantedBy=multi-user.target
 END
 
-#sevice stunel15
-cat > /etc/systemd/systemd/stunel15.service << END
+systemctl daemon-reload
+systemctl enable ws-nontls
+systemctl start ws-nontls
+systemctl restart ws-nontls
+
+clear
+
+# Perbaikan link download bot
+wget -O /usr/bin/bot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bot.sh"
+chmod +x /usr/bin/bot
+
+cat > /etc/systemd/system/telegram-bot.service << END
 [Unit]
-Description=Stunnel5 Service
-After=network.target auditd.service
-ConditionFileNotEmpty=/etc/stunnel5/stunnel5.conf
+Description=Telegram Bot VPS Service
+After=network.target
 
 [Service]
-Type=forking
-ExecStart=/usr/local/lamvpn/stunnel5 /etc/stunnel5/stunnel5.conf
-KillMode=process
+Type=simple
+User=root
+ExecStart=/usr/bin/bot
 Restart=on-failure
 RestartSec=5
-TimeoutStartSec=0
 
 [Install]
 WantedBy=multi-user.target
 END
 
-chmod +x /etc/init.d/stunnel5
-chmod +x /usr/local/lamvpn/stunnel5
+systemctl daemon-reload
+systemctl enable telegram-bot
+systemctl restart telegram-bot
+
+clear
+
+# // 2. WEBSOCKET TLS (Port 443)
+echo -e "[ ${GREEN}INFO${NC} ] Setup WS-TLS..."
+wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-tls.sh"
+chmod +x /usr/local/bin/ws-tls
+
+cat > /etc/systemd/system/ws-tls.service << END
+[Unit]
+Description=Python Proxy Mod By geovpn
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 -O /usr/bin/ws-tls 443
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+END
 
 systemctl daemon-reload
-systemctl enable stunnel5
-systemctl start stunnel5
-systemctl stop stunnel5
-systemctl restart stunnel5
+systemctl enable ws-tls
+systemctl start ws-tls
+systemctl restart ws-tls
 
-systemctl enable ws-dropbear ws-ovpn
-systemctl enable ws-tls ws-ovpn
-systemctl enable ws-nontls ws-ovpn
-systemctl restart ws-dropbear ws-ovpn
-systemctl restart ws-tls ws-ovpn
-systemctl restart ws-nontls ws ovpn
-# [ 5. CONFIGURE SSH & DROPBEAR ]
-echo -e "[ ${GREEN}INFO${NC} ] Configuring SSH & Dropbear..."
-# SSH Port 22 & 2253
-sed -i 's/#Port 22/Port 22/g' /etc/ssh/sshd_config
-echo "Port 2253" >> /etc/ssh/sshd_config
-sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+clear
+
+# Getting websocket ssl stunnel
+wget -O /usr/local/bin/ws-stunnel "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-stunnel.py"
+chmod +x /usr/local/bin/ws-stunnel
+
+# Installing Service Ovpn Websocket
+cat > /etc/systemd/system/ws-stunnel.service << END
+[Unit]
+Description=Websocket SSL Service
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-stunnel 443
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl daemon-reload
+systemctl enable ws-stunnel
+systemctl restart ws-stunnel
+
+clear
+
+# Setup RC-LOCAL untuk Ubuntu terbaru
+cat > /etc/systemd/system/rc-local.service <<-END
+[Unit]
+Description=/etc/rc.local
+ConditionPathExists=/etc/rc.local
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+StandardOutput=tty
+RemainAfterExit=yes
+SysVStartPriority=99
+[Install]
+WantedBy=multi-user.target
+END
+
+cat > /etc/rc.local <<-END
+#!/bin/sh -e
+# rc.local
+exit 0
+END
+
+chmod +x /etc/rc.local
+systemctl enable rc-local
+systemctl start rc-local.service
+
+# set time GMT +8
+ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
+
+# install badvpn
+wget -q -O /usr/bin/badvpn-udpgw "https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/newudpgw"
+chmod +x /usr/bin/badvpn-udpgw
+# Menggunakan systemctl untuk mengelola badvpn lebih baik di Ubuntu baru, 
+# tapi karena script ini menggunakan screen di rc.local, kita pertahankan alurnya:
+sed -i '$ i\screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 500' /etc/rc.local
+sed -i '$ i\screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 500' /etc/rc.local
+sed -i '$ i\screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 500' /etc/rc.local
+
+# SSH Config
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 systemctl restart ssh
 
-# Dropbear Port 109 & 143
+# install dropbear
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 109"/g' /etc/default/dropbear
 systemctl restart dropbear
 
-# [ 6. INSTALL STUNNEL 5 ]
-# (Logika instalasi source tetap dipertahankan namun dipastikan path-nya)
-echo -e "[ ${GREEN}INFO${NC} ] Installing Stunnel 5..."
-cd /root
+# Install Stunnel5
+cd /root/
 wget -q "https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/stunnel5.zip"
 unzip -o stunnel5.zip
-cd stunnel
+cd /root/stunnel
 chmod +x configure
-./configure && make && make install
+./configure
+make
+make install
+cd /root
+rm -rf stunnel5.zip stunnel
 
 # Config Stunnel5
 mkdir -p /etc/stunnel5
-cat > /etc/stunnel5/stunnel5.conf << END
+cat > /etc/stunnel5/stunnel5.conf <<-END
 cert = /etc/xray/xray.crt
 key = /etc/xray/xray.key
 client = no
 socket = a:SO_REUSEADDR=1
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
 
 [dropbear]
 accept = 447
@@ -193,18 +344,47 @@ connect = 127.0.0.1:109
 [openssh]
 accept = 777
 connect = 127.0.0.1:22
+
+[openvpn]
+accept = 442
+connect = 127.0.0.1:1194
 END
 
-# [ 7. OPTIMIZATION (BBR & BADVPN) ]
-# Bagian BBR & Badvpn diletakkan sebelum selesai agar performa langsung naik
-echo -e "[ ${GREEN}INFO${NC} ] Optimizing System (BBR & Badvpn)..."
+# Service Stunnel5
+cat > /etc/systemd/system/stunnel5.service << END
+[Unit]
+Description=Stunnel5 Service
+After=syslog.target network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/stunnel5 /etc/stunnel5/stunnel5.conf
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl daemon-reload
+systemctl enable stunnel5
+systemctl restart stunnel5
+
+# Install BBR & Optimize
 modprobe tcp_bbr
-echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 sysctl -p
 
-# [ 8. FINISHING ]
-echo -e "[ ${GREEN}INFO${NC} ] Cleaning Up..."
+# Finishing
 apt autoremove -y
+systemctl restart cron
+systemctl restart ssh
+systemctl restart dropbear
+
 history -c
-echo -e "${GREEN}SSH & Websocket Installation Finished!${NC}"
+echo "unset HISTFILE" >> /etc/profile
+
+cd
+yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
+yellow "SSH & OVPN install successfully"
+sleep 2
+clear
