@@ -257,8 +257,7 @@ if [ -f "/etc/root/bot.conf" ]; then
 ━━━━━━━━━━━━━━━━━━━━
 <b>VMESS GRPC:</b>
 <code>$asi</code>
-━━━━━━━━━━━━━━━━━━━━
-"
+━━━━━━━━━━━━━━━━━━━━"
     # 4. Kirim menggunakan cURL
     curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
     -d chat_id="$CHATID" \
