@@ -130,7 +130,7 @@ wget -q -O /usr/local/bin/ws-dropbear "https://raw.githubusercontent.com/arturro
 chmod +x /usr/local/bin/ws-drobear
 
 # Installing Service
-cat > /etc/systemd/system/ws-dropbear.service << END
+cat > /etc/systemd/system/ws-drobear.service << END
 [Unit]
 Description=Ssh Websocket By Akhir Zaman
 Documentation=https://xnxx.com
@@ -142,7 +142,7 @@ User=root
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-dropbear 8880
+ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-drobear 8880
 Restart=on-failure
 
 [Install]
@@ -150,14 +150,14 @@ WantedBy=multi-user.target
 END
 
 systemctl daemon-reload
-systemctl enable ws-dropbear
-systemctl start ws-dropbear
-systemctl restart ws-dropbear
+systemctl enable ws-drobear
+systemctl start ws-drobear
+systemctl restart ws-drobear
 
 clear
 
 # Perbaikan link download
-wget -q -O /usr/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-nontls.sh"
+wget -q -O /usr/local/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
 chmod +x /usr/local/bin/ws-nontls
 
 cat > /etc/systemd/system/ws-nontls.service << END
