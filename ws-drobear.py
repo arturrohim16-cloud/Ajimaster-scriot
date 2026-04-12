@@ -15,15 +15,7 @@ PASS = ''
 BUFLEN = 4096 * 4
 TIMEOUT = 60
 DEFAULT_HOST = '127.0.0.1:109'
-# Satu Response Universal untuk semua Payload (Anti-Typo)
-RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\n' \
-           b'Upgrade: websocket\r\n' \
-           b'Connection: Upgrade\r\n' \
-           b'Sec-WebSocket-Accept: foo\r\n' \
-           b'Server: nginx/1.18.0\r\n' \
-           b'Content-Type: application/octet-stream\r\n' \
-           b'\r\n'
-
+RESPONSE = b'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: foo\r\nServer: nginx/1.18.0\r\nContent-Type: application/octet-stream\r\nCache-Control: no-cache, no-store, must-revalidate\r\nPragma: no-cache\r\nExpires: 0\r\n\r\n'
 class Server(threading.Thread):
     def __init__(self, host, port):
         threading.Thread.__init__(self)
