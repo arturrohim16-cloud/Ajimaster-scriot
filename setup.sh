@@ -239,7 +239,7 @@ files=(
     "add-vmess" "add-vless" "add-tr" "add-ws" "add-ssws" "add-socks" "add-trgo" 
     "menu-vless" "menu-vmess" "menu-socks" "menu-ss" "menu-trojan" "menu-trgo" "menu-ssh"
     "restart" "autoreboot" "ram" "limit-speed" "cek-trafik" "cek-badwing" 
-    "webbin" "dns" "netf" "bbr" "del-xray" "user-xray" "limit-ip"
+    "webbin" "dns" "netf" "bbr" "del-xray" "user-xray" "limit-ip" "limit-vmess"
 )
 
 echo -e "Sedang mendownload semua file script..."
