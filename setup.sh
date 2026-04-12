@@ -100,8 +100,7 @@ apt autoremove -y
 apt update -y
 
 # // Install Requirement Tools
-apt --reinstall --fix-missing install -y sudo dpkg psmisc socat jq ruby wondershaper python2 tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip wget vim net-tools curl nano sed screen gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent
-apt --reinstall --fix-missing install -y libreadline-dev zlib1g-dev libssl-dev python2 screen curl jq bzip2 gzip coreutils rsyslog iftop htop zip unzip net-tools sed gnupg gnupg1 bc sudo apt-transport-https build-essential dirmngr libxml-parser-perl neofetch screenfetch git lsof openssl easy-rsa fail2ban tmux vnstat dropbear libsqlite3-dev socat cron bash-completion ntpdate xz-utils sudo apt-transport-https gnupg2 gnupg1 dnsutils lsb-release chrony
+apt --reinstall --fix-missing install -y sudo dpkg psmisc socat jq ruby wondershaper tmux nmap bzip2 gzip coreutils wget screen rsyslog iftop htop net-tools zip unzip vim curl nano sed gnupg gnupg1 bc apt-transport-https build-essential gcc g++ automake make autoconf perl m4 dos2unix dropbear libreadline-dev zlib1g-dev libssl-dev dirmngr libxml-parser-perl neofetch git lsof iptables iptables-persistent openssl easy-rsa fail2ban vnstat libsqlite3-dev cron bash-completion ntpdate xz-utils gnupg2 dnsutils lsb-release chrony python3 python3-pip python3-dev python-is-python3
 gem install lolcat
 # ======================
 # SSL
@@ -183,76 +182,6 @@ echo -e "$white\033[0;34m└─────────────────�
 sleep 1 
 wget -q https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Ins-xray.sh && chmod +x Ins-xray.sh && ./Ins-xray.sh
 wget -q https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/set-br.sh && chmod +x set-br.sh && ./set-br.sh
-
-
-#!/bin/bash
-# ==========================================
-# Script Auto-Install VPS - AJI SYSTEM
-# ==========================================
-
-# // Root Checking
-if [ "${EUID}" -ne 0 ]; then
-    echo -e "Please Run This Script As Root User !"
-    exit 1
-fi
-
-# // Export Color & Information
-export RED='\033[0;31m'
-export GREEN='\033[0;32m'
-export YELLOW='\033[0;33m'
-export NC='\033[0m'
-export INFO="[${YELLOW} INFO ${NC}]"
-export OKEY="[${GREEN} OKEY ${NC}]"
-
-# // Set Timezone
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-
-clear
-echo -e "${OKEY} Memulai Persiapan Instalasi..."
-
-# 1. UPDATE & INSTALL ESSENTIAL TOOLS
-# Dipasang di awal agar semua fungsi (wget, curl, python) tersedia
-apt update -y
-apt upgrade -y
-apt install -y jq curl wget sed socat python3 python3-is-python3 \
-binutils build-essential cron lsb-release tar zip unzip htop net-tools
-
-# 2. INPUT DOMAIN (Wajib di awal agar SSL tidak error)
-echo -e "======================================"
-read -p " Masukkan Domain VPS Anda: " DOMAIN
-echo "--------------------------------------"
-if [[ -z "$DOMAIN" ]]; then
-    echo -e "${RED}Error: Domain tidak boleh kosong!${NC}"
-    exit 1
-fi
-mkdir -p /etc/xray
-echo "$DOMAIN" > /etc/xray/domain
-
-# 3. CLEANING OLD SYSTEM (Opsional)
-# Menghapus instalasi lama agar tidak konflik
-apt remove --purge nginx* dropbear* stunnel* -y
-apt autoremove -y
-rm -rf /etc/nginx /usr/bin/xray /etc/xray/config.json
-
-# 4. PREPARE DIRECTORIES
-# Membuat folder yang dibutuhkan sebelum download file
-mkdir -p /etc/xray
-mkdir -p /usr/bin/xray
-mkdir -p /var/lib/scrz-prem/
-mkdir -p /usr/local/etc/xray
-
-# 5. INSTALL CORE SERVICES (Silakan isi link script instalasi kamu nanti)
-echo -e "${INFO} Memasang Core Services..."
-
-# [CONTOH PENEMPATAN LINK]
- wget -q  https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/set-br.sh && chmod +x set-br.sh && ./set-br.sh
-
- wget -q https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/install-jembut.sh && chmod +x install-jembut.sh && ./install-jembut.sh
-
- wget -q  https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ssh-vpn.sh && chmod +x ssh-vpn.sh && ./ssh-vpn.sh
- wget -q  https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/Ins-xray.sh && chmod +x Ins-xray.sh && ./Ins-xray.sh
-
-echo -e "${OKEY} Core Services Terpasang."
 
 # 6. DOWNLOAD MENU & COMMANDS
 # Folder /usr/bin adalah tempat perintah terminal (menu, add-ws, dll)
