@@ -214,7 +214,7 @@ clear
 
 # // 2. WEBSOCKET TLS (Port 443)
 echo -e "[ ${GREEN}INFO${NC} ] Setup WS-TLS..."
-wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/ws-tls.sh"
+wget -q -O /usr/local/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
 chmod +x /usr/local/bin/ws-tls
 
 cat > /etc/systemd/system/ws-tls.service << END
