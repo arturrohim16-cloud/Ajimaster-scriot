@@ -247,7 +247,7 @@ if [ -f "/etc/root/bot.conf" ]; then
 📅 <b>Expired:</b> <code>$exp</code>
 ━━━━━━━━━━━━━━━━━━━━
 <b>VMESS TLS:</b>
-<code>$asu</code>
+<code>$vmesslink1</code>
 ━━━━━━━━━━━━━━━━━━━━"
 
     # Menggunakan --data-urlencode agar karakter aneh di config Vmess tidak bikin error
