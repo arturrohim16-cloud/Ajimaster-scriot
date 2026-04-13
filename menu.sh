@@ -73,41 +73,41 @@ stat=-f5
 else
 stat=-f7
 fi
-ssh=$(service ssh status | grep active | cut -d ' ' $stat)
+ssh=$(service ssh status | grep active | wc -1 ' ' $stat)
 if [ "$ssh" = "active" ]; then
-ressh="${green}ON${NC}"
+ressh="${green}🟢${NC}"
 else
-ressh="${red}OFF${NC}"
+ressh="${red}🔴${NC}"
 fi
 sshstunel=$(service stunnel5 status | grep active | cut -d ' ' $stat)
 if [ "$sshstunel" = "active" ]; then
-resst="${green}ON${NC}"
+resst="${green}🟢${NC}"
 else
-resst="${red}OFF${NC}"
+resst="${red}🔴${NC}"
 fi
 sshws=$(service ws-stunnel status | grep active | cut -d ' ' $stat)
 if [ "$sshws" = "active" ]; then
-ressshws="${green}ON${NC}"
+ressshws="${green}🟢${NC}"
 else
-ressshws="${red}OFF${NC}"
+ressshws="${red}🔴${NC}"
 fi
 ngx=$(service nginx status | grep active | cut -d ' ' $stat)
 if [ "$ngx" = "active" ]; then
-resngx="${green}ON${NC}"
+resngx="${green}🟢${NC}"
 else
-resngx="${red}OFF${NC}"
+resngx="${red}🔴${NC}"
 fi
 dbr=$(service dropbear status | grep active | cut -d ' ' $stat)
 if [ "$dbr" = "active" ]; then
-resdbr="${green}ON${NC}"
+resdbr="${green}🟢${NC}"
 else
-resdbr="${red}OFF${NC}"
+resdbr="${red}🔴${NC}"
 fi
 v2r=$(service xray status | grep active | cut -d ' ' $stat)
 if [ "$v2r" = "active" ]; then
-resv2r="${green}ON${NC}"
+resv2r="${green}🟢${NC}"
 else
-resv2r="${red}OFF${NC}"
+resv2r="${red}🔴${NC}"
 fi
 # --- KONFIGURASI BOT TELEGRAM ---
 TOKEN="8226263150:AAFdiVuQeEshxOpSvema_F6fDwbyFcfNWnw"
