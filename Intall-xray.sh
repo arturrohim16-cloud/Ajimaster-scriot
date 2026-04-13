@@ -94,45 +94,7 @@ vlessgrpc=$((RANDOM + 10001))
 vmessgrpc=$((RANDOM + 10001))
 uuid=$(cat /proc/sys/kernel/random/uuid)
 
-# // 8. Nginx Config
-cat > /etc/nginx/conf.d/xray.conf <<EOF
-server {
-    listen 80;
-    listen [::]:80;
-    listen 443 ssl http2 reuseport;
-    listen [::]:443 ssl http2 reuseport;
-    server_name $domain;
-
-    ssl_certificate /etc/xray/xray.crt;
-    ssl_certificate_key /etc/xray/xray.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    
-    root /home/vps/public_html;
-
-    location /vless {
-        proxy_pass http://127.0.0.1:$vless;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
-    }
-
-    location /vmess {
-        proxy_pass http://127.0.0.1:$vmess;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
-    }
-
-    location ^~ /vless-grpc {
-        proxy_redirect off;
-        grpc_pass grpc://127.0.0.1:$vlessgrpc;
-    }
-}
-EOF
-
-# // Xray Config.json Full Version
+# // Xray Config.json God-Mode Ultimate AJI STORE PREMIUM
 cat > /etc/xray/config.json <<EOF
 {
   "log": {
@@ -141,7 +103,11 @@ cat > /etc/xray/config.json <<EOF
     "loglevel": "warning"
   },
   "api": {
-    "services": ["StatsService"],
+    "services": [
+      "HandlerService",
+      "StatsService",
+      "LoggerService"
+    ],
     "tag": "api"
   },
   "stats": {},
@@ -154,7 +120,7 @@ cat > /etc/xray/config.json <<EOF
         "connIdle": 300,
         "uplinkOnly": 2,
         "downlinkOnly": 5,
-        "bufferSize": 4
+        "bufferSize": 10240
       }
     },
     "system": {
@@ -163,6 +129,28 @@ cat > /etc/xray/config.json <<EOF
       "statsOutboundUplink": true,
       "statsOutboundDownlink": true
     }
+  },
+  "dns": {
+    "hosts": {
+      "geosite:category-ads-all": "127.0.0.1",
+      "domain:aji.store": "127.0.0.1"
+    },
+    "servers": [
+      {
+        "address": "1.1.1.1",
+        "port": 53,
+        "domains": ["geosite:google", "geosite:facebook", "geosite:youtube"]
+      },
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "domains": ["geosite:geolocation-noncn"]
+      },
+      "8.8.8.8",
+      "8.8.4.4",
+      "localhost"
+    ],
+    "queryStrategy": "UseIP",
+    "tag": "dns_inbound"
   },
   "inbounds": [
     {
@@ -176,75 +164,189 @@ cat > /etc/xray/config.json <<EOF
       "listen": "127.0.0.1",
       "port": $vless,
       "protocol": "vless",
-      "settings": { "decryption": "none", "clients": [{ "id": "$uuid" }] },
-      "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+      "settings": {
+        "decryption": "none",
+        "clients": [
+          { "id": "$uuid", "level": 0, "email": "vless-ws@ajistore" }
+#vless-ws
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": { "path": "/vless", "headers": { "Host": "$domain" } },
+        "sockopt": { "tcpFastOpen": true }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic", "fakedns"] },
+      "tag": "vless-ws"
     },
     {
       "listen": "127.0.0.1",
       "port": $vmess,
       "protocol": "vmess",
-      "settings": { "clients": [{ "id": "$uuid", "alterId": 0 }] },
-      "streamSettings": { "network": "ws", "wsSettings": { "path": "/vmess" } },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+      "settings": {
+        "clients": [
+          { "id": "$uuid", "alterId": 0, "level": 0, "email": "vmess-ws@ajistore" }
+#vmess-ws
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": { "path": "/vmess", "headers": { "Host": "$domain" } },
+        "sockopt": { "tcpFastOpen": true }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic", "fakedns"] },
+      "tag": "vmess-ws"
     },
     {
       "listen": "127.0.0.1",
-      "port": $trojan,
+      "port": $trojanws,
       "protocol": "trojan",
-      "settings": { "clients": [{ "password": "$uuid" }] },
-      "streamSettings": { "network": "ws", "wsSettings": { "path": "/trojan-ws" } },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+      "settings": {
+        "clients": [
+          { "password": "$uuid", "level": 0, "email": "trojan-ws@ajistore" }
+#trojan-ws
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": { "path": "/trojan-ws", "headers": { "Host": "$domain" } },
+        "sockopt": { "tcpFastOpen": true }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic", "fakedns"] },
+      "tag": "trojan-ws"
     },
     {
       "listen": "127.0.0.1",
       "port": $vlessgrpc,
       "protocol": "vless",
-      "settings": { "decryption": "none", "clients": [{ "id": "$uuid" }] },
-      "streamSettings": { "network": "grpc", "grpcSettings": { "serviceName": "vless-grpc" } },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+      "settings": {
+        "decryption": "none",
+        "clients": [
+          { "id": "$uuid", "level": 0, "email": "vless-grpc@ajistore" }
+#vless-grpc
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": { "serviceName": "vless-grpc", "multiMode": true },
+        "sockopt": { "tcpFastOpen": true }
+      },
+      "tag": "vless-grpc"
     },
     {
       "listen": "127.0.0.1",
       "port": $vmessgrpc,
       "protocol": "vmess",
-      "settings": { "clients": [{ "id": "$uuid", "alterId": 0 }] },
-      "streamSettings": { "network": "grpc", "grpcSettings": { "serviceName": "vmess-grpc" } },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+      "settings": {
+        "clients": [
+          { "id": "$uuid", "alterId": 0, "level": 0, "email": "vmess-grpc@ajistore" }
+#vmess-grpc
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": { "serviceName": "vmess-grpc", "multiMode": true },
+        "sockopt": { "tcpFastOpen": true }
+      },
+      "tag": "vmess-grpc"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $trojangrpc,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          { "password": "$uuid", "level": 0, "email": "trojan-grpc@ajistore" }
+#trojan-grpc
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": { "serviceName": "trojan-grpc", "multiMode": true },
+        "sockopt": { "tcpFastOpen": true }
+      },
+      "tag": "trojan-grpc"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $ssws,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "aes-128-gcm",
+        "password": "$uuid",
+        "network": "tcp,udp",
+        "level": 0,
+        "email": "ss-ws@ajistore"
+#ss-ws
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": { "path": "/ss-ws", "headers": { "Host": "$domain" } }
+      },
+      "tag": "shadowsocks-ws"
     }
   ],
   "outbounds": [
-    { "protocol": "freedom", "settings": {} },
-    { "protocol": "blackhole", "settings": {}, "tag": "blocked" }
+    { "protocol": "freedom", "settings": { "domainStrategy": "UseIP" }, "tag": "direct" },
+    { "protocol": "blackhole", "settings": { "response": { "type": "http" } }, "tag": "blocked" },
+    { "protocol": "dns", "tag": "dns-out" }
   ],
   "routing": {
-    "domainStrategy": "AsIs",
+    "domainStrategy": "IPIfNonMatch",
     "rules": [
-      { "type": "field", "outboundTag": "api", "inboundTag": ["api"] },
-      { "type": "field", "outboundTag": "blocked", "protocol": ["bittorrent"] },
-      { "type": "field", "outboundTag": "blocked", "domain": ["geosite:category-ads-all"] },
+      { "type": "field", "inboundTag": ["api"], "outboundTag": "api" },
+      { "type": "field", "port": 53, "outboundTag": "dns-out" },
+      { "type": "field", "protocol": ["bittorrent"], "outboundTag": "blocked" },
       {
         "type": "field",
-        "outboundTag": "blocked",
+        "domain": [
+          "geosite:category-ads-all",
+          "geosite:category-ads-indonesia",
+          "geosite:google-ads",
+          "domain:ads.google.com",
+          "domain:doubleclick.net",
+          "domain:googlesyndication.com"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
         "ip": [
+          "geoip:private",
+          "geoip:cn",
           "0.0.0.0/8",
           "10.0.0.0/8",
           "100.64.0.0/10",
           "127.0.0.0/8",
           "169.254.0.0/16",
           "172.16.0.0/12",
-          "192.0.0.0/24",
-          "192.0.2.0/24",
-          "192.168.0.0/16",
-          "198.18.0.0/15",
-          "198.51.100.0/24",
-          "203.0.113.0/24",
-          "::1/128",
-          "fc00::/7",
-          "fe80::/10"
-        ]
+          "192.168.0.0/16"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:facebook",
+          "geosite:instagram",
+          "geosite:whatsapp",
+          "geosite:telegram",
+          "geosite:tiktok",
+          "geosite:netflix",
+          "geosite:disney"
+        ],
+        "outboundTag": "direct"
       }
     ]
+  },
+  "observatory": {
+    "subjectSelector": ["vless-ws", "vmess-ws", "trojan-ws", "vless-grpc", "vmess-grpc"],
+    "probeUrl": "https://www.google.com/generate_204",
+    "probeInterval": "30s"
+  },
+  "burstObs": {
+    "subjectSelector": ["vless-ws", "vmess-ws"],
+    "pingConfig": { "destination": "1.1.1.1:53", "interval": "10s" }
   }
 }
 EOF
