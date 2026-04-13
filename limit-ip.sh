@@ -3,36 +3,43 @@ cat > /usr/bin/limit-ip << 'END'
 
 while true; do
     if [ -f "/etc/ssh/limit-ip" ]; then
-        # Membaca file limit-ip
         while read -r user limit; do
             [[ -z "$user" || -z "$limit" ]] && continue
 
-            # Hanya hitung koneksi SSH yang sudah ESTABLISHED (Benar-benar login)
-            # Ini mencegah proses login/handshake ikut terhitung dan terbunuh
-            current_pids=$(ps -u "$user" -o pid,comm,state | grep sshd | grep -v "grep" | awk '{print $1}')
-            current_count=$(echo "$current_pids" | wc -w)
+            # LOGIKA PINTAR: 
+            # Kita hanya menghitung baris di 'who' atau 'users' yang benar-benar aktif.
+            # 'who' hanya mencatat user yang sudah berhasil melewati tahap autentikasi.
+            current_count=$(who | grep -w "$user" | wc -l)
 
             if [ "$current_count" -gt "$limit" ]; then
-                # Hitung jumlah kelebihan
+                # Hitung berapa koneksi yang harus ditendang
                 excess=$((current_count - limit))
                 
-                # Ambil PID yang paling baru login (paling bawah) untuk dimatikan
-                # Kita berikan jeda sedikit agar tidak terlalu agresif
-                to_kill=$(echo "$current_pids" | tail -n "$excess")
+                # Ambil PID sshd milik user yang PALING BARU (paling bawah di ps)
+                # Kita mencari proses sshd yang ada string '@pts' atau '@notty' (ciri khas user login)
+                all_pids=$(ps -u "$user" -o pid,comm,args | grep sshd | grep -E "pts|notty" | awk '{print $1}')
+                to_kill=$(echo "$all_pids" | tail -n "$excess")
 
                 for pid in $to_kill; do
-                    # Cek sekali lagi apakah PID masih ada sebelum kill
-                    if ps -p "$pid" > /dev/null; then
-                        kill -9 "$pid"
-                        echo "$(date) : User $user melampaui limit ($current_count/$limit). PID $pid dimatikan." >> /var/log/ssh-limit.log
+                    if [ -n "$pid" ]; then
+                        # Berikan delay 10 detik sebelum benar-benar di-kill (sesuai permintaan)
+                        # Kita jalankan di background agar tidak menghentikan loop user lain
+                        (
+                            sleep 10
+                            # Cek lagi, jika masih melebihi limit, baru kill
+                            recheck=$(who | grep -w "$user" | wc -l)
+                            if [ "$recheck" -gt "$limit" ]; then
+                                kill -9 "$pid" >/dev/null 2>&1
+                                echo "$(date) : User $user melampaui limit ($recheck/$limit). PID $pid dimatikan setelah 10 detik." >> /var/log/ssh-limit.log
+                            fi
+                        ) &
                     fi
                 done
             fi
         done < /etc/ssh/limit-ip
     fi
-    # Naikkan sleep menjadi 10-15 detik agar server tidak terlalu berat 
-    # dan memberi waktu user untuk menstabilkan koneksi
-    sleep 10
+    # Loop pengecekan setiap 5 detik agar responsif tapi tidak berat
+    sleep 5
 done
 END
 
