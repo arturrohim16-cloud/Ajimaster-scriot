@@ -73,7 +73,7 @@ stat=-f5
 else
 stat=-f7
 fi
-ssh=$(service ssh status | grep active | wc -1 ' ' $stat)
+ssh=$(service ssh status | grep active | cut -d ' ' $stat)
 if [ "$ssh" = "active" ]; then
 ressh="${green}🟢${NC}"
 else
