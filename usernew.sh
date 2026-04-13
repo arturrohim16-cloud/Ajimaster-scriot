@@ -120,24 +120,29 @@ echo "$Login $iplimit" >> /etc/ssh/limit-ip
 # Menyimpan data limit Kuota
 echo "$Login $gblimit" >> /etc/ssh/limit-quota
 
-source /usr/bin/bot.sh
-msg="🚀 <b>SSH ACCOUNT CREATED</b> 🚀
-━━━━━━━━━━━━━━━━━━━━━
-👤 <b>User:</b> <code>$Login</code>
-🔑 <b>Pass:</b> <code>$Pass</code>
-📅 <b>Exp:</b> <code>$exp</code>
-━━━━━━━━━━━━━━━━━━━━━
-🌐 <b>IP Address :</b> <code>$IP</code>
-✨ <b>Host : </b> <code>$domen</code>
-🔓 <b>OpenSSH :</b> <code>22</code>
-🐻 <b>Dropbear :</b> <code>109, 143</code>
-🔐 <b>SSH-WS :</b> <code>80</code>
-🔌 <b>SSH-SSL-WS :</b> <code>443</code>
-🚀 <b>UDPGW :</b> <code>7100-7300</code>
-━━━━━━━━━━━━━━━━━━━━━━
-📝 <b>Payload Websocket :</b>
-<code>GET / [protocol][crlf]Host: [host][crlf]Connection: Keep-Alive[crlf]Connection: Upgrade[crlf]Upgrade: websocket[crlf][crlf]</code>
-━━━━━━━━━━━━━━━━━━━━━━
+# --- INTEGRASI BOT TELEGRAM UNTUK SSH ---
+if [ -f "/etc/root/bot.conf" ]; then
+    source /etc/root/bot.conf
+    
+    # Mengambil IP dan Domain
+    domain=$(cat /etc/xray/domain)
+    localip=$(curl -s ifconfig.me)
+
+    TEXT="🚀 <b>SSH ACCOUNT CREATED</b> 🚀
+━━━━━━━━━━━━━━━━━━━━
+👤 <b>User:</b> <code>$user</code>
+🔑 <b>Password:</b> <code>$password</code>
+🔑 <b>Limit IP:</b> <code>$iplimit Device</code>
+📅 <b>Expired:</b> <code>$exp</code>
+━━━━━━━━━━━━━━━━━━━━
+🌐 <b>Host:</b> <code>$domain</code>
+🌐 <b>IP:</b> <code>$localip</code>
+🚪 <b>Port OpenSSH:</b> <code>22</code>
+🚪 <b>Port Dropbear:</b> <code>109, 143</code>
+🚪 <b>Port SSL/TLS:</b> <code>443, 413</code>
+🚪 <b>Port Squid:</b> <code>3128, 8080</code>
+🚪 <b>Port UDP:</b> <code>1-65535</code>
+━━━━━━━━━━━━━━━━━━━━
 🔗 <b>Format Login (Klik untuk Salin) :</b>
 🔹 <b>UDP Custom :</b> 
 <code>$domen:1-65535@$Login:$Pass</code>
@@ -145,10 +150,18 @@ msg="🚀 <b>SSH ACCOUNT CREATED</b> 🚀
 <code>$domen:443@$Login:$Pass</code>
 🔹 <b>SSH-WS :</b> 
 <code>$domen:80@$Login:$Pass</code>
-━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━
+🔗 <b>Payload:</b>
+<code>GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf]</code>
+━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Script By AJI VPN</b>"
+    # Menggunakan --data-urlencode untuk keamanan karakter khusus
+    curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+    --data-urlencode "chat_id=${CHATID}" \
+    --data-urlencode "text=${TEXT}" \
+    -d "parse_mode=HTML" > /dev/null
+fi
 
-send_log "$msg"
 
 END
 
