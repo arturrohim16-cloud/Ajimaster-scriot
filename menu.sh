@@ -224,21 +224,16 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "\E[44;1;39m                     ⇱ MENU SERVICE ⇲                         \E[0m"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo -e ""
-echo -e " ${BICyan}[${BIWhite}01${BICyan}]${RED} ☞${NC} ${BICyan}SSH MENU        $NC  ${BICyan}[${BIWhite}12${BICyan}]${RED} ☞ ${NC}${BICyan}GEN-SSL / CERTV $NC"
-echo -e " ${BICyan}[${BIWhite}02${BICyan}]${RED} ☞${NC} ${BICyan}VMESS MENU      $NC  ${BICyan}[${BIWhite}13${BICyan}]${RED} ☞ ${NC}${BICyan}BANNER CHAGE $NC"
-echo -e " ${BICyan}[${BIWhite}03${BICyan}]${RED} ☞${NC} ${BICyan}VLESS MENU      $NC  ${BICyan}[${BIWhite}14${BICyan}]${RED} ☞ ${NC}${BICyan}CEK RUNNING SERVICE $NC"
-echo -e " ${BICyan}[${BIWhite}04${BICyan}]${RED} ☞${NC} ${BICyan}TROJAN MENU     $NC  ${BICyan}[${BIWhite}15${BICyan}]${RED} ☞ ${NC}${BICyan}CEK TRAFIC $NC"
-echo -e " ${BICyan}[${BIWhite}05${BICyan}]${RED} ☞${NC} ${BICyan}S-SOCK MENU     $NC  ${BICyan}[${BIWhite}16${BICyan}]${RED} ☞ ${NC}${BICyan}SPEEDTEDT  $NC"
-echo -e " ${BICyan}[${BIWhite}06${BICyan}]${RED} ☞${NC} ${BICyan}TENDANG         $NC  ${BICyan}[${BIWhite}17${BICyan}]${RED} ☞ ${NC}${BICyan}CEK BANDWIDTH USE $NC"
-echo -e " ${BICyan}[${BIWhite}07${BICyan}]${RED} ☞${NC} ${BICyan}AUTO REBOOT     $NC  ${BICyan}[${BIWhite}18${BICyan}]${RED} ☞ ${NC}${BICyan}LIMMIT SPEED $NC"
-echo -e " ${BICyan}[${BIWhite}08${BICyan}]${RED} ☞${NC} ${BICyan}REBOOT          $NC  ${BICyan}[${BIWhite}19${BICyan}]${RED} ☞ ${NC}${BICyan}WEBMIN $NC"
-echo -e " ${BICyan}[${BIWhite}09${BICyan}]${RED} ☞${NC} ${BICyan}RESTART SERVICE $NC  ${BICyan}[${BIWhite}20${BICyan}]${RED} ☞ ${NC}${BICyan}SCRIPT INFO $NC"
-echo -e " ${BICyan}[${BIWhite}10${BICyan}]${RED} ☞${NC} ${BICyan}BACKUP MENU     $NC  ${BICyan}[${BIWhite}21${BICyan}]${RED} ☞ ${NC}${BICyan}CLEAR LOG $NC"
-echo -e " ${BICyan}[${BIWhite}11${BICyan}]${RED} ☞${NC} ${BICyan}ADD HOST        $NC  ${BICyan}[${BIWhite}22${BICyan}]${RED} ☞ ${NC}${BICyan}FIX MISSING POINTING $NC"
-echo -e " ${BICyan}[${BIWhite} X${BICyan}]${RED} ☞ TYPE X FOR EXIT ${BICyan}${BIYellow}${BICyan}${NC}"
-echo -e " ${BICyan}[${BIWhite}23${BICyan}]${RED} ☞ ${NC}${BICyan}INTL UDP $NC"
-echo -e " ${BICyan}[${BIWhite}24${BICyan}]${RED} ☞ ${NC}${BICyan}BOT TELEGRAM  $NC"
-echo -e " ${RED}"
+echo -e " ${BICyan}[${BIWhite}01${BICyan}]${RED} ☞${NC} ${BICyan}SSH MENU        $NC  ${BICyan}[${BIWhite}09${BICyan}]${RED} ☞ ${NC}${BICyan}GEN-SSL / CERTV $NC"
+echo -e " ${BICyan}[${BIWhite}02${BICyan}]${RED} ☞${NC} ${BICyan}VMESS MENU      $NC  ${BICyan}[${BIWhite}10${BICyan}]${RED} ☞ ${NC}${BICyan}BANNER CHAGE $NC"
+echo -e " ${BICyan}[${BIWhite}03${BICyan}]${RED} ☞${NC} ${BICyan}VLESS MENU      $NC  ${BICyan}[${BIWhite}11${BICyan}]${RED} ☞ ${NC}${BICyan}REBOOT $NC"
+echo -e " ${BICyan}[${BIWhite}04${BICyan}]${RED} ☞${NC} ${BICyan}TROJAN MENU     $NC  ${BICyan}[${BIWhite}12${BICyan}]${RED} ☞ ${NC} ${BICyan}POITING DOMIN $NC"
+echo -e " ${BICyan}[${BIWhite}05${BICyan}]${RED} ☞${NC} ${BICyan}TENDANG         $NC  ${BICyan}[${BIWhite}13${BICyan}]${RED} ☞ ${NC} ${BICyan}TENDANG $NC"
+echo -e " ${BICyan}[${BIWhite}06${BICyan}]${RED} ☞${NC} ${BICyan}RESTAR          $NC  ${BICyan}[${BIWhite}14${BICyan}]${RED} ☞ ${NC}${BICyan}CEK WEBIN $NC"
+echo -e " ${BICyan}[${BIWhite}07${BICyan}]${RED} ☞${NC} ${BICyan}CEK RUNNING     $NC  ${BICyan}[${BIWhite}15${BICyan}]${RED} ☞ ${NC}${BICyan}BOT TELEGRAM  $NC"
+echo -e " ${BICyan}[${BIWhite}08${BICyan}]${RED} ☞${NC} ${BICyan}ADD HOST        $NC  ${BICyan}[${BIWhite}16${BICyan}]${RED} ☞ ${NC}${BICyan}INTL UDP $NC"
+echo -e " ${BICyan}[${BIWhite} X${BICyan}]${RED} ☞ MENU LENGKAP ${BICyan}${BIYellow}${BICyan}${NC}"
+echo -e ""
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo -e "\E[44;1;39m                ⇱ MASTER AJI PREMIUM LXC ⇲                    \E[0m"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
@@ -251,27 +246,27 @@ case $opt in
 3) clear ; menu-vless ;;
 4) clear ; menu-trojan ;;
 5) clear ; menu-ss ;;
-6) clear ; tendang ;;
-7) clear ; autoreboot ;;
-8) clear ; reboot ;;
-9) clear ; restart ;;
-10) clear ; bekap-tg ;;
-11) clear ; addhost ;;
-12) clear ; genssl ;;
-13) clear ; nano /etc/issue.net ;;
-14) clear ; running ;;
-15) clear ; cek-trafik ;;
-16) clear ; cek-speed ;;
-17) clear ; cek-bandwidth ;;
+13) clear ; tendang ;;
+#7) clear ; autoreboot ;;
+11) clear ; reboot ;;
+6) clear ; restart ;;
+#10) clear ; bekap-tg ;;
+8) clear ; addhost ;;
+9) clear ; genssl ;;
+10) clear ; nano /etc/issue.net ;;
+7) clear ; running ;;
+#15) clear ; cek-trafik ;;
+#16) clear ; cek-speed ;;
+#17) clear ; cek-bandwidth ;;
 #18) clear ; wget https://raw.githubusercontent.com/NevermoreSSH/Vergil/main/Tunnel/udp.sh && bash udp.sh ;;
-18) clear ; limit-speed ;;
-19) clear ; wbm ;;
-20) clear ; cat /root/log-install.txt ;;
-21) clear ; clearlog ;;
-24) clear ; menu-bot ;;
-22) clear ; wget https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/cf.sh && chmod +x cf.sh && ./cf.sh ;;
-23) clear ; wget https://raw.githubusercontent.com/NevermoreSSH/Vergil/main/Tunnel/udp.sh && bash udp.sh ;;
-0) clear ; menu ;;
+#18) clear ; limit-speed ;;
+14) clear ; wbm ;;
+#20) clear ; cat /root/log-install.txt ;;
+#21) clear ; clearlog ;;
+15) clear ; menu-bot ;;
+12) clear ; wget https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/cf.sh && chmod +x cf.sh && ./cf.sh ;;
+16) clear ; wget https://raw.githubusercontent.com/NevermoreSSH/Vergil/main/Tunnel/udp.sh && bash udp.sh ;;
+#0) clear ; menu ;;
 x) menu1 ;;
 *) echo -e "" ; echo "Press any key to back exit" ; sleep 1 ; exit ;;
 esac
