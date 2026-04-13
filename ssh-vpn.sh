@@ -403,9 +403,15 @@ systemctl daemon-reload
 systemctl enable stunnel5
 systemctl restart stunnel5
 
-#confik SSH-WS
-# Membuat service untuk SSH-WS Port 80
-cat > /etc/systemd/system/ws-stunnel.service << 'END'
+# --- PERBAIKAN LOGIKA PORT ---
+
+# 1. Pastikan Nginx yang memegang Port 80
+systemctl stop ws-stunnel 2>/dev/null
+systemctl stop ws-dropbear 2>/dev/null
+
+# 2. Jalankan Python WS di port internal (8880) agar tidak bentrok
+# Edit service ws-stunnel Anda atau buat baru seperti ini:
+cat > /etc/systemd/system/ws-stunnel.service << END
 [Unit]
 Description=SSH Websocket Service
 After=network.target nss-lookup.target
@@ -413,23 +419,7 @@ After=network.target nss-lookup.target
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python3 /usr/bin/ws-stunnel 80
-Restart=on-failure
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-END
-
-# Membuat service untuk SSH-WS Port 8880 (Dropbear)
-cat > /etc/systemd/system/ws-dropbear.service << 'END'
-[Unit]
-Description=SSH Websocket Dropbear Service
-After=network.target nss-lookup.target
-
-[Service]
-Type=simple
-User=root
+# Gunakan port 8880, jangan 80 karena sudah dipakai Nginx
 ExecStart=/usr/bin/python3 /usr/bin/ws-stunnel 8880
 Restart=on-failure
 RestartSec=3
@@ -437,32 +427,19 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 END
-# Reload sistem service
+
+# 3. Pastikan konfigurasi Nginx (xray.conf) mengoper trafik ke 8880
+# Cek bagian 'location /' di xray.conf Anda, pastikan ada baris:
+# proxy_pass http://127.0.0.1:8880;
+
+# 4. Refresh & Jalankan
 systemctl daemon-reload
-
-# Aktifkan dan jalankan Nginx
-nginx -t && systemctl restart nginx
-systemctl enable nginx
-
-# Install BBR & Optimize
-modprobe tcp_bbr
-echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-sysctl -p
-
-# Aktifkan dan jalankan SSH-WS
 systemctl enable ws-stunnel
-systemctl enable ws-dropbear
 systemctl restart ws-stunnel
+systemctl restart nginx
 # 1. Hentikan semua yang pakai port 80
 fuser -k 80/tcp
-
-# 2. Restart Nginx (dia akan ambil jalur IPv6 jika perlu, atau tetap di 80)
-systemctl restart nginx
-
-# 3. Pastikan ws-dropbear jalan di 8880 (biar tidak bentrok)
-systemctl restart ws-dropbear
-
+#hapus history
 history -c
 echo "unset HISTFILE" >> /etc/profile
 
