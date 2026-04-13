@@ -1,7 +1,7 @@
 #!/bin/bash
 # =========================================
 # Quick Setup | Script Setup Manager
-# Edition : Stable Edition V1.0
+# Edition : Ultimate Masterpiece V3.0
 # Author  : AJI STORE PREMIUM
 # =========================================
 
@@ -9,6 +9,8 @@
 export RED='\033[0;31m'
 export GREEN='\033[0;32m'
 export YELLOW='\033[0;33m'
+export BLUE='\033[0;34m'
+export CYAN='\033[0;36m'
 export NC='\033[0m'
 
 # // Root Checking
@@ -18,40 +20,38 @@ if [ "${EUID}" -ne 0 ]; then
 fi
 
 clear
-echo -e "${YELLOW}---------------------------------------------------${NC}"
-echo -e "          INSTALLER XRAY CORE - AJI STORE          "
-echo -e "${YELLOW}---------------------------------------------------${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}          INSTALLER XRAY CORE - AJI STORE          ${NC}"
+echo -e "${BLUE}             (FULL AUTOMATIC RUNNING)              ${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 # // 1. Input Domain
-echo -e "[ ${GREEN}INFO${NC} ] Masukkan Domain Anda (Contoh: aji.izz-store.my.id)"
-read -p "Domain: " domain
+echo -e "[ ${GREEN}INFO${NC} ] Konfigurasi Domain..."
+read -p "   Masukkan Domain: " domain
 
 if [[ -z "$domain" ]]; then
-    echo -e "[ ${RED}ERROR${NC} ] Domain tidak boleh kosong!"
+    echo -e "[ ${RED}ERROR${NC} ] Domain kosong! Batalkan..."
     exit 1
 fi
 
-# Simpan domain
+# Simpan domain & Siapkan Folder
 mkdir -p /etc/xray
+mkdir -p /home/vps/public_html
 echo "$domain" > /etc/xray/domain
-echo "$domain" > /root/domain
 
-# // 2. Update & Install Dependencies
+# // 2. Update & Dependencies
 echo -e "[ ${GREEN}INFO${NC} ] Menginstall paket pendukung..."
 apt update -y
-apt install curl socat xz-utils wget apt-transport-https gnupg netcat cron chrony unzip -y
+apt install curl socat xz-utils wget apt-transport-https gnupg netcat cron chrony unzip nginx jq -y
 
-# // 3. Setting Timezone
+# // 3. Setting Time & Firewall
 timedatectl set-timezone Asia/Jakarta
 systemctl enable chrony && systemctl restart chrony
+# Buka port standar agar tidak terblokir firewall sendiri
+iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+iptables -I INPUT -p tcp --dport 443 -j ACCEPT
 
-# // 4. Prepare Folders
-mkdir -p /var/log/xray /home/vps/public_html
-chown www-data:www-data /var/log/xray
-chmod +x /var/log/xray
-touch /var/log/xray/access.log /var/log/xray/error.log
-
-# // 5. Install Xray Core (Latest)
+# // 4. Install Xray Core
 echo -e "[ ${GREEN}INFO${NC} ] Mengunduh Xray Core Terbaru..."
 latest_version="$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
 wget -q -O xray.zip "https://github.com/XTLS/Xray-core/releases/download/v$latest_version/xray-linux-64.zip"
@@ -59,41 +59,38 @@ unzip -o xray.zip -d /usr/local/bin/
 chmod +x /usr/local/bin/xray
 rm -f xray.zip
 
-# // 6. SSL Generation (Let's Encrypt / ZeroSSL)
-echo -e "[ ${GREEN}INFO${NC} ] Memulai pembuatan sertifikat SSL..."
+# // 5. SSL Generation (Auto-Logic)
+echo -e "[ ${GREEN}INFO${NC} ] Memulai pembuatan SSL (Otomatis)..."
 systemctl stop nginx
 rm -rf /root/.acme.sh
 curl https://get.acme.sh | sh
 alias acme.sh=~/.acme.sh/acme.sh
 
-# Coba Let's Encrypt dulu, jika gagal pindah ZeroSSL (Menghindari Rate Limit 429)
+# Daftarkan Akun SSL
+~/.acme.sh/acme.sh --register-account -m aji@gmail.com --server letsencrypt
+
+# Coba Let's Encrypt, jika 429 (limit) langsung loncat ke ZeroSSL
 ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-~/.acme.sh/acme.sh --register-account -m aji@gmail.com
 ~/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256 --force
 
 if [ $? -ne 0 ]; then
-    echo -e "[ ${YELLOW}WARNING${NC} ] Let's Encrypt Gagal/Limit, Mencoba ZeroSSL..."
+    echo -e "[ ${YELLOW}WARNING${NC} ] Let's Encrypt Limit! Berpindah ke ZeroSSL..."
     ~/.acme.sh/acme.sh --set-default-ca --server zerossl
     ~/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256 --force
 fi
 
-# Install Cert
+# Install Cert ke direktori Xray
 ~/.acme.sh/acme.sh --install-cert -d "${domain}" --ecc \
 --fullchain-file /etc/xray/xray.crt \
 --key-file /etc/xray/xray.key
-
 chown -R www-data:www-data /etc/xray
-chmod 644 /etc/xray/xray.crt
-chmod 644 /etc/xray/xray.key
 
-# // 7. Configuration Ports
+# // 6. Configuration Ports & UUID
 vless=$((RANDOM + 10000))
-vmess=$((RANDOM + 10000))
-trojan=$((RANDOM + 10000))
-vlessgrpc=$((RANDOM + 10001))
-vmessgrpc=$((RANDOM + 10001))
+vmess=$((RANDOM + 11000))
+trojan=$((RANDOM + 12000))
+vlessgrpc=$((RANDOM + 13000))
 uuid=$(cat /proc/sys/kernel/random/uuid)
-
 # // Xray Config.json God-Mode Ultimate AJI STORE PREMIUM
 cat > /etc/xray/config.json <<EOF
 {
@@ -377,10 +374,26 @@ EOF
 systemctl daemon-reload
 systemctl enable xray nginx
 systemctl restart xray nginx
+# // 10. AUTO-RUN & VERIFICATION (BAGIAN PALING PENTING)
+echo -e "[ ${GREEN}INFO${NC} ] Mengaktifkan semua layanan secara otomatis..."
+systemctl daemon-reload
+systemctl enable nginx xray
+systemctl restart nginx xray
 
-echo -e "${GREEN}---------------------------------------------------${NC}"
-echo -e "  INSTALLASI SELESAI! STATUS SERVICE: ON           "
-echo -e "  Domain: $domain"
-echo -e "  UUID  : $uuid"
-echo -e "${GREEN}---------------------------------------------------${NC}"
+# Cek Status
+status_nginx=$(systemctl is-active nginx)
+status_xray=$(systemctl is-active xray)
 
+clear
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "         INSTALLASI SELESAI - AJI STORE PREMIUM     "
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "  Domain   : $domain"
+echo -e "  UUID     : $uuid"
+echo -e "  Nginx    : $status_nginx"
+echo -e "  Xray     : $status_xray"
+echo -e "  Vless WS : $vless"
+echo -e "  Vmess WS : $vmess"
+echo -e "  Trojan WS: $trojan"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e " Semua layanan telah berjalan otomatis (RUNNING) "
