@@ -132,19 +132,122 @@ server {
 }
 EOF
 
-# // 9. Xray Config.json
+# // Xray Config.json Full Version
 cat > /etc/xray/config.json <<EOF
 {
-  "log": { "loglevel": "warning", "access": "/var/log/xray/access.log", "error": "/var/log/xray/error.log" },
+  "log": {
+    "access": "/var/log/xray/access.log",
+    "error": "/var/log/xray/error.log",
+    "loglevel": "warning"
+  },
+  "api": {
+    "services": ["StatsService"],
+    "tag": "api"
+  },
+  "stats": {},
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true,
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 2,
+        "downlinkOnly": 5,
+        "bufferSize": 4
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  },
   "inbounds": [
-    { "port": $vless, "listen": "127.0.0.1", "protocol": "vless", "settings": { "decryption": "none", "clients": [{ "id": "$uuid" }] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } },
-    { "port": $vmess, "listen": "127.0.0.1", "protocol": "vmess", "settings": { "clients": [{ "id": "$uuid" }] }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vmess" } } },
-    { "port": $vlessgrpc, "listen": "127.0.0.1", "protocol": "vless", "settings": { "decryption": "none", "clients": [{ "id": "$uuid" }] }, "streamSettings": { "network": "grpc", "grpcSettings": { "serviceName": "vless-grpc" } } }
+    {
+      "listen": "127.0.0.1",
+      "port": 10085,
+      "protocol": "dokodemo-door",
+      "settings": { "address": "127.0.0.1" },
+      "tag": "api"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $vless,
+      "protocol": "vless",
+      "settings": { "decryption": "none", "clients": [{ "id": "$uuid" }] },
+      "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $vmess,
+      "protocol": "vmess",
+      "settings": { "clients": [{ "id": "$uuid", "alterId": 0 }] },
+      "streamSettings": { "network": "ws", "wsSettings": { "path": "/vmess" } },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $trojan,
+      "protocol": "trojan",
+      "settings": { "clients": [{ "password": "$uuid" }] },
+      "streamSettings": { "network": "ws", "wsSettings": { "path": "/trojan-ws" } },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $vlessgrpc,
+      "protocol": "vless",
+      "settings": { "decryption": "none", "clients": [{ "id": "$uuid" }] },
+      "streamSettings": { "network": "grpc", "grpcSettings": { "serviceName": "vless-grpc" } },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": $vmessgrpc,
+      "protocol": "vmess",
+      "settings": { "clients": [{ "id": "$uuid", "alterId": 0 }] },
+      "streamSettings": { "network": "grpc", "grpcSettings": { "serviceName": "vmess-grpc" } },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    }
   ],
-  "outbounds": [{ "protocol": "freedom" }]
+  "outbounds": [
+    { "protocol": "freedom", "settings": {} },
+    { "protocol": "blackhole", "settings": {}, "tag": "blocked" }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      { "type": "field", "outboundTag": "api", "inboundTag": ["api"] },
+      { "type": "field", "outboundTag": "blocked", "protocol": ["bittorrent"] },
+      { "type": "field", "outboundTag": "blocked", "domain": ["geosite:category-ads-all"] },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "ip": [
+          "0.0.0.0/8",
+          "10.0.0.0/8",
+          "100.64.0.0/10",
+          "127.0.0.0/8",
+          "169.254.0.0/16",
+          "172.16.0.0/12",
+          "192.0.0.0/24",
+          "192.0.2.0/24",
+          "192.168.0.0/16",
+          "198.18.0.0/15",
+          "198.51.100.0/24",
+          "203.0.113.0/24",
+          "::1/128",
+          "fc00::/7",
+          "fe80::/10"
+        ]
+      }
+    ]
+  }
 }
 EOF
-
 # // 10. Systemd Service
 cat > /etc/systemd/system/xray.service <<EOF
 [Unit]
