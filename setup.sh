@@ -235,7 +235,7 @@ REPO="https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs
 
 # Masukkan semua nama file sesuai yang ada di GitHub Anda (tanpa .sh)
 files=(
-    "menu" "menu1" "running" "runing" "usernew" "speedtest-cli" "xp" 
+    "menu" "menu1" "runing" "usernew" "speedtest-cli" "xp" 
     "add-vless" "add-tr" "add-ws" "add-ssws" "add-socks" "add-trgo" 
     "menu-vless" "menu-vmess" "menu-socks" "menu-ss" "menu-trojan" "menu-trgo" "menu-ssh"
     "restart" "autoreboot" "ram" "limit-speed" "cek-trafik" "cek-badwing" 
