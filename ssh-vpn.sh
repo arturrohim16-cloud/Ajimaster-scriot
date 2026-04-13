@@ -318,7 +318,7 @@ make install
 cd /root
 rm -rf stunnel5.zip stunnel
 #confik xray.conf
-cat <<EOF > /etc/nginx/conf.d/xray.conf << END
+cat > /etc/nginx/conf.d/xray.conf << END
 server {
     listen 80;
     listen 443 ssl http2;
