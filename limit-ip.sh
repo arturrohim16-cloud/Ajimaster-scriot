@@ -1,4 +1,4 @@
-cat > /usr/bin/limit-ip << 'END'
+cat > /usr/bin/limit-ip <<  END 
 #!/bin/bash
 
 while true; do
