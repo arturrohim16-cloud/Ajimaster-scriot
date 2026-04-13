@@ -228,7 +228,7 @@ echo -e " ${BICyan}[${BIWhite}01${BICyan}]${RED} ☞${NC} ${BICyan}SSH MENU     
 echo -e " ${BICyan}[${BIWhite}02${BICyan}]${RED} ☞${NC} ${BICyan}VMESS MENU      $NC  ${BICyan}[${BIWhite}10${BICyan}]${RED} ☞ ${NC}${BICyan}BANNER CHAGE $NC"
 echo -e " ${BICyan}[${BIWhite}03${BICyan}]${RED} ☞${NC} ${BICyan}VLESS MENU      $NC  ${BICyan}[${BIWhite}11${BICyan}]${RED} ☞ ${NC}${BICyan}REBOOT $NC"
 echo -e " ${BICyan}[${BIWhite}04${BICyan}]${RED} ☞${NC} ${BICyan}TROJAN MENU     $NC  ${BICyan}[${BIWhite}12${BICyan}]${RED} ☞ ${NC} ${BICyan}POITING DOMIN $NC"
-echo -e " ${BICyan}[${BIWhite}05${BICyan}]${RED} ☞${NC} ${BICyan}TENDANG         $NC  ${BICyan}[${BIWhite}13${BICyan}]${RED} ☞ ${NC} ${BICyan}TENDANG $NC"
+echo -e " ${BICyan}[${BIWhite}05${BICyan}]${RED} ☞${NC} ${BICyan}SS MENU         $NC  ${BICyan}[${BIWhite}13${BICyan}]${RED} ☞ ${NC} ${BICyan}TENDANG $NC"
 echo -e " ${BICyan}[${BIWhite}06${BICyan}]${RED} ☞${NC} ${BICyan}RESTAR          $NC  ${BICyan}[${BIWhite}14${BICyan}]${RED} ☞ ${NC}${BICyan}CEK WEBIN $NC"
 echo -e " ${BICyan}[${BIWhite}07${BICyan}]${RED} ☞${NC} ${BICyan}CEK RUNNING     $NC  ${BICyan}[${BIWhite}15${BICyan}]${RED} ☞ ${NC}${BICyan}BOT TELEGRAM  $NC"
 echo -e " ${BICyan}[${BIWhite}08${BICyan}]${RED} ☞${NC} ${BICyan}ADD HOST        $NC  ${BICyan}[${BIWhite}16${BICyan}]${RED} ☞ ${NC}${BICyan}INTL UDP $NC"
