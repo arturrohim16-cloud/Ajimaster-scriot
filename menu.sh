@@ -184,10 +184,34 @@ echo ""
 read -n 1 -s -r -p "Press any key to back on menu"
 menu
 }
-export sem=$( curl -s https://raw.githubusercontent.com/NevermoreSSH/Blueblue/main/test/versions)
-export pak=$( cat /home/.ver)
-IPVPS=$(curl -s ipinfo.io/ip )
-ISPVPS=$( curl -s ipinfo.io/org )
+# 1. Mengambil data mentah dari sistem
+OS=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d'"' -f2)
+CPU=$(grep -m1 "model name" /proc/cpuinfo | cut -d: -f2 | sed 's/^[ \t]*//')
+CORE=$(nproc)
+RAM_USED=$(free -m | awk '/Mem:/ {print $3}')
+RAM_TOTAL=$(free -m | awk '/Mem:/ {print $2}')
+UPTIME=$(uptime -p | sed 's/up //')
+MYIP=$(curl -s ifconfig.me)
+
+# 2. Mengambil data lokasi dan ISP (Logika API)
+# Kita pecah hasil dari ipinfo agar lebih akurat
+IP_DATA=$(curl -s ipinfo.io)
+ISP=$(echo "$IP_DATA" | grep '"org"' | cut -d'"' -f4 | cut -d' ' -f2-)
+CITY=$(echo "$IP_DATA" | grep '"city"' | cut -d'"' -f4)
+DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "not.found")
+
+# 3. Menampilkan Hasil dengan Format Box (Sesuai Foto)
+clear
+echo -e "┌──────────────────────────────────────────────────────────┐"
+echo -e " SYSTEM OS      : $OS"
+echo -e " CPU            : $CPU $CORE CORE"
+echo -e " SERVER RAM     : $RAM_USED/$RAM_TOTAL MB"
+echo -e " UPTIME SERVER  : $UPTIME"
+echo -e " IP VPS         : $MYIP"
+echo -e " ISP            : $ISP"
+echo -e " CITY           : $CITY"
+echo -e " DOMAIN         : $DOMAIN"
+echo -e "└──────────────────────────────────────────────────────────┘"
 clear
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo -e "\E[44;1;39m                   ⇱ SERVER INFORMATION ⇲                      \E[0m"
@@ -196,7 +220,16 @@ echo -e "${BICyan} "
 echo -e "${BICyan} ⇲  ${BICyan}Use Core        :  ${BIYellow}FREE TUNNELING PTOJECT"    
 echo -e "${BICyan} ⇲  ${BICyan}Current Domain  :  ${BIYellow}$(cat /etc/xray/domain)${NC}" 
 echo -e "${BICyan} ⇲  ${BICyan}IP-VPS          :  ${BIYellow}$IPVPS${NC}"                  
-echo -e "${BICyan} ⇲  ${BICyan}ISP-VPS         :  ${BIYellow}$ISPVPS${NC}"                 
+echo -e "${BICyan} ⇲  ${BICyan}ISP-VPS         :  ${BIYellow}$ISPVPS${NC}"      
+echo -e " SYSTEM OS      : $OS"
+echo -e " CPU            : $CPU $CORE CORE"
+echo -e " SERVER RAM     : $RAM_USED/$RAM_TOTAL MB"
+echo -e " UPTIME SERVER  : $UPTIME"
+echo -e " IP VPS         : $MYIP"
+echo -e " ISP            : $ISP"
+echo -e " CITY           : $CITY"
+echo -e " DOMAIN         : $DOMAIN"
+
 echo -e "${BICyan} "
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo -e "\E[44;1;39m                    ⇱ STATUS SERVICE ⇲                        \E[0m"
