@@ -350,21 +350,29 @@ cat > /etc/xray/config.json <<EOF
   }
 }
 EOF
-# // 10. Systemd Service
+
+#config.json
 cat > /etc/systemd/system/xray.service <<EOF
 [Unit]
-Description=Xray Service By AJI
+Description=Xray Service By AJI STORE PREMIUM
+Documentation=https://github.com/xtls/xray-core
 After=network.target nss-lookup.target
 
 [Service]
 User=www-data
+Group=www-data
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
 ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
 Restart=on-failure
+RestartSec=3s
+# Menaikkan limit file agar sanggup menampung ribuan user sekaligus
+LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
 EOF
-
 # // 11. Finalizing
 systemctl daemon-reload
 systemctl enable xray nginx
