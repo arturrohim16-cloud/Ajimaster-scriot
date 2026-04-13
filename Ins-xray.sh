@@ -53,18 +53,27 @@ export NETWORK_IFACE="$(ip route show to default | awk '{print $5}')"
 
 
 clear
-# Pastikan domain diambil dari sumber yang konsisten
-if [ -f "/etc/xray/domain" ]; then
-    domain=$(cat /etc/xray/domain)
-else
-    domain=$(cat /root/domain)
+# Bersihkan layar agar rapi
+# Input Domain Manual
+echo -e "[ ${GREEN}INFO${NC} ] Masukkan Domain Anda (Contoh: aji.izz-store.my.id)"
+read -p "Domain: " domain
+
+# Validasi jika input kosong
+if [[ -z "$domain" ]]; then
+    echo -e "[ ${RED}ERROR${NC} ] Domain tidak boleh kosong! Instalasi dibatalkan."
+    exit 1
 fi
 
-echo -e "[ ${GREEN}INFO${NC} ] Checking... "
+# Simpan ke folder sistem agar konsisten
+mkdir -p /etc/xray
+echo "$domain" > /etc/xray/domain
+echo "$domain" > /root/domain
+
+echo -e "[ ${GREEN}INFO${NC} ] Domain $domain berhasil disimpan!"
 sleep 1
-echo -e "[ ${GREEN}INFO$NC ] Setting ntpdate"
+echo -e "[ ${GREEN}INFO${NC} ] Setting ntpdate..."
 sleep 1
-domain=$(cat /root/domain)
+# Lanjutkan instalasi dependensi
 apt install iptables iptables-persistent -y
 apt install curl socat xz-utils wget apt-transport-https gnupg gnupg2 gnupg1 dnsutils lsb-release -y
 apt install socat cron bash-completion ntpdate -y
