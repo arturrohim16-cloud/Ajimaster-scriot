@@ -16,7 +16,82 @@ fuser -k 80/tcp 443/tcp 2>/dev/null
 domain=$(cat /root/domain 2>/dev/null || cat /etc/xray/domain)
 uuid=$(cat /etc/xray/uuid 2>/dev/null || cat /proc/sys/kernel/random/uuid)
 # Port Internal (Paling Aman di range ini)
-v_vless="10001"; v_vmess="11000"; v_trojan="12000"
+apt install iptables iptables-persistent -y
+apt install curl socat xz-utils wget apt-transport-https gnupg gnupg2 gnupg1 dnsutils lsb-release -y
+apt install socat cron bash-completion ntpdate -y
+#ntpdate pool.ntp.org
+ntpdate -u pool.ntp.org
+apt -y install chrony
+timedatectl set-ntp true
+#systemctl enable chronyd && systemctl restart chronyd
+systemctl enable chronyd && systemctl restart chronyd
+systemctl enable chrony && systemctl restart chrony
+timedatectl set-timezone Asia/Kuala_Lumpur
+#chronyc sourcestats -v
+#chronyc tracking -v
+chronyc sourcestats -v
+chronyc tracking -v
+apt install curl pwgen openssl netcat cron -y
+
+# Make Folder & Log XRay & Log Trojan
+rm -fr /var/log/xray
+#rm -fr /var/log/trojan
+rm -fr /var/log/trojan
+rm -fr /home/vps/public_html
+mkdir -p /var/log/xray
+#mkdir -p /var/log/trojan
+mkdir -p /var/log/trojan
+mkdir -p /home/vps/public_html
+chown www-data.www-data /var/log/xray
+chown www-data.www-data /etc/xray
+chmod +x /var/log/xray
+#chmod +x /var/log/trojan
+chmod +x /var/log/trojan
+touch /var/log/xray/access.log
+touch /var/log/xray/error.log
+touch /var/log/xray/access2.log
+@@ -181,522 +181,522 @@
+alias acme.sh=~/.acme.sh/acme.sh
+/root/.acme.sh/acme.sh --upgrade --auto-upgrade
+/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+#/root/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-2048
+/root/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-2048
+/root/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256
+/root/.acme.sh/acme.sh --install-cert -d "${domain}" --ecc \
+--fullchain-file /etc/xray/xray.crt \
+--key-file /etc/xray/xray.key
+chown -R nobody:nogroup /etc/xray
+chmod 644 /etc/xray/xray.crt
+chmod 644 /etc/xray/xray.key
+echo -e "${OKEY} Your Domain : $domain"
+
+# nginx renew ssl
+echo -n '#!/bin/bash
+/etc/init.d/nginx stop
+"/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" &> /root/renew_ssl.log
+/etc/init.d/nginx start
+' > /usr/local/bin/ssl_renew.sh
+chmod +x /usr/local/bin/ssl_renew.sh
+if ! grep -q 'ssl_renew.sh' /var/spool/cron/crontabs/root;then (crontab -l;echo "15 03 */3 * * /usr/local/bin/ssl_renew.sh") | crontab;fi
+
+# / / Unzip Xray Linux 64
+cd `mktemp -d`
+curl -sL "$xraycore_link" -o xray.zip
+unzip -q xray.zip && rm -rf xray.zip
+mv xray /usr/local/bin/xray
+chmod +x /usr/local/bin/xray
+
+# Random Port Xray
+trojanws=$((RANDOM + 10000))
+ssws=$((RANDOM + 10000))
+ssgrpc=$((RANDOM + 10000))
+vless=$((RANDOM + 10000))
+vlessgrpc=$((RANDOM + 10000))
+vmess=$((RANDOM + 10000))
+worryfree=$((RANDOM + 10000))
+kuotahabis=$((RANDOM + 10000))
+vmessgrpc=$((RANDOM + 10000))
+trojangrpc=$((RANDOM + 10000))
 
 if [[ -z "$domain" ]]; then echo -e "${RED}EROR: Domain tidak ditemukan!${NC}"; exit 1; fi
 echo "$uuid" > /etc/xray/uuid
