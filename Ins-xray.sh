@@ -1,496 +1,500 @@
 #!/bin/bash
-# =========================================
-# Quick Setup | Script Setup Manager
-# Edition : Ultimate Masterpiece V3.0
-# Author  : AJI STORE PREMIUM
-# =========================================
+# Mod By SL
+# =====================================================
 
-# // Export Color
-export RED='\033[0;31m'
-export GREEN='\033[0;32m'
-export YELLOW='\033[0;33m'
-export BLUE='\033[0;34m'
-export CYAN='\033[0;36m'
-export NC='\033[0m'
+# Color
+RED='\033[0;31m'
+NC='\033[0m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+LIGHT='\033[0;37m'
 
-# // Root Checking
-if [ "${EUID}" -ne 0 ]; then
-    echo -e "${RED}Error:${NC} Jalankan sebagai root!"
-    exit 1
-fi
-
+MYIP=$(wget -qO- ipinfo.io/ip);
 clear
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}          INSTALLER XRAY CORE - AJI STORE          ${NC}"
-echo -e "${BLUE}             (FULL AUTOMATIC RUNNING)              ${NC}"
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-
-# // 1. Input Domain
-echo -e "[ ${GREEN}INFO${NC} ] Konfigurasi Domain..."
-read -p "   Masukkan Domain: " domain
-
-if [[ -z "$domain" ]]; then
-    echo -e "[ ${RED}ERROR${NC} ] Domain kosong! Batalkan..."
-    exit 1
-fi
-
-# Simpan domain & Siapkan Folder
-mkdir -p /etc/xray
-mkdir -p /home/vps/public_html
-echo "$domain" > /etc/xray/domain
-
-# // 2. Update & Dependencies
-echo -e "[ ${GREEN}INFO${NC} ] Menginstall paket pendukung..."
-apt update -y
-apt install curl socat xz-utils wget apt-transport-https gnupg netcat cron chrony unzip nginx jq -y
-
-# // 3. Setting Time & Firewall
-timedatectl set-timezone Asia/Jakarta
+domain=$(cat /etc/xray/domain)
+apt install iptables iptables-persistent -y
+apt install curl socat xz-utils wget apt-transport-https gnupg gnupg2 gnupg1 dnsutils lsb-release -y 
+apt install socat cron bash-completion ntpdate -y
+ntpdate pool.ntp.org
+apt -y install chrony
+timedatectl set-ntp true
+systemctl enable chronyd && systemctl restart chronyd
 systemctl enable chrony && systemctl restart chrony
-# Buka port standar agar tidak terblokir firewall sendiri
-iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+timedatectl set-timezone Asia/Jakarta
+chronyc sourcestats -v
+chronyc tracking -v
+date
 
-# // 4. Install Xray Core
-echo -e "[ ${GREEN}INFO${NC} ] Mengunduh Xray Core Terbaru..."
+# / / Ambil Xray Core Version Terbaru
 latest_version="$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-wget -q -O xray.zip "https://github.com/XTLS/Xray-core/releases/download/v$latest_version/xray-linux-64.zip"
-unzip -o xray.zip -d /usr/local/bin/
+
+# / / Installation Xray Core
+xraycore_link="https://github.com/XTLS/Xray-core/releases/download/v$latest_version/xray-linux-64.zip"
+
+# / / Make Main Directory
+mkdir -p /usr/bin/xray
+mkdir -p /etc/xray
+
+# / / Unzip Xray Linux 64
+cd `mktemp -d`
+curl -sL "$xraycore_link" -o xray.zip
+unzip -q xray.zip && rm -rf xray.zip
+mv xray /usr/local/bin/xray
 chmod +x /usr/local/bin/xray
-rm -f xray.zip
 
-# // 5. SSL Generation (Auto-Logic)
-echo -e "[ ${GREEN}INFO${NC} ] Memulai pembuatan SSL (Otomatis)..."
-systemctl stop nginx
-rm -rf /root/.acme.sh
-curl https://get.acme.sh | sh
-alias acme.sh=~/.acme.sh/acme.sh
+# Make Folder XRay
+mkdir -p /var/log/xray/
 
-# Daftarkan Akun SSL
-~/.acme.sh/acme.sh --register-account -m aji@gmail.com --server letsencrypt
+sudo lsof -t -i tcp:80 -s tcp:listen | sudo xargs kill
+cd /root/
+wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
+bash acme.sh --install
+rm acme.sh
+cd .acme.sh
+bash acme.sh --register-account -m senowahyu62@gmail.com
+bash acme.sh --issue --standalone -d $domain --force
+bash acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key
 
-# Coba Let's Encrypt, jika 429 (limit) langsung loncat ke ZeroSSL
-~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-~/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256 --force
+service squid start
+uuid7=$(cat /proc/sys/kernel/random/uuid)
+uuid1=$(cat /proc/sys/kernel/random/uuid)
+uuid2=$(cat /proc/sys/kernel/random/uuid)
+uuid3=$(cat /proc/sys/kernel/random/uuid)
+uuid4=$(cat /proc/sys/kernel/random/uuid)
+uuid5=$(cat /proc/sys/kernel/random/uuid)
+uuid6=$(cat /proc/sys/kernel/random/uuid)
 
-if [ $? -ne 0 ]; then
-    echo -e "[ ${YELLOW}WARNING${NC} ] Let's Encrypt Limit! Berpindah ke ZeroSSL..."
-    ~/.acme.sh/acme.sh --set-default-ca --server zerossl
-    ~/.acme.sh/acme.sh --issue -d "${domain}" --standalone --keylength ec-256 --force
-fi
+# // Certificate File
+path_crt="/etc/xray/xray.crt"
+path_key="/etc/xray/xray.key"
 
-# Install Cert ke direktori Xray
-~/.acme.sh/acme.sh --install-cert -d "${domain}" --ecc \
---fullchain-file /etc/xray/xray.crt \
---key-file /etc/xray/xray.key
-chown -R www-data:www-data /etc/xray
-
-# // 6. Configuration Ports & UUID
-vless=$((RANDOM + 10000))
-vmess=$((RANDOM + 11000))
-trojan=$((RANDOM + 12000))
-vlessgrpc=$((RANDOM + 13000))
-uuid=$(cat /proc/sys/kernel/random/uuid)
-# // 8. Generate Nginx Config (The Shield & Connector)
-echo -e "[ ${GREEN}INFO${NC} ] Menyusun konfigurasi Nginx (xray.conf)..."
-cat > /etc/nginx/conf.d/xray.conf <<EOF
-server {
-    listen 80;
-    listen [::]:80;
-    listen 443 ssl http2 reuseport;
-    listen [::]:443 ssl http2 reuseport;
-    server_name $domain;
-
-    ssl_certificate /etc/xray/xray.crt;
-    ssl_certificate_key /etc/xray/xray.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-    
-    root /home/vps/public_html;
-
-    # Vless WebSocket
-    location /vless {
-        if (\$http_upgrade != "websocket") {
-            return 404;
-        }
-        proxy_redirect off;
-        proxy_pass http://127.0.0.1:$vless;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Vmess WebSocket
-    location /vmess {
-        if (\$http_upgrade != "websocket") {
-            return 404;
-        }
-        proxy_redirect off;
-        proxy_pass http://127.0.0.1:$vmess;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Trojan WebSocket
-    location /trojan-ws {
-        if (\$http_upgrade != "websocket") {
-            return 404;
-        }
-        proxy_redirect off;
-        proxy_pass http://127.0.0.1:$trojanws;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Shadowsocks WebSocket
-    location /ss-ws {
-        if (\$http_upgrade != "websocket") {
-            return 404;
-        }
-        proxy_redirect off;
-        proxy_pass http://127.0.0.1:$ssws;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # gRPC Paths (Vless, Vmess, Trojan)
-    location ^~ /vless-grpc {
-        proxy_redirect off;
-        grpc_set_header X-Real-IP \$remote_addr;
-        grpc_pass grpc://127.0.0.1:$vlessgrpc;
-    }
-
-    location ^~ /vmess-grpc {
-        proxy_redirect off;
-        grpc_set_header X-Real-IP \$remote_addr;
-        grpc_pass grpc://127.0.0.1:$vmessgrpc;
-    }
-
-    location ^~ /trojan-grpc {
-        proxy_redirect off;
-        grpc_set_header X-Real-IP \$remote_addr;
-        grpc_pass grpc://127.0.0.1:$trojangrpc;
-    }
-}
-EOF
-# // Xray Config.json God-Mode Ultimate AJI STORE PREMIUM
-cat > /etc/xray/config.json <<EOF
+# Buat Config Xray
+cat > /etc/xray/config.json << END
 {
   "log": {
     "access": "/var/log/xray/access.log",
     "error": "/var/log/xray/error.log",
-    "loglevel": "warning"
+    "loglevel": "info"
   },
+  "inbounds": [
+    {
+      "port": 8443,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "${uuid1}",
+            "alterId": 0
+#xray-vmess-tls
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "certificates": [
+            {
+              "certificateFile": "${path_crt}",
+              "keyFile": "${path_key}"
+            }
+          ]
+        },
+        "tcpSettings": {},
+        "kcpSettings": {},
+        "httpSettings": {},
+        "wsSettings": {
+          "path": "/vmess/",
+          "headers": {
+            "Host": ""
+          }
+        },
+        "quicSettings": {}
+      }
+    },
+    {
+      "port": 80,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+
+          {
+            "id": "${uuid2}",
+            "alterId": 0
+#xray-vmess-nontls
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "tlsSettings": {},
+        "tcpSettings": {},
+        "kcpSettings": {},
+        "httpSettings": {},
+        "wsSettings": {
+          "path": "/vmess/",
+          "headers": {
+            "Host": ""
+          }
+        },
+        "quicSettings": {}
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+    {
+      "port": 8443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "${uuid3}"
+#xray-vless-tls
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "certificates": [
+            {
+              "certificateFile": "${path_crt}",
+              "keyFile": "${path_key}"
+            }
+          ]
+        },
+        "tcpSettings": {},
+        "kcpSettings": {},
+        "httpSettings": {},
+        "wsSettings": {
+          "path": "/vless/",
+          "headers": {
+            "Host": ""
+          }
+        },
+        "quicSettings": {}
+      },
+      "domain": "$domain",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+    {
+      "port": 80,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "${uuid4}"
+#xray-vless-nontls
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "tlsSettings": {},
+        "tcpSettings": {},
+        "kcpSettings": {},
+        "httpSettings": {},
+        "wsSettings": {
+          "path": "/vless/",
+          "headers": {
+            "Host": ""
+          }
+        },
+        "quicSettings": {}
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+    {
+      "port": 2083,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "${uuid5}"
+#xray-trojan
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": 80
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+          "certificates": [
+            {
+              "certificateFile": "${path_crt}",
+              "keyFile": "${path_key}"
+            }
+          ],
+          "alpn": [
+            "http/1.1"
+          ]
+        },
+        "tcpSettings": {},
+        "kcpSettings": {},
+        "wsSettings": {},
+        "httpSettings": {},
+        "quicSettings": {},
+        "grpcSettings": {}
+      },
+      "domain": "$domain"
+     }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "0.0.0.0/8",
+          "10.0.0.0/8",
+          "100.64.0.0/10",
+          "169.254.0.0/16",
+          "172.16.0.0/12",
+          "192.0.0.0/24",
+          "192.0.2.0/24",
+          "192.168.0.0/16",
+          "198.18.0.0/15",
+          "198.51.100.0/24",
+          "203.0.113.0/24",
+          "::1/128",
+          "fc00::/7",
+          "fe80::/10"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api",
+        "type": "field"
+      },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "protocol": [
+          "bittorrent"
+        ]
+      }
+    ]
+  },
+  "stats": {},
   "api": {
     "services": [
-      "HandlerService",
-      "StatsService",
-      "LoggerService"
+      "StatsService"
     ],
     "tag": "api"
   },
-  "stats": {},
   "policy": {
     "levels": {
       "0": {
         "statsUserDownlink": true,
-        "statsUserUplink": true,
-        "handshake": 4,
-        "connIdle": 300,
-        "uplinkOnly": 2,
-        "downlinkOnly": 5,
-        "bufferSize": 10240
+        "statsUserUplink": true
       }
     },
     "system": {
       "statsInboundUplink": true,
-      "statsInboundDownlink": true,
-      "statsOutboundUplink": true,
-      "statsOutboundDownlink": true
+      "statsInboundDownlink": true
     }
-  },
-  "dns": {
-    "hosts": {
-      "geosite:category-ads-all": "127.0.0.1",
-      "domain:aji.store": "127.0.0.1"
-    },
-    "servers": [
-      {
-        "address": "1.1.1.1",
-        "port": 53,
-        "domains": ["geosite:google", "geosite:facebook", "geosite:youtube"]
-      },
-      {
-        "address": "https://1.1.1.1/dns-query",
-        "domains": ["geosite:geolocation-noncn"]
-      },
-      "8.8.8.8",
-      "8.8.4.4",
-      "localhost"
-    ],
-    "queryStrategy": "UseIP",
-    "tag": "dns_inbound"
-  },
-  "inbounds": [
-    {
-      "listen": "127.0.0.1",
-      "port": 10085,
-      "protocol": "dokodemo-door",
-      "settings": { "address": "127.0.0.1" },
-      "tag": "api"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $vless,
-      "protocol": "vless",
-      "settings": {
-        "decryption": "none",
-        "clients": [
-          { "id": "$uuid", "level": 0, "email": "vless-ws@ajistore" }
-#vless-ws
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": { "path": "/vless", "headers": { "Host": "$domain" } },
-        "sockopt": { "tcpFastOpen": true }
-      },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic", "fakedns"] },
-      "tag": "vless-ws"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $vmess,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          { "id": "$uuid", "alterId": 0, "level": 0, "email": "vmess-ws@ajistore" }
-#vmess-ws
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": { "path": "/vmess", "headers": { "Host": "$domain" } },
-        "sockopt": { "tcpFastOpen": true }
-      },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic", "fakedns"] },
-      "tag": "vmess-ws"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $trojanws,
-      "protocol": "trojan",
-      "settings": {
-        "clients": [
-          { "password": "$uuid", "level": 0, "email": "trojan-ws@ajistore" }
-#trojan-ws
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": { "path": "/trojan-ws", "headers": { "Host": "$domain" } },
-        "sockopt": { "tcpFastOpen": true }
-      },
-      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic", "fakedns"] },
-      "tag": "trojan-ws"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $vlessgrpc,
-      "protocol": "vless",
-      "settings": {
-        "decryption": "none",
-        "clients": [
-          { "id": "$uuid", "level": 0, "email": "vless-grpc@ajistore" }
-#vless-grpc
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": { "serviceName": "vless-grpc", "multiMode": true },
-        "sockopt": { "tcpFastOpen": true }
-      },
-      "tag": "vless-grpc"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $vmessgrpc,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          { "id": "$uuid", "alterId": 0, "level": 0, "email": "vmess-grpc@ajistore" }
-#vmess-grpc
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": { "serviceName": "vmess-grpc", "multiMode": true },
-        "sockopt": { "tcpFastOpen": true }
-      },
-      "tag": "vmess-grpc"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $trojangrpc,
-      "protocol": "trojan",
-      "settings": {
-        "clients": [
-          { "password": "$uuid", "level": 0, "email": "trojan-grpc@ajistore" }
-#trojan-grpc
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": { "serviceName": "trojan-grpc", "multiMode": true },
-        "sockopt": { "tcpFastOpen": true }
-      },
-      "tag": "trojan-grpc"
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": $ssws,
-      "protocol": "shadowsocks",
-      "settings": {
-        "method": "aes-128-gcm",
-        "password": "$uuid",
-        "network": "tcp,udp",
-        "level": 0,
-        "email": "ss-ws@ajistore"
-#ss-ws
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": { "path": "/ss-ws", "headers": { "Host": "$domain" } }
-      },
-      "tag": "shadowsocks-ws"
-    }
-  ],
-  "outbounds": [
-    { "protocol": "freedom", "settings": { "domainStrategy": "UseIP" }, "tag": "direct" },
-    { "protocol": "blackhole", "settings": { "response": { "type": "http" } }, "tag": "blocked" },
-    { "protocol": "dns", "tag": "dns-out" }
-  ],
-  "routing": {
-    "domainStrategy": "IPIfNonMatch",
-    "rules": [
-      { "type": "field", "inboundTag": ["api"], "outboundTag": "api" },
-      { "type": "field", "port": 53, "outboundTag": "dns-out" },
-      { "type": "field", "protocol": ["bittorrent"], "outboundTag": "blocked" },
-      {
-        "type": "field",
-        "domain": [
-          "geosite:category-ads-all",
-          "geosite:category-ads-indonesia",
-          "geosite:google-ads",
-          "domain:ads.google.com",
-          "domain:doubleclick.net",
-          "domain:googlesyndication.com"
-        ],
-        "outboundTag": "blocked"
-      },
-      {
-        "type": "field",
-        "ip": [
-          "geoip:private",
-          "geoip:cn",
-          "0.0.0.0/8",
-          "10.0.0.0/8",
-          "100.64.0.0/10",
-          "127.0.0.0/8",
-          "169.254.0.0/16",
-          "172.16.0.0/12",
-          "192.168.0.0/16"
-        ],
-        "outboundTag": "blocked"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "geosite:facebook",
-          "geosite:instagram",
-          "geosite:whatsapp",
-          "geosite:telegram",
-          "geosite:tiktok",
-          "geosite:netflix",
-          "geosite:disney"
-        ],
-        "outboundTag": "direct"
-      }
-    ]
-  },
-  "observatory": {
-    "subjectSelector": ["vless-ws", "vmess-ws", "trojan-ws", "vless-grpc", "vmess-grpc"],
-    "probeUrl": "https://www.google.com/generate_204",
-    "probeInterval": "30s"
-  },
-  "burstObs": {
-    "subjectSelector": ["vless-ws", "vmess-ws"],
-    "pingConfig": { "destination": "1.1.1.1:53", "interval": "10s" }
   }
 }
-EOF
+END
 
-#config.json
-cat > /etc/systemd/system/xray.service <<EOF
+
+# / / Installation Xray Service
+cat > /etc/systemd/system/xray.service << END
 [Unit]
-Description=Xray Service By AJI STORE PREMIUM
-Documentation=https://github.com/xtls/xray-core
+Description=Xray Service Mod By SL
+Documentation=https://nekopoi.care
 After=network.target nss-lookup.target
 
 [Service]
-User=www-data
-Group=www-data
+User=root
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
+ExecStart=/usr/local/bin/xray -config /etc/xray/config.json
 Restart=on-failure
-RestartSec=3s
-# Menaikkan limit file agar sanggup menampung ribuan user sekaligus
-LimitNOFILE=1000000
+RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
-EOF
-# // 11. Finalizing
-systemctl daemon-reload
-systemctl enable xray nginx
-systemctl restart xray nginx
-# // 10. AUTO-RUN & VERIFICATION (BAGIAN PALING PENTING)
-echo -e "[ ${GREEN}INFO${NC} ] Mengaktifkan semua layanan secara otomatis..."
-systemctl daemon-reload
-systemctl enable nginx xray
-systemctl restart nginx xray
+END
 
-# Cek Status
-status_nginx=$(systemctl is-active nginx)
-status_xray=$(systemctl is-active xray)
+# // Enable & Start Service
+# Accept port Xray
+iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8443 -j ACCEPT
+iptables -I INPUT -m state --state NEW -m udp -p udp --dport 8443 -j ACCEPT
+iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+iptables -I INPUT -m state --state NEW -m udp -p udp --dport 80 -j ACCEPT
+iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 2083 -j ACCEPT
+iptables -I INPUT -m state --state NEW -m udp -p udp --dport 2083 -j ACCEPT
+iptables-save > /etc/iptables.up.rules
+iptables-restore -t < /etc/iptables.up.rules
+netfilter-persistent save
+netfilter-persistent reload
+systemctl daemon-reload
+systemctl stop xray.service
+systemctl start xray.service
+systemctl enable xray.service
+systemctl restart xray.service
 
-clear
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "         INSTALLASI SELESAI - AJI STORE PREMIUM     "
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "  Domain   : $domain"
-echo -e "  UUID     : $uuid"
-echo -e "  Nginx    : $status_nginx"
-echo -e "  Xray     : $status_xray"
-echo -e "  Vless WS : $vless"
-echo -e "  Vmess WS : $vmess"
-echo -e "  Trojan WS: $trojan"
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e " Semua layanan telah berjalan otomatis (RUNNING) "
+# Install Trojan Go
+latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
+trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/v${latest_version}/trojan-go-linux-amd64.zip"
+mkdir -p "/usr/bin/trojan-go"
+mkdir -p "/etc/trojan-go"
+cd `mktemp -d`
+curl -sL "${trojango_link}" -o trojan-go.zip
+unzip -q trojan-go.zip && rm -rf trojan-go.zip
+mv trojan-go /usr/local/bin/trojan-go
+chmod +x /usr/local/bin/trojan-go
+mkdir /var/log/trojan-go/
+touch /etc/trojan-go/akun.conf
+touch /var/log/trojan-go/trojan-go.log
+
+# Buat Config Trojan Go
+cat > /etc/trojan-go/config.json << END
+{
+  "run_type": "server",
+  "local_addr": "0.0.0.0",
+  "local_port": 2087,
+  "remote_addr": "127.0.0.1",
+  "remote_port": 89,
+  "log_level": 1,
+  "log_file": "/var/log/trojan-go/trojan-go.log",
+  "password": [
+      "$uuid"
+  ],
+  "disable_http_check": true,
+  "udp_timeout": 60,
+  "ssl": {
+    "verify": false,
+    "verify_hostname": false,
+    "cert": "/etc/xray/xray.crt",
+    "key": "/etc/xray/xray.key",
+    "key_password": "",
+    "cipher": "",
+    "curves": "",
+    "prefer_server_cipher": false,
+    "sni": "$domain",
+    "alpn": [
+      "http/1.1"
+    ],
+    "session_ticket": true,
+    "reuse_session": true,
+    "plain_http_response": "",
+    "fallback_addr": "127.0.0.1",
+    "fallback_port": 0,
+    "fingerprint": "firefox"
+  },
+  "tcp": {
+    "no_delay": true,
+    "keep_alive": true,
+    "prefer_ipv4": true
+  },
+  "mux": {
+    "enabled": false,
+    "concurrency": 8,
+    "idle_timeout": 60
+  },
+  "websocket": {
+    "enabled": true,
+    "path": "/trojango",
+    "host": "$domain"
+  },
+    "api": {
+    "enabled": false,
+    "api_addr": "",
+    "api_port": 0,
+    "ssl": {
+      "enabled": false,
+      "key": "",
+      "cert": "",
+      "verify_client": false,
+      "client_cert": []
+    }
+  }
+}
+END
+
+# Installing Trojan Go Service
+cat > /etc/systemd/system/trojan-go.service << END
+[Unit]
+Description=Trojan-Go Service Mod By SL
+Documentation=nekopoi.care
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/usr/local/bin/trojan-go -config /etc/trojan-go/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+END
+
+# Trojan Go Uuid
+cat > /etc/trojan-go/uuid.txt << END
+$uuid
+END
+
+# restart
+iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 2086 -j ACCEPT
+iptables -I INPUT -m state --state NEW -m udp -p udp --dport 2087 -j ACCEPT
+iptables-save > /etc/iptables.up.rules
+iptables-restore -t < /etc/iptables.up.rules
+netfilter-persistent save
+netfilter-persistent reload
+systemctl daemon-reload
+systemctl stop trojan-go
+systemctl start trojan-go
+systemctl enable trojan-go
+systemctl restart trojan-go
+
+cd
+cp /root/domain /etc/xray
