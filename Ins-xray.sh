@@ -351,43 +351,91 @@ echo -e "${BLUE}[ 4/5 ]${NC} Menyusun Nginx Reverse Proxy..."
 rm -f /etc/nginx/conf.d/xray.conf
 cat > /etc/nginx/conf.d/xray.conf <<EOF
 server {
-    listen 80;
-    listen [::]:80;
-    listen 443 ssl http2 reuseport;
-    listen [::]:443 ssl http2 reuseport;
-    server_name $domain;
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
 
+server {
+    listen 443 ssl http2 default_server;
+    listen [::]:443 ssl http2 default_server;
+    server_name _;
+    
+    # SSL Certificates
     ssl_certificate /etc/xray/xray.crt;
     ssl_certificate_key /etc/xray/xray.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
     
-    root /home/vps/public_html;
-
+    # Modern SSL
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    
+    # WebSocket VLESS
     location /vless {
-        proxy_pass http://127.0.0.1:$v_vless;
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:8080;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
+    
+    # WebSocket VMESS  
     location /vmess {
-        proxy_pass http://127.0.0.1:$v_vmess;
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:8081;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
-    location /trojan-ws {
-        proxy_pass http://127.0.0.1:$v_trojan;
+    
+    # WebSocket Trojan
+    location /trojan {
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:8082;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$http_host;
     }
+    
+    # gRPC VLESS
+    location ^~ /vless-grpc {
+        grpc_pass grpc://127.0.0.1:8083;
+        grpc_set_header X-Real-IP $remote_addr;
+        grpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    
+    # gRPC VMESS
+    location ^~ /vmess-grpc {
+        grpc_pass grpc://127.0.0.1:8084;
+        grpc_set_header X-Real-IP $remote_addr;
+    }
+    
+    # Fallback Static
+    location / {
+        root /home/vps/public_html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Security Headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
 }
 EOF
-
 # // FINALIZING
 echo -e "${BLUE}[ 5/5 ]${NC} Menghidupkan Semua Layanan..."
 mkdir -p /var/log/xray
