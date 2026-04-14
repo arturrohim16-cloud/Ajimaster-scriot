@@ -147,36 +147,6 @@ systemctl restart ws-dropbear
 
 clear
 
-# Perbaikan link download
-wget -q -O /usr/bin/ws-nontls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-nontls.py"
-chmod +x /usr/bin/ws-nontls
-
-cat > /etc/systemd/system/ws-nontls.service << END
-[Unit]
-Description=Python Proxy Mod By geovpn
-Documentation=https://t.me/geovpn
-After=network.target nss-lookup.target
-
-[Service]
-Type=simple
-User=root
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-NoNewPrivileges=true
-ExecStart=/usr/bin/python3 -O /usr/local/bin/ws-nontls 8880
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-END
-
-systemctl daemon-reload
-systemctl enable ws-nontls
-systemctl start ws-nontls
-systemctl restart ws-nontls
-
-clear
-
 # Perbaikan link download bot
 wget -O /usr/bin/bot "https://raw.githubusercontent.com/arturrohim16-cloud/Blueblue/refs/heads/main/bot.sh"
 chmod +x /usr/bin/bot
@@ -200,33 +170,6 @@ END
 systemctl daemon-reload
 systemctl enable telegram-bot
 systemctl restart telegram-bot
-
-clear
-
-# // 2. WEBSOCKET TLS (Port 443)
-echo -e "[ ${GREEN}INFO${NC} ] Setup WS-TLS..."
-wget -q -O /usr/bin/ws-tls "https://raw.githubusercontent.com/arturrohim16-cloud/Ajimaster-scriot/refs/heads/main/ws-tls.py"
-chmod +x /usr/bin/ws-tls
-
-cat > /etc/systemd/system/ws-tls.service << END
-[Unit]
-Description=Python Proxy Mod By geovpn
-After=network.target nss-lookup.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=/usr/bin/python3 -O /usr/bin/ws-tls 443
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-END
-
-systemctl daemon-reload
-systemctl enable ws-tls
-systemctl start ws-tls
-systemctl restart ws-tls
 
 clear
 
