@@ -329,7 +329,53 @@ END
 # 3. Pastikan konfigurasi Nginx (xray.conf) mengoper trafik ke 8880
 # Cek bagian 'location /' di xray.conf Anda, pastikan ada baris:
 # proxy_pass http://127.0.0.1:8880;
+# remove unnecessary files
+sleep 1
+echo -e "[ ${green}INFO$NC ] Clearing trash"
+apt autoclean -y >/dev/null 2>&1
 
+if dpkg -s unscd >/dev/null 2>&1; then
+apt -y remove --purge unscd >/dev/null 2>&1
+fi
+
+ apt-get -y --purge remove samba* >/dev/null 2>&1
+ apt-get -y --purge remove apache2* >/dev/null 2>&1
+ apt-get -y --purge remove bind9* >/dev/null 2>&1
+ apt-get -y remove sendmail* >/dev/null 2>&1
+ apt autoremove -y >/dev/null 2>&1
+# finishing
+cd
+echo -e "[ ${green}ok${NC} ] Restarting openvpn"
+/etc/init.d/cron restart >/dev/null 2>&1
+sleep 1
+echo -e "[ ${green}ok${NC} ] Restarting cron"
+/etc/init.d/ssh restart >/dev/null 2>&1
+sleep 1
+echo -e "[ ${green}ok${NC} ] Restarting ssh"
+/etc/init.d/dropbear restart >/dev/null 2>&1
+sleep 1
+echo -e "[ ${green}ok${NC} ] Restarting dropbear"
+/etc/init.d/fail2ban restart >/dev/null 2>&1
+sleep 1
+echo -e "[ ${green}ok${NC} ] Restarting fail2ban"
+/etc/init.d/stunnel5 restart >/dev/null 2>&1
+sleep 1
+echo -e "[ ${green}ok${NC} ] Restarting stunnel5"
+/etc/init.d/vnstat restart >/dev/null 2>&1
+sleep 1
+echo -e "[ ${green}ok${NC} ] Restarting squid "
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 500 >/dev/null 2>&1
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 500 >/dev/null 2>&1
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 500 >/dev/null 2>&1
+history -c
+echo "unset HISTFILE" >> /etc/profile
+
+cd
+yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
+sleep 1
+yellow "SSH & OVPN install successfully"
+sleep 5
+clear
 # 4. Refresh & Jalankan
 systemctl daemon-reload
 systemctl enable ws-stunnel
@@ -338,6 +384,10 @@ systemctl restart nginx
 # 1. Hentikan semua yang pakai port 80
 fuser -k 80/tcp
 #hapus history
+
+rm -fr /root/key.pem >/dev/null 2>&1
+rm -fr /root/cert.pem >/dev/null 2>&1
+rm -fr /root/ssh-vpn.sh >/dev/null 2>&1�
 history -c
 echo "unset HISTFILE" >> /etc/profile
 
